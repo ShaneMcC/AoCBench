@@ -24,6 +24,7 @@
 		}
 
 		// Prepare.
+		echo 'Preparing.', "\n";
 		$participant->prepare();
 
 		$results[$person] = [];
