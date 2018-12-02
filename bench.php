@@ -92,7 +92,7 @@
 
 				// Long-Running days, run less times.
 				if ($end - $start > $longTimeout) { $long = true; }
-				if ($result === NULL) { echo '!'; break; } else { echo $i; }
+				if ($result === NULL) { echo '!'; break; } else { echo ' ', $i; }
 
 				// Get the `real` time output.
 				$time = $participant->extractTime($result);

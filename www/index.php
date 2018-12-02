@@ -4,7 +4,7 @@
 	$pageid = 'index';
 	require_once(__DIR__ . '/header.php');
 
-	function getTime($times, $method = 'SPECIAL') {
+	function getTime($times, $method) {
 		$parsedTimes = [];
 		foreach ($times as $time) {
 			if (preg_match('#^([0-9]+)m\s?([0-9]+).([0-9]+)s$#', $time, $match)) {
@@ -52,7 +52,7 @@
 		return sprintf('%dm%d.%03ds', $m, $s, $ms);
 	}
 
-	$method = isset($_REQUEST['method']) ? $_REQUEST['method'] : 'AVG';
+	$method = isset($_REQUEST['method']) ? $_REQUEST['method'] : 'SPECIAL';
 
 	$hasResults = false;
 	if (file_exists($resultsFile)) {
