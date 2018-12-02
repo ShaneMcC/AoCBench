@@ -57,13 +57,13 @@
 
 			// Run 10 times.
 			$long = false;
-			for ($i = 0; $i < ($long ? 4 : 10); $i++) {
+			for ($i = 0; $i < ($long ? $longRepeatCount : $repeatCount); $i++) {
 				$start = time();
 				$result = $participant->run($day);
 				$end = time();
 
 				// Long-Running days, run less times.
-				if ($end - $start > 30) { $long = true; }
+				if ($end - $start > $longTimeout) { $long = true; }
 				if ($result === NULL) { echo '!'; break; } else { echo $i; }
 
 				// Get the `real` time output.

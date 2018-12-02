@@ -3,6 +3,10 @@
 	$resultsFile = __DIR__ . '/results.json';
 	$participantsDir = __DIR__ . '/participants/';
 
+	$repeatCount = 10;
+	$longTimeout = 30;
+	$longRepeatCount = 4;
+
 	$participants = [];
 
 	abstract class Participant {
