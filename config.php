@@ -1,5 +1,6 @@
 <?php
 
+	$resultsFile = __DIR__ . '/results.json';
 	$participants = [];
 
 	abstract class Participant {
@@ -9,22 +10,7 @@
 		abstract function run($day);
 	}
 
-
-	$participants[] = new class extends Participant {
-		public function getName() { return 'Dataforce'; }
-		public function getRepo() { return 'https://github.com/ShaneMcC/aoc-2018'; }
-
-		public function prepare() {
-			// Ensures container is built.
-			exec('./docker.sh 2>&1');
-		}
-
-		public function run($day) {
-			$output = [];
-			$ret = -1;
-			exec('./docker.sh --time ' . $day . ' 2>&1', $output, $ret);
-
-			return $ret === 0 ? $output : null;
-		}
-	};
-
+	// Local configuration.
+	if (file_exists(dirname(__FILE__) . '/config.local.php')) {
+		include(dirname(__FILE__) . '/config.local.php');
+	}

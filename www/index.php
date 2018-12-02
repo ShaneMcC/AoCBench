@@ -1,16 +1,16 @@
 <?php
-	$json = __DIR__ . '/../results.json';
+	require_once(__DIR__ . '/../config.php');
 
-	if (!file_exists($json)) { die('No results yet.'); }
+	if (!file_exists($resultsFile)) { die('No results yet.'); }
 
-	$data = json_decode(file_get_contents($json), true);
+	$data = json_decode(file_get_contents($resultsFile), true);
 
 	// Dump a table of benchmark results.
-
 	$particpants = array_keys($data['results']);
 
 	echo '<h2>Results</h2>', "\n";
 	echo '<table>';
+
 	// Participants
 	echo '<tr>';
 	echo '<th>&nbsp;</th>';

@@ -46,7 +46,7 @@
 				$time = $result[count($result) - 3];
 				$time = trim(preg_replace('#^real#', '', $time));
 
-				$results[$person]['days'][$day][] = $time;
+				$results[$person]['days'[]$day][] = $time;
 			}
 			echo "\n";
 
@@ -69,4 +69,4 @@
 	$data['results'] = $results;
 
 	// Output Results.
-	file_put_contents(__DIR__ . '/results.json', json_encode($data));
+	file_put_contents($resultsFile, json_encode($data));
