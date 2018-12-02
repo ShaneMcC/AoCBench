@@ -1,6 +1,8 @@
 <?php
 
 	$resultsFile = __DIR__ . '/results.json';
+	$participantsDir = __DIR__ . '/participants/';
+
 	$participants = [];
 
 	abstract class Participant {

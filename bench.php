@@ -9,7 +9,7 @@
 		$person = $participant->getName();
 		echo $person , ': ', "\n";
 
-		$dir = __DIR__ . '/participants/' . $person;
+		$dir = $participantsDir . '/' . $person;
 
 		if (file_exists($dir)) {
 			echo 'Updating Repo.', "\n";
