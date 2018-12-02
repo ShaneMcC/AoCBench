@@ -4,6 +4,49 @@
 	$pageid = 'index';
 	require_once(__DIR__ . '/header.php');
 
+	function getTime($times, $method = 'MIN') {
+		$parsedTimes = [];
+		foreach ($times as $time) {
+			if (preg_match('#^([0-9]+)m([0-9]+).([0-9]+)s$#', $time, $match)) {
+				[$all, $m, $s, $ms] = $match;
+
+				$time = $ms + ($s * 1000) + ($m * 60 * 1000);
+				$parsedTimes[] = $time;
+			}
+		}
+
+		switch ($method) {
+			case 'AVG':
+				return array_sum($parsedTimes) / count($parsedTimes);
+
+			case 'MIN':
+			default:
+				return $parsedTimes[0];
+		}
+
+	}
+
+	function formatTime($time) {
+		if (empty($time)) { return ''; }
+
+		$m = $s = $ms = 0;
+
+		if ($time > 60 * 1000) {
+			$m = floor($time / (60 * 1000));
+			$time -= $m * 60 * 1000;
+		}
+
+		if ($time > 1000) {
+			$s = floor($time / (1000));
+			$time -= $s * 1000;
+		}
+
+		$ms = $time;
+
+		return sprintf('%dm%d.%03ds', $m, $s, $ms);
+	}
+
+	$method = isset($_REQUEST['method']) ? $_REQUEST['method'] : 'AVG';
 
 	$hasResults = false;
 	if (file_exists($resultsFile)) {
@@ -34,7 +77,7 @@
 				$times = [];
 				foreach ($particpants as $particpant) {
 					if (isset($data['results'][$particpant]['days'][$day]['times'])) {
-						$times[] = $data['results'][$particpant]['days'][$day]['times'][0];
+						$times[] = getTime($data['results'][$particpant]['days'][$day]['times'], $method);
 					}
 				}
 				if (empty($times)) { continue; }
@@ -46,13 +89,13 @@
 				echo '<th class="day">Day ', $day, '</th>';
 
 				foreach ($particpants as $particpant) {
-					$time = '&nbsp;';
+					$time = '';
 					if (isset($data['results'][$particpant]['days'][$day]['times'])) {
-						$time = $data['results'][$particpant]['days'][$day]['times'][0];
+						$time = getTime($data['results'][$particpant]['days'][$day]['times'], $method);
 					}
 
 					echo '<td class="participant ', ($time == $best ? 'table-success' : ''), '">';
-					echo $time;
+					echo formatTime($time);
 					echo '</td>';
 				}
 				echo '</tr>', "\n";
