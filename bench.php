@@ -46,7 +46,7 @@
 				$time = $result[count($result) - 3];
 				$time = trim(preg_replace('#^real#', '', $time));
 
-				$results[$person]['days'[]$day][] = $time;
+				$results[$person]['days'][$day][] = $time;
 			}
 			echo "\n";
 
