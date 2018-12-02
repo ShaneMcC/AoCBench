@@ -4,7 +4,7 @@
 	$pageid = 'index';
 	require_once(__DIR__ . '/header.php');
 
-	function getTime($times, $method = 'MIN') {
+	function getTime($times, $method = 'SPECIAL') {
 		$parsedTimes = [];
 		foreach ($times as $time) {
 			if (preg_match('#^([0-9]+)m\s?([0-9]+).([0-9]+)s$#', $time, $match)) {
@@ -18,6 +18,10 @@
 		}
 
 		switch ($method) {
+			case 'SPECIAL':
+				$parsedTimes = array_chunk($parsedTimes, count($parsedTimes) - 5)[0];
+				return array_sum($parsedTimes) / count($parsedTimes);
+
 			case 'AVG':
 				return array_sum($parsedTimes) / count($parsedTimes);
 
