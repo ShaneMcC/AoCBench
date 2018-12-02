@@ -2,8 +2,9 @@
 	require_once(__DIR__ . '/../config.php');
 
 	if (!file_exists($resultsFile)) { die('No results yet.'); }
-
 	$data = json_decode(file_get_contents($resultsFile), true);
+
+	if (!isset($data['results'])) { die('No results yet.'); }
 
 	// Dump a table of benchmark results.
 	$particpants = array_keys($data['results']);
