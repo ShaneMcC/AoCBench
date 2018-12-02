@@ -7,8 +7,10 @@
 	function getTime($times, $method = 'MIN') {
 		$parsedTimes = [];
 		foreach ($times as $time) {
-			if (preg_match('#^([0-9]+)m([0-9]+).([0-9]+)s$#', $time, $match)) {
+			if (preg_match('#^([0-9]+)m\s?([0-9]+).([0-9]+)s$#', $time, $match)) {
 				list($all, $m, $s, $ms) = $match;
+
+				$ms = str_pad($ms, 3, '0');
 
 				$time = $ms + ($s * 1000) + ($m * 60 * 1000);
 				$parsedTimes[] = $time;
