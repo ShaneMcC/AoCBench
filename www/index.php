@@ -22,7 +22,20 @@
 				$parsedTimes = array_chunk($parsedTimes, count($parsedTimes) - 5)[0];
 				return array_sum($parsedTimes) / count($parsedTimes);
 
+			case 'MEDIAN':
+				$count = count($parsedTimes);
+				$middle = floor(($count - 1) / 2);
+
+				if ($count % 2) {
+					return $parsedTimes[$middle];
+				} else {
+					$low = $parsedTimes[$middle];
+					$high = $parsedTimes[$middle + 1];
+					return (($low + $high) / 2);
+				}
+
 			case 'AVG':
+			case 'MEAN':
 				return array_sum($parsedTimes) / count($parsedTimes);
 
 			case 'MIN':
@@ -52,7 +65,7 @@
 		return sprintf('%dm%d.%03ds', $m, $s, $ms);
 	}
 
-	$method = isset($_REQUEST['method']) ? $_REQUEST['method'] : 'SPECIAL';
+	$method = isset($_REQUEST['method']) ? $_REQUEST['method'] : 'MEDIAN';
 
 	$hasResults = false;
 	if (file_exists($resultsFile)) {
