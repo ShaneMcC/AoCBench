@@ -5,6 +5,7 @@
 
 	$hasRun = false;
 
+	$data = [];
 	$results = [];
 	if (file_exists($resultsFile)) {
 		$data = json_decode(file_get_contents($resultsFile), true);
@@ -12,6 +13,32 @@
 			$results = $data['results'];
 		}
 	}
+
+	// Hardware Data
+	$hardware = [];
+	exec('lscpu 2>&1', $hardware);
+	$hardware = implode("\n", $hardware);
+	$data['hardware'] = $hardware;
+
+	function saveData() {
+		global $data, $results, $resultsFile, $hasRun;
+
+		$data['results'] = $results;
+		if ($hasRun || !isset($data['time'])) { $data['time'] = time(); }
+
+		// Output Results.
+		file_put_contents($resultsFile, json_encode($data));
+	}
+
+	// Setup signal handlers etc.
+	$shutdownFunc = function() {
+		saveData();
+		die();
+	};
+	register_shutdown_function($shutdownFunc);
+	pcntl_signal(SIGINT, $shutdownFunc);
+	pcntl_signal(SIGTERM, $shutdownFunc);
+	pcntl_async_signals(true);
 
 	foreach ($participants as $participant) {
 		$person = $participant->getName();
@@ -57,6 +84,7 @@
 
 			// Run 10 times.
 			$long = false;
+			$hasRun = false;
 			for ($i = 0; $i < ($long ? $longRepeatCount : $repeatCount); $i++) {
 				$start = time();
 				$result = $participant->run($day);
@@ -75,25 +103,15 @@
 			}
 			echo "\n";
 
-			if (empty($results[$person]['days'][$day]['times'])) {
-				unset($results[$person]['days'][$day]);
-				break;
-			} else {
+			// Only save if we've actually ran enough times.
+			if ($hasRun && count($results[$person]['days'][$day]['times']) >= ($long ? $longRepeatCount : $repeatCount)) {
 				sort($results[$person]['days'][$day]['times']);
 				$results[$person]['days'][$day]['version'] = $participant->getVersion($day);
+
+				saveData();
+			} else {
+				unset($results[$person]['days'][$day]);
+				break;
 			}
 		}
 	}
-
-	// Hardware Data
-	$hardware = [];
-	exec('lscpu 2>&1', $hardware);
-	$hardware = implode("\n", $hardware);
-
-	$data = [];
-	$data['hardware'] = $hardware;
-	$data['results'] = $results;
-	if ($hasRun || !isset($data['time'])) { $data['time'] = time(); }
-
-	// Output Results.
-	file_put_contents($resultsFile, json_encode($data));
