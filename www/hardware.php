@@ -1,7 +1,7 @@
 <?php
 	require_once(__DIR__ . '/../config.php');
 
-	$pageid = 'index';
+	$pageid = 'hardware';
 	require_once(__DIR__ . '/header.php');
 
 	$hasResults = false;
@@ -10,7 +10,10 @@
 		if (isset($data['results'])) {
 			$hasResults = true;
 
-			require_once(__DIR__ . '/data.php');
+			echo '<h2>Hardware</h2>', "\n";
+			echo '<pre>';
+			echo $data['hardware'];
+			echo '</pre>';
 		}
 	}
 
