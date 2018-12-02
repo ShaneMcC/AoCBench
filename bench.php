@@ -4,6 +4,12 @@
 	require_once(__DIR__ . '/config.php');
 
 	$results = [];
+	if (file_exists($resultsFile)) {
+		$data = json_decode(file_get_contents($resultsFile), true);
+		if (isset($data['results'])) {
+			$results = $data['results'];
+		}
+	}
 
 	foreach ($participants as $participant) {
 		$person = $participant->getName();
@@ -27,35 +33,51 @@
 		echo 'Preparing.', "\n";
 		$participant->prepare();
 
-		$results[$person] = [];
-		$results[$person]['name'] = $person;
-		$results[$person]['repo'] = $participant->getRepo();
-		$results[$person]['days'] = [];
+		if (!isset($results[$person])) {
+			$results[$person] = [];
+			$results[$person]['name'] = $person;
+			$results[$person]['repo'] = $participant->getRepo();
+			$results[$person]['days'] = [];
+		}
 
 		// Run day.
 		for ($day = 1; $day <= 25; $day++) {
 			echo 'Day ', $day, ': ';
 
-			$results[$person]['days'][$day] = [];
+			if (isset($results[$person]['days'][$day]['version'])) {
+				if ($results[$person]['days'][$day]['version'] == $participant->getVersion($day)) {
+					echo 'No changes.', "\n";
+					continue;
+				}
+			}
+
+			$results[$person]['days'][$day] = ['times' => []];
 
 			// Run 10 times.
-			for ($i = 0; $i < 10; $i++) {
+			$long = false;
+			for ($i = 0; $i < ($long ? 4 : 10); $i++) {
+				$start = time();
 				$result = $participant->run($day);
+				$end = time();
+
+				// Long-Running days, run less times.
+				if ($end - $start > 30) { $long = true; }
 				if ($result === NULL) { echo '!'; break; } else { echo $i; }
 
 				// Get the `real` time output.
 				$time = $result[count($result) - 3];
 				$time = trim(preg_replace('#^real#', '', $time));
 
-				$results[$person]['days'][$day][] = $time;
+				$results[$person]['days'][$day]['times'][] = $time;
 			}
 			echo "\n";
 
-			if (empty($results[$person]['days'][$day])) {
+			if (empty($results[$person]['days'][$day]['times'])) {
 				unset($results[$person]['days'][$day]);
 				break;
 			} else {
-				sort($results[$person]['days'][$day]);
+				sort($results[$person]['days'][$day]['times']);
+				$results[$person]['days'][$day]['version'] = $participant->getVersion($day);
 			}
 		}
 	}

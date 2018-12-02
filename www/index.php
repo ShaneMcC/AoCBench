@@ -27,8 +27,8 @@
 
 		foreach ($particpants as $particpant) {
 			echo '<td>';
-			if (isset($data['results'][$particpant]['days'][$day])) {
-				echo $data['results'][$particpant]['days'][$day][0];
+			if (isset($data['results'][$particpant]['days'][$day]['times'])) {
+				echo $data['results'][$particpant]['days'][$day]['times'][0];
 			} else {
 				echo '&nbsp;';
 			}

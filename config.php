@@ -10,6 +10,7 @@
 		abstract function getRepo();
 		abstract function prepare();
 		abstract function run($day);
+		abstract function getVersion($day);
 	}
 
 	// Local configuration.
