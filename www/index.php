@@ -4,6 +4,7 @@
 	$pageid = 'index';
 	require_once(__DIR__ . '/header.php');
 
+
 	$hasResults = false;
 	if (file_exists($resultsFile)) {
 		$data = json_decode(file_get_contents($resultsFile), true);

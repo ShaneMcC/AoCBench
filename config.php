@@ -15,6 +15,12 @@
 		abstract function prepare();
 		abstract function run($day);
 		abstract function getVersion($day);
+
+		function extractTime($output) {
+			$time = $output[count($output) - 3];
+			$time = trim(preg_replace('#^real#', '', $time));
+			return $time;
+		}
 	}
 
 	// Local configuration.

@@ -15,13 +15,13 @@
 			$hasResults = true;
 
 			if (isset($_REQUEST['json'])) {
-				echo json_encode($data['results'], JSON_PRETTY_PRINT);
+				echo json_encode($data, JSON_PRETTY_PRINT);
 			} else {
 				echo '<h2>Raw Data</h2>', "\n";
 				echo '<small><a href="raw.json">json</a></small>', "\n";
 				echo '<br><br>';
 				echo '<pre>';
-				echo htmlspecialchars(json_encode($data['results'], JSON_PRETTY_PRINT));
+				echo htmlspecialchars(json_encode($data, JSON_PRETTY_PRINT));
 				echo '</pre>';
 			}
 		}

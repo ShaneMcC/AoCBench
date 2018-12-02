@@ -95,8 +95,7 @@
 				if ($result === NULL) { echo '!'; break; } else { echo $i; }
 
 				// Get the `real` time output.
-				$time = $result[count($result) - 3];
-				$time = trim(preg_replace('#^real#', '', $time));
+				$time = $participant->extractTime($result);
 
 				$results[$person]['days'][$day]['times'][] = $time;
 				$hasRun = true;
@@ -115,3 +114,5 @@
 			}
 		}
 	}
+
+	saveData();
