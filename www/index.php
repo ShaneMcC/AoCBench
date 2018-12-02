@@ -8,7 +8,7 @@
 		$parsedTimes = [];
 		foreach ($times as $time) {
 			if (preg_match('#^([0-9]+)m([0-9]+).([0-9]+)s$#', $time, $match)) {
-				[$all, $m, $s, $ms] = $match;
+				list($all, $m, $s, $ms) = $match;
 
 				$time = $ms + ($s * 1000) + ($m * 60 * 1000);
 				$parsedTimes[] = $time;
