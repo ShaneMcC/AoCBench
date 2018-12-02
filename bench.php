@@ -3,6 +3,8 @@
 
 	require_once(__DIR__ . '/config.php');
 
+	$hasRun = false;
+
 	$results = [];
 	if (file_exists($resultsFile)) {
 		$data = json_decode(file_get_contents($resultsFile), true);
@@ -69,6 +71,7 @@
 				$time = trim(preg_replace('#^real#', '', $time));
 
 				$results[$person]['days'][$day]['times'][] = $time;
+				$hasRun = true;
 			}
 			echo "\n";
 
@@ -90,6 +93,7 @@
 	$data = [];
 	$data['hardware'] = $hardware;
 	$data['results'] = $results;
+	if ($hasRun || !isset($data['time'])) { $data['time'] = time(); }
 
 	// Output Results.
 	file_put_contents($resultsFile, json_encode($data));
