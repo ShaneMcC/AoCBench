@@ -14,6 +14,26 @@
 		}
 	}
 
+
+	$__CLIOPTS = getopt('fp:d:', ['force', 'participant:', 'day:']);
+
+	$force = false;
+	if (isset($__CLIOPTS['f']) || isset($__CLIOPTS['force'])) {
+		$force = true;
+	}
+
+	$wantedParticipant = '.*';
+	if (isset($__CLIOPTS['p']) || isset($__CLIOPTS['participant'])) {
+		$wantedParticipant = isset($__CLIOPTS['p']) ? $__CLIOPTS['p'] : $__CLIOPTS['participant'];
+		if (is_array($wantedParticipant)) { $wantedParticipant = $wantedParticipant[0]; }
+	}
+
+	$wantedDay = '.*';
+	if (isset($__CLIOPTS['d']) || isset($__CLIOPTS['day'])) {
+		$wantedDay = isset($__CLIOPTS['d']) ? $__CLIOPTS['d'] : $__CLIOPTS['day'];
+		if (is_array($wantedDay)) { $wantedDay = $wantedDay[0]; }
+	}
+
 	// Hardware Data
 	$hardware = [];
 	exec('lscpu 2>&1', $hardware);
@@ -42,7 +62,9 @@
 
 	foreach ($participants as $participant) {
 		$person = $participant->getName();
-		echo $person , ': ', "\n";
+		echo "\n", $person , ': ', "\n";
+
+		if (!preg_match('#^' . $wantedParticipant. '$#', $person)) { echo 'Skipping.', "\n"; continue; }
 
 		$dir = $participantsDir . '/' . $person;
 
@@ -71,12 +93,18 @@
 
 		// Run day.
 		for ($day = 1; $day <= 25; $day++) {
-			echo 'Day ', $day, ': ';
+			echo 'Day ', $day, ':';
+
+			if (!preg_match('#^' . $wantedDay. '$#', $day)) { echo ' Skipping.', "\n"; continue; }
 
 			if (isset($results[$person]['days'][$day]['version'])) {
 				if ($results[$person]['days'][$day]['version'] == $participant->getVersion($day)) {
-					echo 'No changes.', "\n";
-					continue;
+					if ($force) {
+						echo ' [Forced]';
+					} else {
+						echo ' No changes.', "\n";
+						continue;
+					}
 				}
 			}
 
@@ -89,6 +117,8 @@
 				$start = time();
 				$result = $participant->run($day);
 				$end = time();
+
+				usleep(500); // Sleep a bit so that we're not constantly running.
 
 				// Long-Running days, run less times.
 				if ($end - $start > $longTimeout) { $long = true; }
