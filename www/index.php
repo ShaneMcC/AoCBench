@@ -1,138 +1,56 @@
 <?php
-	require_once(__DIR__ . '/../config.php');
+	require_once(__DIR__ . '/functions.php');
 
 	$pageid = 'index';
 	require_once(__DIR__ . '/header.php');
 
-	function getTime($times, $method) {
-		$parsedTimes = [];
-		foreach ($times as $time) {
-			if (preg_match('#^([0-9]+)m\s?([0-9]+).([0-9]+)s$#', $time, $match)) {
-				list($all, $m, $s, $ms) = $match;
-
-				$ms = str_pad($ms, 3, '0');
-
-				$time = $ms + ($s * 1000) + ($m * 60 * 1000);
-				$parsedTimes[] = $time;
-			}
-		}
-
-		switch ($method) {
-			case 'SPECIAL':
-				$parsedTimes = array_chunk($parsedTimes, count($parsedTimes) - 5)[0];
-				return array_sum($parsedTimes) / count($parsedTimes);
-
-			case 'MEDIAN':
-				$count = count($parsedTimes);
-				$middle = floor(($count - 1) / 2);
-
-				if ($count % 2) {
-					return $parsedTimes[$middle];
-				} else {
-					$low = $parsedTimes[$middle];
-					$high = $parsedTimes[$middle + 1];
-					return (($low + $high) / 2);
-				}
-
-			case 'AVG':
-			case 'MEAN':
-				return array_sum($parsedTimes) / count($parsedTimes);
-
-			case 'MIN':
-			default:
-				return $parsedTimes[0];
-		}
-
-	}
-
-	function formatTime($time) {
-		if (empty($time)) { return ''; }
-
-		$m = $s = $ms = 0;
-
-		if ($time > 60 * 1000) {
-			$m = floor($time / (60 * 1000));
-			$time -= $m * 60 * 1000;
-		}
-
-		if ($time > 1000) {
-			$s = floor($time / (1000));
-			$time -= $s * 1000;
-		}
-
-		$ms = $time;
-
-		return sprintf('%dm%d.%03ds', $m, $s, $ms);
-	}
 
 	$method = isset($_REQUEST['method']) ? $_REQUEST['method'] : 'MEDIAN';
 
-	$hasResults = false;
-	if (file_exists($resultsFile)) {
-		$data = json_decode(file_get_contents($resultsFile), true);
-		if (isset($data['results'])) {
-			$hasResults = true;
+	if ($hasResults) {
+		echo '<h2>Results</h2>', "\n";
+		echo '<table class="table table-striped">';
 
-			// Dump a table of benchmark results.
-			$particpants = array_keys($data['results']);
+		// Participants
+		echo '<thead>';
+		echo '<tr>';
+		echo '<th class="day">&nbsp;</th>';
+		foreach ($data['results'] as $participant => $pdata) {
+			$link = '<a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="https://github.com/favicon.ico" alt="github"></a>';
 
-			echo '<h2>Results</h2>', "\n";
-			echo '<table class="table table-striped">';
+			echo '<th class="participant">', $participant, ' ', $link, '</th>';
+		}
+		echo '</tr>', "\n";
+		echo '</thead>';
 
-			// Participants
-			echo '<thead>';
+		echo '<tbody>';
+
+		for ($day = 1; $day <= 25; $day++) {
+			$best = getDayBestTime($day, $method);
+			if ($best === NULL) { continue; }
+
 			echo '<tr>';
-			echo '<th class="day">&nbsp;</th>';
-			foreach ($particpants as $particpant) {
-				$link = '<a href="' . $data['results'][$particpant]['repo'] . '"><img height="16px" width="16px" src="https://github.com/favicon.ico" alt="github"></a>';
+			echo '<th class="day">Day ', $day, '</th>';
 
-				echo '<th class="particpant">', $particpant, ' ', $link, '</th>';
+			foreach ($data['results'] as $participant => $pdata) {
+				$time = isset($pdata['days'][$day]['times']) ? getParticipantTime($pdata['days'][$day]['times'], $method) : '';
+
+				echo '<td class="participant ', ($time == $best ? 'table-success' : ''), '">';
+				echo formatTime($time);
+				echo '</td>';
 			}
 			echo '</tr>', "\n";
-			echo '</thead>';
-
-			echo '<tbody>';
-			// Best time for each day.
-			for ($day = 1; $day <= 25; $day++) {
-				// Calculate best time.
-				$times = [];
-				foreach ($particpants as $particpant) {
-					if (isset($data['results'][$particpant]['days'][$day]['times'])) {
-						$times[] = getTime($data['results'][$particpant]['days'][$day]['times'], $method);
-					}
-				}
-				if (empty($times)) { continue; }
-
-				sort($times);
-				$best = $times[0];
-
-				echo '<tr>';
-				echo '<th class="day">Day ', $day, '</th>';
-
-				foreach ($particpants as $particpant) {
-					$time = '';
-					if (isset($data['results'][$particpant]['days'][$day]['times'])) {
-						$time = getTime($data['results'][$particpant]['days'][$day]['times'], $method);
-					}
-
-					echo '<td class="participant ', ($time == $best ? 'table-success' : ''), '">';
-					echo formatTime($time);
-					echo '</td>';
-				}
-				echo '</tr>', "\n";
-			}
-
-			echo '</tbody>';
-			echo '</table>';
-			if (isset($data['time'])) {
-				echo '<p class="text-muted text-right">';
-				echo '<small>Last updated: ', date('r', $data['time']), '</small>';
-				echo '</p>';
-			}
 		}
-	}
 
-	if (!$hasResults) {
+		echo '</tbody>';
+		echo '</table>';
+
+		if (isset($data['time'])) {
+			echo '<p class="text-muted text-right">';
+			echo '<small>Last updated: ', date('r', $data['time']), '</small>';
+			echo '</p>';
+		}
+	} else {
 		echo 'No results yet.';
 	}
 
