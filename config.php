@@ -68,7 +68,7 @@
 			}
 		}
 
-		public function cleanup() { }
+		public function cleanup() { exec('git reset --hard origin 2>&1'); }
 	}
 
 	// Local configuration.

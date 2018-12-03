@@ -68,7 +68,7 @@ When benchmarking, the following happens per-participant:
    - The default implementation assumes that the 3rd-from-last line of the output will contain `real 0m0.000s` or so as per the `time` function in `bash`.
    - If the output time is not in `real` format, it should be converted to `0m0.000s` format for the frontend to understand.
  - After all the days are run, `cleanup()` will be called.
-   - The default implementation does nothing.
+   - The default implementation runs `git reset --hard origin`
 
 
 ## Updating
