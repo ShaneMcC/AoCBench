@@ -80,9 +80,9 @@
 	}
 
 	foreach ($participants as $participant) {
+		$person = $participant->getName();
 		if (!preg_match('#^' . $wantedParticipant. '$#', $person)) { continue; }
 
-		$person = $participant->getName();
 		echo "\n", $person , ': ', "\n";
 
 		$dir = $participantsDir . '/' . $person;
