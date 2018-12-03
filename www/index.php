@@ -35,9 +35,18 @@
 			foreach ($data['results'] as $participant => $pdata) {
 				$time = isset($pdata['days'][$day]['times']) ? getParticipantTime($pdata['days'][$day]['times'], $method) : '';
 
-				echo '<td class="participant ', ($time == $best ? 'table-success' : ''), '">';
-				echo formatTime($time);
-				echo '</td>';
+				if (!empty($time)) {
+					$min = isset($pdata['days'][$day]['times']) ? getParticipantTime($pdata['days'][$day]['times'], 'MIN') : '';
+					$max = isset($pdata['days'][$day]['times']) ? getParticipantTime($pdata['days'][$day]['times'], 'MAX') : '';
+
+					$tooltip = 'Min: ' . formatTime($min) . '<br>' . 'Max: ' . formatTime($max);
+
+					echo '<td class="participant time ', ($time == $best ? 'table-success' : ''), '" data-toggle="tooltip" data-placement="bottom" data-html="true" title="', htmlspecialchars($tooltip), '">';
+					echo formatTime($time);
+					echo '</td>';
+				} else {
+					echo '<td class="participant">&nbsp;</td>';
+				}
 			}
 			echo '</tr>', "\n";
 		}
@@ -50,6 +59,8 @@
 			echo '<small>Last updated: ', date('r', $data['time']), '</small>';
 			echo '</p>';
 		}
+
+		echo '<script src="./index.js"></script>';
 	} else {
 		echo 'No results yet.';
 	}
