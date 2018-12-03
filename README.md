@@ -1,6 +1,6 @@
 # AoC Bench
 
-This application allows for benchmarking [Advent of Code](https://adventofcode.com/)) solutions.
+This application allows for benchmarking [Advent of Code](https://adventofcode.com/) solutions.
 
 There are 2 parts to this, the web frontend (under `web`) and the benchmarker (`bench.php`).
 
