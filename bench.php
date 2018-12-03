@@ -80,10 +80,10 @@
 	}
 
 	foreach ($participants as $participant) {
+		if (!preg_match('#^' . $wantedParticipant. '$#', $person)) { continue; }
+
 		$person = $participant->getName();
 		echo "\n", $person , ': ', "\n";
-
-		if (!preg_match('#^' . $wantedParticipant. '$#', $person)) { echo 'Skipping.', "\n"; continue; }
 
 		$dir = $participantsDir . '/' . $person;
 
@@ -114,10 +114,9 @@
 		// Run day.
 		for ($day = 1; $day <= 25; $day++) {
 			if (!$participant->hasDay($day)) { continue; }
+			if (!preg_match('#^' . $wantedDay. '$#', $day)) { continue; }
 
 			echo 'Day ', $day, ':';
-
-			if (!preg_match('#^' . $wantedDay. '$#', $day)) { echo ' Skipping.', "\n"; continue; }
 
 			if (isset($results[$person]['days'][$day]['version'])) {
 				if ($results[$person]['days'][$day]['version'] == $participant->getVersion($day)) {
