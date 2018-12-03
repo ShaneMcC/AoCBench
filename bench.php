@@ -27,7 +27,7 @@
 	function saveData() {
 		global $data, $resultsFile, $hasRun;
 
-		if ($hasRun && !isset($data['time'])) { $data['time'] = time(); }
+		if ($hasRun || !isset($data['time'])) { $data['time'] = time(); }
 
 		// Output results to disk.
 		file_put_contents($resultsFile, json_encode($data));
@@ -145,7 +145,6 @@
 
 			// Run the day.
 			$long = false;
-			$hasRun = false;
 
 			// Reset the times.
 			$thisDay['times'] = [];
@@ -171,7 +170,7 @@
 			echo "\n";
 
 			// Update data if we've actually ran enough times.
-			if ($hasRun && count($thisDay['times']) >= ($long ? $longRepeatCount : $repeatCount)) {
+			if (count($thisDay['times']) >= ($long ? $longRepeatCount : $repeatCount)) {
 				sort($thisDay['times']);
 				$thisDay['version'] = $participant->getVersion($day);
 				$data['results'][$person]['days'][$day] = $thisDay;
