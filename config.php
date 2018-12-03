@@ -1,5 +1,6 @@
 <?php
 
+	$lockfile = __DIR__ . '/.benchlock';
 	$resultsFile = __DIR__ . '/results.json';
 	$participantsDir = __DIR__ . '/participants/';
 

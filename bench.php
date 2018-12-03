@@ -2,6 +2,14 @@
 <?php
 	require_once(__DIR__ . '/config.php');
 
+	$lockfile = __DIR__ . '/.benchlock';
+	if (!file_exists($lockfile)) { file_put_contents($lockfile, ''); }
+	$fp = fopen($lockfile, 'r+');
+	if (!flock($fp, LOCK_EX | LOCK_NB)) {
+		echo 'Unable to get lock on ', $lockfile, "\n";
+		exit(1);
+	}
+
 	// Load old data file.
 	$data = ['results' => []];
 	if (file_exists($resultsFile)) {
