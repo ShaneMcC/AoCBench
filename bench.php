@@ -120,10 +120,10 @@
 
 		if (!isset($data['results'][$person])) {
 			$data['results'][$person] = [];
-			$data['results'][$person]['name'] = $participant->getName();
-			$data['results'][$person]['repo'] = $participant->getRepo();
 			$data['results'][$person]['days'] = [];
 		}
+		$data['results'][$person]['name'] = $participant->getName();
+		$data['results'][$person]['repo'] = $participant->getRepo();
 
 		// Run day.
 		for ($day = 1; $day <= 25; $day++) {
@@ -246,7 +246,7 @@
 		if ($seconds > 60) {
 			$minutes = floor($seconds / 60);
 			$seconds -= $minutes * 60;
-			$result .= $minutes . ' minute' . ($minute != 1 ? 's' : '');
+			$result .= $minutes . ' minute' . ($minutes != 1 ? 's' : '');
 		}
 
 		$result .= $seconds . ' second' . ($seconds != 1 ? 's' : '');

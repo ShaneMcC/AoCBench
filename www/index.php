@@ -28,7 +28,11 @@
 		echo '<th class="day">&nbsp;</th>';
 		$p = 1;
 		foreach ($data['results'] as $participant => $pdata) {
-			$link = '<a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="https://github.com/favicon.ico" alt="github"></a>';
+			if (isset($pdata['repo'])) {
+				$link = '<a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="https://github.com/favicon.ico" alt="github"></a>';
+			} else {
+				$link = '';
+			}
 
 			if (isset($_REQUEST['anon'])) { $participant = 'Participant ' . $p++; }
 			echo '<th class="participant">', $participant, ' ', $link, '</th>';

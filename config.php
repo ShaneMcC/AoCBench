@@ -2,6 +2,7 @@
 
 	$lockfile = __DIR__ . '/.benchlock';
 	$resultsFile = __DIR__ . '/results.json';
+	$outputResultsFile = __DIR__ . '/outputresults.json';
 	$participantsDir = __DIR__ . '/participants/';
 
 	$repeatCount = 20;
@@ -30,7 +31,7 @@
 		public function hasDay($day) { return $this->getVersion($day) !== NULL; }
 
 		public function getInput($day) {
-			return file_get_contents($this->getInputFilename($day));
+			return file_exists($this->getInputFilename($day)) ? file_get_contents($this->getInputFilename($day)) : '';
 		}
 
 		public function setInput($day, $input) {

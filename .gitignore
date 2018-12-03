@@ -4,3 +4,5 @@ results.*.json
 config.local.php
 config.local.*.php
 .benchlock
+outputresults.json
+outputresults.*.json

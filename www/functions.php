@@ -9,6 +9,14 @@
 		}
 	}
 
+	$hasMatrix = false;
+	if (file_exists($outputResultsFile)) {
+		$matrix = json_decode(file_get_contents($outputResultsFile), true);
+		if (isset($matrix['results'])) {
+			$hasMatrix = true;
+		}
+	}
+
 	function getDayBestTime($day, $method) {
 		global $data;
 
