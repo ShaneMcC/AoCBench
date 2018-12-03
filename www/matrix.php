@@ -55,9 +55,13 @@
 					$classes = ['output'];
 
 					if ($dayMatrix[$p1][$p2]['return'] != '0') {
-						$classes[] = 'table-danger';
+						$classes[] = 'table-warning';
 					} else if ($p1 == $p2) {
 						$classes[] = 'table-primary';
+					} else if (isset($dayMatrix[$p1][$p2]['correct']) && $dayMatrix[$p1][$p2]['correct']) {
+						$classes[] = 'table-success';
+					} else if (isset($dayMatrix[$p1][$p2]['correct']) && !$dayMatrix[$p1][$p2]['correct']) {
+						$classes[] = 'table-danger';
 					}
 
 					echo '<td class="', implode(' ', $classes),'"><pre>', htmlspecialchars(implode("\n", $dayMatrix[$p1][$p2]['output'])), '</pre></td>';

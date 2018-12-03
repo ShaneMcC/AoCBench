@@ -29,7 +29,7 @@
 	}
 
 	// Get CLI Options.
-	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help', 'no-update']);
+	$__CLIOPTS = getopt('fp:d:i:h', ['force', 'participant:', 'day:', 'input:', 'help', 'no-update']);
 
 	function getOptionValue($short = NULL, $long = NULL, $default = '') {
 		global $__CLIOPTS;
@@ -46,6 +46,7 @@
 	$noUpdate = getOptionValue(NULL, 'no-update', NULL) !== NULL;
 	$wantedParticipant = getOptionValue('p', 'participant', '.*');
 	$wantedDay = getOptionValue('d', 'day', '.*');
+	$wantedInput = getOptionValue('i', 'input', '.*');
 	$force = getOptionValue('f', 'force', NULL) !== NULL;
 
 	if (getOptionValue('h', 'help', NULL) !== NULL) {
@@ -57,14 +58,16 @@
 		echo '  -h, --help                    Show this help output', "\n";
 		echo '  -f, --force                   Force run matching participants/days that would', "\n";
 		echo '                                otherwise be ignored due to lack of changes.', "\n";
+		echo '  -i, --input <regex>           Only run inputs for participants matching <regex> (This', "\n";
+		echo '                                is automatically anchored start/end)', "\n";
 		echo '  -p, --participant <regex>     Only look at participants matching <regex> (This', "\n";
 		echo '                                is automatically anchored start/end)', "\n";
 		echo '  -d, --day <regex>             Only look at days matching <regex> (This is', "\n";
 		echo '                                automatically anchored start/end)', "\n";
 		echo '      --no-update               Do not update repos.', "\n";
 		echo '', "\n";
-		echo 'If not specified, day and participant both default to ".*" to match all', "\n";
-		echo 'participants/days.', "\n";
+		echo 'If not specified, day, participant, input all default to ".*" to match all', "\n";
+		echo 'participants/days/inputs.', "\n";
 		die();
 	}
 
@@ -87,6 +90,8 @@
 			$input = $participant->getInput($day);
 			$inputs[$day][$person]['input'] = $input;
 			$inputs[$day][$person]['version'] = $participant->getInputVersion($day);
+			$inputs[$day][$person]['answer1'] = !empty($input) ? $participant->getInputAnswer($day, 1) : null;
+			$inputs[$day][$person]['answer2'] = !empty($input) ? $participant->getInputAnswer($day, 2) : null;
 		}
 
 		echo 'Done.', "\n";
@@ -142,6 +147,8 @@
 			}
 
 			foreach ($inputs[$day] as $inputPerson => $input) {
+				if (!preg_match('#^' . $wantedInput. '$#', $inputPerson)) { continue; }
+
 				echo '        ', $inputPerson, ': ';
 
 				$thisInputVersion = isset($thisDay['outputs'][$inputPerson]['version']) ? $thisDay['outputs'][$inputPerson]['version'] : 'Unknown';
@@ -150,7 +157,14 @@
 
 				$participant->setInput($day, $input['input']);
 				list($ret, $result) = $participant->run($day);
+
 				$thisDay['outputs'][$inputPerson] = ['version' => $input['version'], 'return' => $ret, 'output' => $result];
+
+				if ($input['answer1'] !== NULL && $input['answer2'] !== NULL) {
+					$rightAnswer = preg_match('#' . preg_quote($input['answer1'], '#') . '.+' . preg_quote($input['answer2'], '#') . '#', implode(' ', $result));
+					$thisDay['outputs'][$inputPerson]['correct'] = $rightAnswer;
+				}
+
 				echo 'Done!', "\n";
 			}
 			echo "\n";
