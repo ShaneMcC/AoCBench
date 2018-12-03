@@ -15,17 +15,39 @@
 	abstract class Participant {
 		abstract function getName();
 		abstract function getRepo();
-		abstract function prepare();
-		public function hasDay($day) { return $this->getVersion($day) !== NULL; }
-		abstract function run($day);
+		public function prepare() {
+			if (file_exists('./docker.sh')) {
+				exec('bash ./docker.sh 2>&1');
+			} else if (file_exists('./run.sh')) {
+				exec('bash ./run.sh 2>&1');
+			}
+		}
+		abstract function getInputFilename($day);
 		abstract function getVersion($day);
-		abstract function getInput($day);
-		abstract function setInput($day, $input);
+		abstract function run($day);
 
-		function extractTime($output) {
+		public function hasDay($day) { return $this->getVersion($day) !== NULL; }
+
+		public function getInput($day) {
+			return file_get_contents($this->getInputFilename());
+		}
+
+		public function setInput($day, $input) {
+			file_put_contents($this->getInputFilename(), $input);
+		}
+
+		public function extractTime($output) {
 			$time = $output[count($output) - 3];
 			$time = trim(preg_replace('#^real#', '', $time));
 			return $time;
+		}
+
+		protected function doRun($cmd) {
+			$output = [];
+			$ret = -1;
+			exec($cmd, $output, $ret);
+
+			return $ret === 0 ? $output : null;
 		}
 	}
 
