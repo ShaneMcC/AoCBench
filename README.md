@@ -60,6 +60,8 @@ When benchmarking, the following happens per-participant:
    - The default implementation checks if getVersion($day) returns non-null
  - If `$normaliseInput` is set, then the file specified by `getInputFilename($day)` will be overwritten with the input for the day.
    - This will either be taken from `./inputs/<day>.txt` or fallback to the file referenced by `getInputFilename($day)` on the first-defined participant.
+   - The user should implement `getInputAnswer($day, $part)` as either a global function `config.local.php` or within the first-defined participant.
+     - This should return a non-`NULL` string to look for in the output to allow for validation.
  - `run($day)` will be called multiple times to run the day the required number of times
    - This should return `[$returnCode, $outputArray]`. A non-0 `$returnCode` is considered a fail and `$outputArray` will be displayed for debugging.
  - `extractTime($outputArray)` will be called on the result from `run($day)` to extract the time value.
