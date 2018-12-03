@@ -9,6 +9,9 @@
 		exit(1);
 	}
 
+	$startTime = time();
+	echo 'Bench starting at: ', date('r'), "\n";
+
 	// Load old data file.
 	$data = ['results' => []];
 	if (file_exists($resultsFile)) {
@@ -187,3 +190,8 @@
 
 		$participant->cleanup();
 	}
+
+	$endTime = time();
+	echo "\n";
+	echo 'Bench ended at: ', date('r'), "\n";
+	echo 'Took: ', ($endTime - $startTime), ' seconds.', "\n";
