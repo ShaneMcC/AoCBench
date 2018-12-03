@@ -122,7 +122,7 @@
 			if (!$participant->hasDay($day)) { continue; }
 			if (!preg_match('#^' . $wantedDay. '$#', $day)) { continue; }
 
-			$thisDay = isset($data['results'][$person]['days'][$day]) ? $data['results'][$person]['days'][$day] : ['times' => []];
+			$thisDay = isset($data['results'][$person]['days'][$day]) ? $data['results'][$person]['days'][$day] : ['times' => [], 'version' => 'Unknown'];
 			echo 'Day ', $day, ':';
 
 			if (isset($thisDay['version'])) {
@@ -173,7 +173,7 @@
 			// Update data if we've actually ran enough times.
 			if ($hasRun && count($thisDay['times']) >= ($long ? $longRepeatCount : $repeatCount)) {
 				sort($thisDay['times']);
-				$thisDay['times']['version'] = $participant->getVersion($day);
+				$thisDay['version'] = $participant->getVersion($day);
 				$data['results'][$person]['days'][$day] = $thisDay;
 			}
 
