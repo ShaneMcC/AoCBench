@@ -2,7 +2,6 @@
 <?php
 	require_once(__DIR__ . '/config.php');
 
-	$lockfile = __DIR__ . '/.benchlock';
 	if (!file_exists($lockfile)) { file_put_contents($lockfile, ''); }
 	$fp = fopen($lockfile, 'r+');
 	if (!flock($fp, LOCK_EX | LOCK_NB)) {
@@ -147,6 +146,9 @@
 			// Run the day.
 			$long = false;
 			$hasRun = false;
+
+			// Reset the times.
+			$thisDay['times'] = [];
 
 			for ($i = 0; $i < ($long ? $longRepeatCount : $repeatCount); $i++) {
 				$start = time();
