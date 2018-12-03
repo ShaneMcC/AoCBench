@@ -5,7 +5,7 @@
 	$participantsDir = __DIR__ . '/participants/';
 
 	$repeatCount = 20;
-	$longTimeout = 30;
+	$longTimeout = 10;
 	$longRepeatCount = 10;
 
 	$normaliseInput = true;

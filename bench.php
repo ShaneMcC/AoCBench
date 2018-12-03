@@ -235,7 +235,26 @@
 		$participant->cleanup();
 	}
 
+	function secondsToDuration($seconds) {
+		$result = '';
+		if ($seconds > 60 * 60) {
+			$hours = floor($seconds / (60 * 60));
+			$seconds -= $hours * 60 * 60;
+			$result .= $hours . ' hour' . ($hours != 1 ? 's' : '');
+		}
+
+		if ($seconds > 60) {
+			$minutes = floor($seconds / 60);
+			$seconds -= $minutes * 60;
+			$result .= $minutes . ' minute' . ($minute != 1 ? 's' : '');
+		}
+
+		$result .= $seconds . ' second' . ($seconds != 1 ? 's' : '');
+
+		return $result;
+	}
+
 	$endTime = time();
 	echo "\n";
 	echo 'Bench ended at: ', date('r'), "\n";
-	echo 'Took: ', ($endTime - $startTime), ' seconds.', "\n";
+	echo 'Took: ', secondsToDuration($endTime - $startTime), "\n";
