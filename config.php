@@ -8,6 +8,7 @@
 	$longRepeatCount = 10;
 
 	$normaliseInput = true;
+	$inputsDir = __DIR__ . '/inputs/';
 
 	$participants = [];
 

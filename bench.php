@@ -14,7 +14,6 @@
 		}
 	}
 
-
 	$__CLIOPTS = getopt('fp:d:', ['force', 'participant:', 'day:']);
 
 	$force = false;
@@ -62,16 +61,21 @@
 
 
 	function getInput($day) {
-		global $participants, $participantsDir;
+		global $participants, $participantsDir, $inputsDir;
 
-		$source = $participants[0];
+		if (file_exists($inputsDir . '/' . $day . '.txt')) {
+			$input = file_get_contents($inputsDir . '/' . $day . '.txt');
+		} else {
+			$source = $participants[0];
 
-		$cwd = getcwd();
-		chdir($participantsDir . '/' . $source->getName());
+			$cwd = getcwd();
+			chdir($participantsDir . '/' . $source->getName());
 
-		$input = $source->getInput($day);
+			$input = $source->getInput($day);
 
-		chdir($cwd);
+			chdir($cwd);
+		}
+
 		return $input;
 	}
 
