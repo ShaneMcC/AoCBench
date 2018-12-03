@@ -163,6 +163,7 @@
 			saveData();
 		}
 
+		echo 'Cleanup.', "\n";
 		$participant->cleanup();
 	}
 
