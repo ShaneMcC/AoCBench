@@ -48,7 +48,7 @@
 			$ret = -1;
 			exec($cmd, $output, $ret);
 
-			return $ret === 0 ? $output : null;
+			return [$ret, $output];
 		}
 
 		public function updateRepo($dir) {

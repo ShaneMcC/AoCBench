@@ -151,12 +151,17 @@
 
 			for ($i = 0; $i < ($long ? $longRepeatCount : $repeatCount); $i++) {
 				$start = time();
-				$result = $participant->run($day);
+				list($ret, $result) = $participant->run($day);
 				$end = time();
 				usleep(500); // Sleep a bit so that we're not constantly running.
 
 				// Output to show the day ran.
-				if (!is_array($result) || empty($result)) { echo ' !'; break; } else { echo ' ', $i; }
+				if ($ret != 0) {
+					echo ' !';
+					echo "\n";
+					foreach ($result as $out) { echo '        > ', $out, "\n"; }
+					break;
+				} else { echo ' ', $i; }
 
 				// If this was a long-running day, run future days less often.
 				if ($end - $start > $longTimeout) { $long = true; }

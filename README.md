@@ -61,7 +61,8 @@ When benchmarking, the following happens per-participant:
  - If `$normaliseInput` is set, then the file specified by `getInputFilename($day)` will be overwritten with the input for the day.
    - This will either be taken from `./inputs/<day>.txt` or fallback to the file referenced by `getInputFilename($day)` on the first-defined participant.
  - `run($day)` will be called multiple times to run the day the required number of times
- - `extractTime($output)` will be called on the output from `run($day)` to extract the time value.
+   - This should return `[$returnCode, $outputArray]`. A non-0 `$returnCode` is considered a fail and `$outputArray` will be displayed for debugging.
+ - `extractTime($outputArray)` will be called on the result from `run($day)` to extract the time value.
    - The default implementation assumes that the 3rd-from-last line of the output will contain `real 0m0.000s` or so as per the `time` function in `bash`.
    - If the output time is not in `real` format, it should be converted to `0m0.000s` format for the frontend to understand.
  - After all the days are run, `cleanup()` will be called.
