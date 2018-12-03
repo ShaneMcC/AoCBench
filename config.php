@@ -29,11 +29,11 @@
 		public function hasDay($day) { return $this->getVersion($day) !== NULL; }
 
 		public function getInput($day) {
-			return file_get_contents($this->getInputFilename());
+			return file_get_contents($this->getInputFilename($day));
 		}
 
 		public function setInput($day, $input) {
-			file_put_contents($this->getInputFilename(), $input);
+			file_put_contents($this->getInputFilename($day), $input);
 		}
 
 		public function extractTime($output) {
@@ -48,6 +48,20 @@
 			exec($cmd, $output, $ret);
 
 			return $ret === 0 ? $output : null;
+		}
+
+		public function updateRepo($dir) {
+			if (file_exists($dir)) {
+				echo 'Updating Repo.', "\n";
+				chdir($dir);
+				exec('git reset --hard origin 2>&1');
+				exec('git pull 2>&1');
+			} else {
+				echo 'Cloning Repo.', "\n";
+				mkdir($dir, 0755, true);
+				exec('git clone ' . $this->getRepo() . ' ' . $dir . ' 2>&1');
+				chdir($dir);
+			}
 		}
 	}
 

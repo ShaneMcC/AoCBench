@@ -1,65 +1,58 @@
 #!/usr/bin/php
 <?php
-
 	require_once(__DIR__ . '/config.php');
 
-	$hasRun = false;
-
-	$data = [];
-	$results = [];
+	// Load old data file.
+	$data = ['results' => []];
 	if (file_exists($resultsFile)) {
 		$data = json_decode(file_get_contents($resultsFile), true);
-		if (isset($data['results'])) {
-			$results = $data['results'];
-		}
 	}
 
-	$__CLIOPTS = getopt('fp:d:', ['force', 'participant:', 'day:']);
-
-	$force = false;
-	if (isset($__CLIOPTS['f']) || isset($__CLIOPTS['force'])) {
-		$force = true;
-	}
-
-	$wantedParticipant = '.*';
-	if (isset($__CLIOPTS['p']) || isset($__CLIOPTS['participant'])) {
-		$wantedParticipant = isset($__CLIOPTS['p']) ? $__CLIOPTS['p'] : $__CLIOPTS['participant'];
-		if (is_array($wantedParticipant)) { $wantedParticipant = $wantedParticipant[0]; }
-	}
-
-	$wantedDay = '.*';
-	if (isset($__CLIOPTS['d']) || isset($__CLIOPTS['day'])) {
-		$wantedDay = isset($__CLIOPTS['d']) ? $__CLIOPTS['d'] : $__CLIOPTS['day'];
-		if (is_array($wantedDay)) { $wantedDay = $wantedDay[0]; }
-	}
-
-	// Hardware Data
+	// Set our hardware.
 	$hardware = [];
 	exec('lscpu 2>&1', $hardware);
 	$hardware = implode("\n", $hardware);
 	$data['hardware'] = $hardware;
 
+	$hasRun = false;
+
+	// Save Data.
 	function saveData() {
-		global $data, $results, $resultsFile, $hasRun;
+		global $data, $resultsFile, $hasRun;
 
-		$data['results'] = $results;
-		if ($hasRun || !isset($data['time'])) { $data['time'] = time(); }
+		if ($hasRun && !isset($data['time'])) { $data['time'] = time(); }
 
-		// Output Results.
+		// Output results to disk.
 		file_put_contents($resultsFile, json_encode($data));
 	}
 
-	// Setup signal handlers etc.
-	$shutdownFunc = function() {
-		saveData();
-		die();
-	};
+	// Get CLI Options.
+	$__CLIOPTS = getopt('fp:d:', ['force', 'participant:', 'day:']);
+
+	function getOptionValue($short = NULL, $long = NULL, $default = '') {
+		global $__CLIOPTS;
+
+		if ($short !== NULL && array_key_exists($short, $__CLIOPTS)) { $val = $__CLIOPTS[$short]; }
+		else if ($long !== NULL && array_key_exists($long, $__CLIOPTS)) { $val = $__CLIOPTS[$long]; }
+		else { $val = $default; }
+
+		if (is_array($val)) { $val = array_pop($val); }
+
+		return $val;
+	}
+
+	$wantedParticipant = getOptionValue('p', 'participant', '.*');
+	$wantedDay = getOptionValue('d', 'day', '.*');
+	$force = getOptionValue('f', 'force', NULL) !== NULL;
+
+	// Ensure we save if we exit:
+	$shutdownFunc = function() { saveData(); die(); };
 	register_shutdown_function($shutdownFunc);
 	pcntl_signal(SIGINT, $shutdownFunc);
 	pcntl_signal(SIGTERM, $shutdownFunc);
 	pcntl_async_signals(true);
 
-
+	// Get input for a given day.
 	function getInput($day) {
 		global $participants, $participantsDir, $inputsDir;
 
@@ -67,12 +60,9 @@
 			$input = file_get_contents($inputsDir . '/' . $day . '.txt');
 		} else {
 			$source = $participants[0];
-
 			$cwd = getcwd();
 			chdir($participantsDir . '/' . $source->getName());
-
 			$input = $source->getInput($day);
-
 			chdir($cwd);
 		}
 
@@ -87,28 +77,18 @@
 
 		$dir = $participantsDir . '/' . $person;
 
-		if (file_exists($dir)) {
-			echo 'Updating Repo.', "\n";
-			chdir($dir);
-			exec('git reset --hard origin 2>&1');
-			exec('git pull 2>&1');
-		} else {
-			echo 'Cloning Repo.', "\n";
-			mkdir($dir, 0755, true);
-			$output = [];
-			exec('git clone ' . $participant->getRepo() . ' ' . $dir . ' 2>&1', $output);
-			chdir($dir);
-		}
+		$participant->updateRepo($dir);
+		chdir($dir);
 
 		// Prepare.
 		echo 'Preparing.', "\n";
 		$participant->prepare();
 
-		if (!isset($results[$person])) {
-			$results[$person] = [];
-			$results[$person]['name'] = $person;
-			$results[$person]['repo'] = $participant->getRepo();
-			$results[$person]['days'] = [];
+		if (!isset($data['results'][$person])) {
+			$data['results'][$person] = [];
+			$data['results'][$person]['name'] = $person;
+			$data['results'][$person]['repo'] = $participant->getRepo();
+			$data['results'][$person]['days'] = [];
 		}
 
 		// Run day.
@@ -116,10 +96,11 @@
 			if (!$participant->hasDay($day)) { continue; }
 			if (!preg_match('#^' . $wantedDay. '$#', $day)) { continue; }
 
+			$thisDay = isset($data['results'][$person]['days'][$day]) ? $data['results'][$person]['days'][$day] : ['times' => []];
 			echo 'Day ', $day, ':';
 
-			if (isset($results[$person]['days'][$day]['version'])) {
-				if ($results[$person]['days'][$day]['version'] == $participant->getVersion($day)) {
+			if (isset($thisDay['version'])) {
+				if ($thisDay['version'] == $participant->getVersion($day)) {
 					if ($force) {
 						echo ' [Forced]';
 					} else {
@@ -129,8 +110,6 @@
 				}
 			}
 
-			$results[$person]['days'][$day] = ['times' => []];
-
 			if ($normaliseInput) {
 				$input = getInput($day);
 				if ($input !== FALSE) {
@@ -138,39 +117,38 @@
 				}
 			}
 
-			// Run 20 times.
+			// Run the day.
 			$long = false;
 			$hasRun = false;
+
 			for ($i = 0; $i < ($long ? $longRepeatCount : $repeatCount); $i++) {
 				$start = time();
 				$result = $participant->run($day);
 				$end = time();
-
 				usleep(500); // Sleep a bit so that we're not constantly running.
 
-				// Long-Running days, run less times.
+				// Output to show the day ran.
+				if (!is_array($result) || empty($result)) { echo ' !'; break; } else { echo ' ', $i; }
+
+				// If this was a long-running day, run future days less often.
 				if ($end - $start > $longTimeout) { $long = true; }
-				if ($result === NULL) { echo ' !'; } else { echo ' ', $i; }
 
 				// Get the `real` time output.
 				$time = $participant->extractTime($result);
 
-				$results[$person]['days'][$day]['times'][] = $time;
+				$thisDay['times'][] = $time;
 				$hasRun = true;
 			}
 			echo "\n";
 
-			// Only save if we've actually ran enough times.
-			if ($hasRun && count($results[$person]['days'][$day]['times']) >= ($long ? $longRepeatCount : $repeatCount)) {
-				sort($results[$person]['days'][$day]['times']);
-				$results[$person]['days'][$day]['version'] = $participant->getVersion($day);
-
-				saveData();
-			} else {
-				unset($results[$person]['days'][$day]);
-				break;
+			// Update data if we've actually ran enough times.
+			if ($hasRun && count($thisDay['times']) >= ($long ? $longRepeatCount : $repeatCount)) {
+				sort($thisDay['times']);
+				$thisDay['times']['version'] = $participant->getVersion($day);
+				$data['results'][$person]['days'][$day] = $thisDay;
 			}
+
+			// Save the data.
+			saveData();
 		}
 	}
-
-	saveData();
