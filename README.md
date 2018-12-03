@@ -41,7 +41,7 @@ An example participant:
 ```
 
 The important bits are:
- - The participant name (Must not contain any spaces)
+ - The participant name (Spaces will be removed and used as the folder name for the repo on disk)
  - The participant repo (This will be automatically checked out)
  - The `getVersion($day)` function should return the most recent commit that changed a given day.
    - This usually checks the version of the directory or a specific per-day file.

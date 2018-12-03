@@ -80,7 +80,8 @@
 		} else {
 			$source = $participants[0];
 			$cwd = getcwd();
-			chdir($participantsDir . '/' . $source->getName());
+			$person = preg_replace('#[^A-Z0-9-_]#i', '', $source->getName());
+			chdir($participantsDir . '/' . $person);
 			$input = $source->getInput($day);
 			chdir($cwd);
 		}
@@ -89,13 +90,12 @@
 	}
 
 	foreach ($participants as $participant) {
-		$person = $participant->getName();
+		$person = preg_replace('#[^A-Z0-9-_]#i', '', $participant->getName());
 		if (!preg_match('#^' . $wantedParticipant. '$#', $person)) { continue; }
 
-		echo "\n", $person , ': ', "\n";
+		echo "\n", $participant->getName() , ': ', "\n";
 
 		$dir = $participantsDir . '/' . $person;
-
 		$participant->updateRepo($dir);
 		chdir($dir);
 
@@ -105,7 +105,7 @@
 
 		if (!isset($data['results'][$person])) {
 			$data['results'][$person] = [];
-			$data['results'][$person]['name'] = $person;
+			$data['results'][$person]['name'] = $participant->getName();
 			$data['results'][$person]['repo'] = $participant->getRepo();
 			$data['results'][$person]['days'] = [];
 		}
