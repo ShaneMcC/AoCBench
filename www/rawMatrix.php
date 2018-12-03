@@ -23,7 +23,7 @@
 		if (isset($_REQUEST['json'])) {
 			echo '[]';
 		} else {
-			echo 'No results yet.';
+			echo 'No data yet.';
 		}
 	}
 

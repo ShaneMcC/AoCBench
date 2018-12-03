@@ -47,4 +47,4 @@
     <main role="main">
       <div class="container-fluid">
         <div class="row">
-            <div class="container">
+            <div class="container<?=(isset($fluid) && $fluid ? '-fluid' : '');?>">

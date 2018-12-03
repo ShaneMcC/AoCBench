@@ -2,6 +2,7 @@
 	require_once(__DIR__ . '/functions.php');
 
 	$pageid = 'matrix';
+	$fluid = true;
 	require_once(__DIR__ . '/header.php');
 
 
@@ -79,7 +80,7 @@
 
 		echo '<script src="./index.js"></script>';
 	} else {
-		echo 'No results yet.';
+		echo 'No data yet.';
 	}
 
 	require_once(__DIR__ . '/footer.php');
