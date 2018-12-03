@@ -27,7 +27,7 @@
 	}
 
 	// Get CLI Options.
-	$__CLIOPTS = getopt('fp:d:', ['force', 'participant:', 'day:']);
+	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help']);
 
 	function getOptionValue($short = NULL, $long = NULL, $default = '') {
 		global $__CLIOPTS;
@@ -44,6 +44,25 @@
 	$wantedParticipant = getOptionValue('p', 'participant', '.*');
 	$wantedDay = getOptionValue('d', 'day', '.*');
 	$force = getOptionValue('f', 'force', NULL) !== NULL;
+
+	if (getOptionValue('h', 'help', NULL) !== NULL) {
+		echo 'AoCBench Benchmarker.', "\n";
+		echo "\n";
+		echo 'Usage: ', $_SERVER['argv'][0], ' [options]', "\n";
+		echo '', "\n";
+		echo 'Valid options:', "\n";
+		echo '  -h, --help                    Show this help output', "\n";
+		echo '  -f, --force                   Force run matching participants/days that would', "\n";
+		echo '                                otherwise be ignored due to lack of changes.', "\n";
+		echo '  -p, --participant <regex>     Only look at participants matching <regex> (This', "\n";
+		echo '                                is automatically anchored start/end)', "\n";
+		echo '  -d, --day <regex>             Only look at days matching <regex> (This is', "\n";
+		echo '                                automatically anchored start/end)', "\n";
+		echo '', "\n";
+		echo 'If not specified, day and participant both default to ".*" to match all', "\n";
+		echo 'participants/days.', "\n";
+		die();
+	}
 
 	// Ensure we save if we exit:
 	$shutdownFunc = function() { saveData(); die(); };
