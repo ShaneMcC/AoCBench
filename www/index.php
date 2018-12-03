@@ -9,6 +9,17 @@
 
 	if ($hasResults) {
 		echo '<h2>Results</h2>', "\n";
+
+		foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'SPECIAL' => 'MeanBest', 'MAX' => 'Maximum'] as $m => $title) {
+			$link = '<a href="?method=' . $m . '">' . $title . '</a>';
+			if ($m == $method) { $link = '<strong>' . $link . '</strong>'; }
+
+			$links[] = $link;
+		}
+		echo '<p class="text-muted text-right">';
+		echo '<small>', implode(' - ', $links), '</small>';
+		echo '</p>';
+
 		echo '<table class="table table-striped">';
 
 		// Participants
@@ -54,11 +65,11 @@
 		echo '</tbody>';
 		echo '</table>';
 
+		echo '<p class="text-muted text-right">';
 		if (isset($data['time'])) {
-			echo '<p class="text-muted text-right">';
 			echo '<small>Last updated: ', date('r', $data['time']), '</small>';
-			echo '</p>';
 		}
+		echo '</p>';
 
 		echo '<script src="./index.js"></script>';
 	} else {

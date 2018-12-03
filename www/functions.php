@@ -39,6 +39,7 @@
 
 		switch ($method) {
 			case 'SPECIAL':
+			case 'MEANBEST':
 				$parsedTimes = array_chunk($parsedTimes, count($parsedTimes) - 5)[0];
 				return array_sum($parsedTimes) / count($parsedTimes);
 
@@ -47,7 +48,12 @@
 				return array_sum($parsedTimes) / count($parsedTimes);
 
 			case 'MIN':
+			case 'MINIMUM':
 				return $parsedTimes[0];
+
+			case 'MAX':
+			case 'MAXIMUM':
+				return $parsedTimes[count($parsedTimes) - 1];
 
 			case 'MEDIAN':
 			default:
