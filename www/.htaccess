@@ -1,2 +1,3 @@
 RewriteEngine On
 RewriteRule raw.json raw.php?json [L,QSA]
+RewriteRule rawMatrix.json rawMatrix.php?json [L,QSA]

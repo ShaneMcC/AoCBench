@@ -33,6 +33,12 @@
             <li class="nav-item <?=($pageid == 'raw' ? 'active' : '');?>">
               <a class="nav-link" href="raw.php">Raw Data</a>
             </li>
+            <li class="nav-item <?=($pageid == 'matrix' ? 'active' : '');?>">
+              <a class="nav-link" href="matrix.php">Output Matrix</a>
+            </li>
+            <li class="nav-item <?=($pageid == 'rawMatrix' ? 'active' : '');?>">
+              <a class="nav-link" href="rawMatrix.php">Matrix Raw Data</a>
+            </li>
           </ul>
         </div>
       </nav>
