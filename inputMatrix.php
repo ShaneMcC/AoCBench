@@ -177,12 +177,12 @@
 		if ($seconds > 60) {
 			$minutes = floor($seconds / 60);
 			$seconds -= $minutes * 60;
-			$result .= $minutes . ' minute' . ($minutes != 1 ? 's' : '');
+			$result .= ' ' . $minutes . ' minute' . ($minutes != 1 ? 's' : '');
 		}
 
-		$result .= $seconds . ' second' . ($seconds != 1 ? 's' : '');
+		$result .= ' ' . $seconds . ' second' . ($seconds != 1 ? 's' : '');
 
-		return $result;
+		return trim($result);
 	}
 
 	$endTime = time();
