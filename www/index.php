@@ -84,7 +84,9 @@
 			echo '<tr>';
 			echo '<th class="day">&nbsp;</th>';
 			foreach ($particpants as $particpant) {
-				echo '<th class="particpant">', $particpant, '</th>';
+				$link = '<a href="' . $data['results'][$particpant]['repo'] . '"><img height="16px" width="16px" src="https://github.com/favicon.ico" alt="github"></a>';
+
+				echo '<th class="particpant">', $particpant, ' ', $link, '</th>';
 			}
 			echo '</tr>', "\n";
 			echo '</thead>';
