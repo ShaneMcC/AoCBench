@@ -2,16 +2,16 @@
 
 This application allows for benchmarking [Advent of Code](https://adventofcode.com/) solutions.
 
-There are 2 parts to this, the web frontend (under `web`) and the benchmarker (`bench.php`).
+There are 2 parts to this, the web frontend (under `www`) and the benchmarker (`bench.php`).
 
-The benchmarker should be run on a cron and is responsible for generating a results.json file that is then used by the web frontend to display the data.
+The benchmarker should be run on a cron and is responsible for generating a `results.json` file that is then used by the web frontend to display the data.
 
 ## Installing
 
  - Check out the code somewhere.
  - Configure `config.local.php` (See `Configuration` section)
  - Cron `bench.php`
- - Make `www/` available via a web server.
+ - Make `www` available via a web server.
 
 ## Configuration
 
