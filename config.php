@@ -37,6 +37,8 @@
 			file_put_contents($this->getInputFilename($day), $input);
 		}
 
+		public function getInputAnswer($day, $part) { return NULL; }
+
 		public function extractTime($output) {
 			$time = $output[count($output) - 3];
 			$time = trim(preg_replace('#^real#', '', $time));
@@ -71,4 +73,8 @@
 	// Local configuration.
 	if (file_exists(dirname(__FILE__) . '/config.local.php')) {
 		include(dirname(__FILE__) . '/config.local.php');
+	}
+
+	if (!function_exists('getInputAnswer')) {
+		function getInputAnswer($day, $part) { return NULL; }
 	}

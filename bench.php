@@ -87,16 +87,21 @@
 
 		if (file_exists($inputsDir . '/' . $day . '.txt')) {
 			$input = file_get_contents($inputsDir . '/' . $day . '.txt');
+
+			$answer1 = $input !== FALSE ? getInputAnswer($day, 1) : null;
+			$answer2 = $input !== FALSE ? getInputAnswer($day, 2) : null;
 		} else {
 			$source = $participants[0];
 			$cwd = getcwd();
 			$person = preg_replace('#[^A-Z0-9-_]#i', '', $source->getName());
 			chdir($participantsDir . '/' . $person);
 			$input = $source->getInput($day);
+			$answer1 = $input !== FALSE ? $source->getInputAnswer($day, 1) : null;
+			$answer2 = $input !== FALSE ? $source->getInputAnswer($day, 2) : null;
 			chdir($cwd);
 		}
 
-		return $input;
+		return [$input, $answer1, $answer2];
 	}
 
 	foreach ($participants as $participant) {
@@ -125,25 +130,34 @@
 			if (!$participant->hasDay($day)) { continue; }
 			if (!preg_match('#^' . $wantedDay. '$#', $day)) { continue; }
 
-			$thisDay = isset($data['results'][$person]['days'][$day]) ? $data['results'][$person]['days'][$day] : ['times' => [], 'version' => 'Unknown'];
+			$thisDay = isset($data['results'][$person]['days'][$day]) ? $data['results'][$person]['days'][$day] : ['times' => []];
 			echo 'Day ', $day, ':';
 
-			if (isset($thisDay['version'])) {
-				if ($thisDay['version'] == $participant->getVersion($day)) {
-					if ($force) {
-						echo ' [Forced]';
-					} else {
-						echo ' No changes.', "\n";
-						continue;
-					}
-				}
+			if ($normaliseInput) {
+				[$input, $answer1, $answer2] = getInput($day);
+				$checkOutput = ($answer1 !== NULL && $answer2 !== NULL);
+			} else {
+				$input = $answer1 = $answer2 = NULL;
+				$checkOutput = FALSE;
 			}
 
-			if ($normaliseInput) {
-				$input = getInput($day);
-				if ($input !== FALSE) {
-					$participant->setInput($day, $input);
-				}
+			$currentVersion = isset($thisDay['version']) ? $thisDay['version'] : 'Unknown';
+			$checkedOutput = isset($thisDay['checkedOutput']) ? $thisDay['checkedOutput'] : FALSE;
+
+			// Should we skip this?
+			$skip = !empty($thisDay['times']);
+			$skip &= ($currentVersion == $participant->getVersion($day));
+			$skip &= (!$checkOutput || $checkOutput == $checkedOutput);
+
+			if ($force) {
+				echo ' [Forced]';
+				$skip = false;
+			}
+
+			if ($skip) { echo ' Up to date.', "\n"; continue; }
+
+			if ($input !== FALSE) {
+				$participant->setInput($day, $input);
 			}
 
 			// Run the day.
@@ -151,6 +165,7 @@
 
 			// Reset the times.
 			$thisDay['times'] = [];
+			$failedRun = false;
 
 			for ($i = 0; $i < ($long ? $longRepeatCount : $repeatCount); $i++) {
 				$start = time();
@@ -162,9 +177,29 @@
 				if ($ret != 0) {
 					echo ' !';
 					echo "\n";
+					echo 'Exited with error.', "\n";
+					echo 'Output:', "\n";
 					foreach ($result as $out) { echo '        > ', $out, "\n"; }
+					$failedRun = true;
 					break;
-				} else { echo ' ', $i; }
+				} else {
+					echo ' ', $i;
+					if ($checkOutput) {
+						$rightAnswer = preg_match('#' . preg_quote($answer1, '#') . '.+' . preg_quote($answer2, '#') . '#', implode(' ', $result));
+						if (!$rightAnswer) {
+							echo 'F';
+							echo "\n";
+							echo 'Wanted Answers:', "\n";
+							echo '                 Part 1:', $answer1, "\n";
+							echo '                 Part 2:', $answer2, "\n";
+							echo "\n";
+							echo 'Actual Output:', "\n";
+							foreach ($result as $out) { echo '        > ', $out, "\n"; }
+							$failedRun = true;
+							break;
+						}
+					}
+				}
 
 				// If this was a long-running day, run future days less often.
 				if ($end - $start > $longTimeout) { $long = true; }
@@ -177,9 +212,18 @@
 			}
 			echo "\n";
 
-			// Update data if we've actually ran enough times.
-			if (count($thisDay['times']) >= ($long ? $longRepeatCount : $repeatCount)) {
-				sort($thisDay['times']);
+			// Update data if we've actually ran enough times or if we failed.
+			if ($failedRun || count($thisDay['times']) >= ($long ? $longRepeatCount : $repeatCount)) {
+				// Invalidate any times if we failed or sort them for later.
+				if ($failedRun) {
+					unset($thisDay['times']);
+				} else {
+					sort($thisDay['times']);
+					if ($checkOutput) {
+						$thisDay['checkedOutput'] = true;
+					}
+				}
+
 				$thisDay['version'] = $participant->getVersion($day);
 				$data['results'][$person]['days'][$day] = $thisDay;
 			}
