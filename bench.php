@@ -60,6 +60,21 @@
 	pcntl_signal(SIGTERM, $shutdownFunc);
 	pcntl_async_signals(true);
 
+
+	function getInput($day) {
+		global $participants, $participantsDir;
+
+		$source = $participants[0];
+
+		$cwd = getcwd();
+		chdir($participantsDir . '/' . $source->getName());
+
+		$input = $source->getInput($day);
+
+		chdir($cwd);
+		return $input;
+	}
+
 	foreach ($participants as $participant) {
 		$person = $participant->getName();
 		echo "\n", $person , ': ', "\n";
@@ -71,6 +86,7 @@
 		if (file_exists($dir)) {
 			echo 'Updating Repo.', "\n";
 			chdir($dir);
+			exec('git reset --hard origin 2>&1');
 			exec('git pull 2>&1');
 		} else {
 			echo 'Cloning Repo.', "\n";
@@ -110,7 +126,14 @@
 
 			$results[$person]['days'][$day] = ['times' => []];
 
-			// Run 10 times.
+			if ($normaliseInput) {
+				$input = getInput($day);
+				if ($input !== FALSE) {
+					$participant->setInput($day, $input);
+				}
+			}
+
+			// Run 20 times.
 			$long = false;
 			$hasRun = false;
 			for ($i = 0; $i < ($long ? $longRepeatCount : $repeatCount); $i++) {

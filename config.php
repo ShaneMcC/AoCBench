@@ -7,6 +7,8 @@
 	$longTimeout = 30;
 	$longRepeatCount = 10;
 
+	$normaliseInput = true;
+
 	$participants = [];
 
 	abstract class Participant {
@@ -15,6 +17,8 @@
 		abstract function prepare();
 		abstract function run($day);
 		abstract function getVersion($day);
+		abstract function getInput($day);
+		abstract function setInput($day, $input);
 
 		function extractTime($output) {
 			$time = $output[count($output) - 3];
