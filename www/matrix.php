@@ -32,7 +32,7 @@
 			// Participants
 			echo '<thead>';
 			echo '<tr>';
-			echo '<th class="who">&nbsp;</th>';
+			echo '<th class="who">Input \ Participant</th>';
 			$p = 1;
 			foreach ($dayParticipants as $participant) {
 				$pdata = $matrix['results'][$participant];
