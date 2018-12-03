@@ -34,6 +34,16 @@
 			return file_exists($this->getInputFilename($day)) ? file_get_contents($this->getInputFilename($day)) : '';
 		}
 
+		public function getInputVersion($day) {
+			$file = $this->getInputFilename($day);
+			if (file_exists($file)) {
+				exec('git rev-list -1 HEAD -- "' . $file . '" 2>&1', $output);
+				return $output[0];
+			}
+
+			return NULL;
+		}
+
 		public function setInput($day, $input) {
 			file_put_contents($this->getInputFilename($day), $input);
 		}

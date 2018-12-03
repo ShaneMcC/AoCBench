@@ -86,7 +86,7 @@
 		for ($day = 1; $day <= 25; $day++) {
 			$input = $participant->getInput($day);
 			$inputs[$day][$person]['input'] = $input;
-			$inputs[$day][$person]['version'] = $participant->getVersion($day);
+			$inputs[$day][$person]['version'] = $participant->getInputVersion($day);
 		}
 
 		echo 'Done.', "\n";
