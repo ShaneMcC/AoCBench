@@ -16,6 +16,7 @@
 		abstract function getName();
 		abstract function getRepo();
 		abstract function prepare();
+		public function hasDay($day) { return $this->getVersion($day) !== NULL; }
 		abstract function run($day);
 		abstract function getVersion($day);
 		abstract function getInput($day);
