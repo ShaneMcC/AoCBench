@@ -63,6 +63,8 @@
 				chdir($dir);
 			}
 		}
+
+		public function cleanup() { }
 	}
 
 	// Local configuration.

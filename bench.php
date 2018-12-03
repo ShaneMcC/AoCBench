@@ -151,4 +151,6 @@
 			// Save the data.
 			saveData();
 		}
+
+		$participant->cleanup();
 	}
