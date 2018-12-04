@@ -6,11 +6,14 @@ There are 2 parts to this, the web frontend (under `www`) and the benchmarker (`
 
 The benchmarker should be run on a cron and is responsible for generating a `results.json` file that is then used by the web frontend to display the data.
 
+There is additionally `inputMatrix.php` which will attempt to run each participant against all the inputs from all participants for each day for comparison. 
+
 ## Installing
 
  - Check out the code somewhere.
  - Configure `config.local.php` (See `Configuration` section)
  - Cron `bench.php`
+ - Optionally Cron `inputMatrix.php`
  - Make `www` available via a web server.
 
 ## Configuration
@@ -83,5 +86,8 @@ I can be found idling on various different IRC Networks, but the best way to get
 
 ## Screenshots
 
-### Main Index
-![Main Index](/AoCBench.png?raw=true "Main Table View")
+### Benchmark Results
+![Benchmark Results](/AoCBench.png?raw=true "Benchmark Results")
+
+### Output Comparison Matrix
+![Output Matrix](AoCBenchMatrix.png?raw=true "Output Comparison Matrix")
