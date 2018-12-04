@@ -64,6 +64,8 @@
 						} else if (isset($dayMatrix[$p1][$p2]['correct']) && !$dayMatrix[$p1][$p2]['correct']) {
 							$classes[] = 'table-danger';
 						}
+					} else {
+						$classes[] = 'table-secondary';
 					}
 
 					echo '<td class="', implode(' ', $classes),'"><pre>', htmlspecialchars(implode("\n", $dayMatrix[$p1][$p2]['output'])), '</pre></td>';
