@@ -41,6 +41,15 @@
             </li>
           </ul>
         </div>
+        <?php if (!empty($leaderboardID) && !empty($leaderboardYear)) { ?>
+          <div class="navbar-nav">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item">
+                <a class="nav-link " href="https://adventofcode.com/<?=$leaderboardYear;?>/leaderboard/private/view/<?=$leaderboardID;?>">Leaderboard</a>
+              </li>
+            </ul>
+          </div>
+        <?php } ?>
       </nav>
     </header>
 

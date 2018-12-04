@@ -5,6 +5,9 @@
 	$outputResultsFile = __DIR__ . '/outputresults.json';
 	$participantsDir = __DIR__ . '/participants/';
 
+	$leaderboardID = '';
+	$leaderboardYear = '';
+
 	$repeatCount = 20;
 	$longTimeout = 10;
 	$longRepeatCount = 10;
