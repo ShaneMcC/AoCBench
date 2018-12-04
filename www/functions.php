@@ -17,6 +17,19 @@
 		}
 	}
 
+	function parseTime($time) {
+		if (preg_match('#^([0-9]+)m\s?([0-9]+).([0-9]+)s$#', $time, $match)) {
+			list($all, $m, $s, $ms) = $match;
+
+			$ms = str_pad($ms, 3, '0');
+			$time = $ms + ($s * 1000) + ($m * 60 * 1000);
+
+			return $time;
+		}
+
+		return NULL;
+	}
+
 	function getDayBestTime($day, $method) {
 		global $data;
 
@@ -35,15 +48,12 @@
 	function getParticipantTime($times, $method) {
 		$parsedTimes = [];
 		foreach ($times as $time) {
-			if (preg_match('#^([0-9]+)m\s?([0-9]+).([0-9]+)s$#', $time, $match)) {
-				list($all, $m, $s, $ms) = $match;
-
-				$ms = str_pad($ms, 3, '0');
-
-				$time = $ms + ($s * 1000) + ($m * 60 * 1000);
+			$time = parseTime($time);
+			if ($time !== NULL) {
 				$parsedTimes[] = $time;
 			}
 		}
+		sort($parsedTimes);
 
 		switch ($method) {
 			case 'SPECIAL':
