@@ -88,10 +88,12 @@
 
 		for ($day = 1; $day <= 25; $day++) {
 			$input = $participant->getInput($day);
+			if (empty($input)) { continue; }
+
 			$inputs[$day][$person]['input'] = $input;
 			$inputs[$day][$person]['version'] = $participant->getInputVersion($day);
-			$inputs[$day][$person]['answer1'] = !empty($input) ? $participant->getInputAnswer($day, 1) : null;
-			$inputs[$day][$person]['answer2'] = !empty($input) ? $participant->getInputAnswer($day, 2) : null;
+			$inputs[$day][$person]['answer1'] = $participant->getInputAnswer($day, 1);
+			$inputs[$day][$person]['answer2'] = $participant->getInputAnswer($day, 2);
 		}
 
 		echo 'Done.', "\n";
