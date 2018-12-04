@@ -103,8 +103,10 @@
 	// Remove days with no inputs.
 	for ($day = 1; $day <= 25; $day++) {
 		$hasInputs = false;
-		foreach ($inputs[$day] as $person => $input) {
-			if (!empty($input['input'])) { $hasInputs = true; continue; }
+		if (isset($inputs[$day])) {
+			foreach ($inputs[$day] as $person => $input) {
+				if (!empty($input['input'])) { $hasInputs = true; continue; }
+			}
 		}
 		if (!$hasInputs) { unset($inputs[$day]); }
 	}
