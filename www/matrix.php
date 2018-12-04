@@ -48,9 +48,11 @@
 			}
 			echo '</tr>', "\n";
 
+			$p = 0;
 			foreach ($dayParticipants as $p2) {
 				echo '<tr>';
-				echo '<th class="who">', $p2, '</th>';
+				$name = isset($_REQUEST['anon']) ? 'Participant ' . $p++ : $p2;
+				echo '<th class="who">', $name, '</th>';
 				foreach ($dayParticipants as $p1) {
 					$classes = ['output'];
 
