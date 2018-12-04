@@ -68,7 +68,8 @@
 						$classes[] = 'table-secondary';
 					}
 
-					echo '<td class="', implode(' ', $classes),'"><pre>', htmlspecialchars(implode("\n", $dayMatrix[$p1][$p2]['output'])), '</pre></td>';
+					$output = isset($dayMatrix[$p1][$p2]['output']) ? implode("\n", $dayMatrix[$p1][$p2]['output']) : '';
+					echo '<td class="', implode(' ', $classes),'"><pre>', htmlspecialchars($output), '</pre></td>';
 				}
 				echo '</tr>';
 			}
