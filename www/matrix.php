@@ -5,10 +5,8 @@
 	$fluid = true;
 	require_once(__DIR__ . '/header.php');
 
-
 	if ($hasMatrix) {
 		for ($day = 1; $day <= 25; $day++) {
-
 			// Build day matrix.
 			$dayMatrix = [];
 			$dayParticipants = array_keys($matrix['results']);
@@ -43,15 +41,16 @@
 					$link = '';
 				}
 
-				if (isset($_REQUEST['anon'])) { $participant = 'Participant ' . $p++; }
-				echo '<th class="output">', $participant, ' ', $link, '</th>';
+				$name = $name = isset($_REQUEST['anon']) ? 'Participant ' . $p++ : $pdata['name'];
+				echo '<th class="output">', $name, ' ', $link, '</th>';
 			}
 			echo '</tr>', "\n";
 
-			$p = 0;
+			$p = 1;
 			foreach ($dayParticipants as $p2) {
 				echo '<tr>';
-				$name = isset($_REQUEST['anon']) ? 'Participant ' . $p++ : $p2;
+				$pdata = $matrix['results'][$p2];
+				$name = isset($_REQUEST['anon']) ? 'Participant ' . $p++ : $pdata['name'];
 				echo '<th class="who">', $name, '</th>';
 				foreach ($dayParticipants as $p1) {
 					$classes = ['output'];
