@@ -89,7 +89,7 @@
 		 * @return boolean True if this day is known.
 		 */
 		public function hasDay($day) {
-			return file_exists($this->getDayFilename($day)) && $this->getDayVersion($day) !== NULL;
+			return !empty(glob($this->getDayFilename($day))) && $this->getDayVersion($day) !== NULL;
 		}
 
 		/**
