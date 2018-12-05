@@ -12,6 +12,8 @@
 	$longTimeout = 10;
 	$longRepeatCount = 10;
 
+	$sleepTime = 500000;
+
 	$normaliseInput = true;
 	$inputsDir = __DIR__ . '/inputs/';
 

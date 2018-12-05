@@ -136,6 +136,7 @@
 
 				$participant->setInput($day, $input['input']);
 				list($ret, $result) = $participant->run($day);
+				usleep($sleepTime); // Sleep a bit so that we're not constantly running.
 				$hasRun = true;
 
 				$thisDay['outputs'][$inputPerson] = ['version' => $input['version'], 'return' => $ret, 'output' => $result];

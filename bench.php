@@ -145,7 +145,7 @@
 				$start = time();
 				list($ret, $result) = $participant->run($day);
 				$end = time();
-				usleep(500); // Sleep a bit so that we're not constantly running.
+				usleep($sleepTime); // Sleep a bit so that we're not constantly running.
 
 				// Output to show the day ran.
 				if ($ret != 0) {

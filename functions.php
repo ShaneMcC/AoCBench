@@ -3,12 +3,12 @@
 	require_once(__DIR__ . '/config.php');
 
 	function getLock() {
-		global $lockfile;
+		global $lockfile, $__LOCK;
 
 		if (!file_exists($lockfile)) { file_put_contents($lockfile, ''); }
 
-		$fp = fopen($lockfile, 'r+');
-		if (!flock($fp, LOCK_EX | LOCK_NB)) {
+		$__LOCK = fopen($lockfile, 'r+');
+		if (!flock($__LOCK, LOCK_EX | LOCK_NB)) {
 			echo 'Unable to get lock on ', $lockfile, "\n";
 			exit(1);
 		}
