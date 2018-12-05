@@ -63,7 +63,7 @@
 		 * @return String Git version or NULL.
 		 */
 		private function getGitVersion($path) {
-			if (file_exists($path)) {
+			if (!empty(glob($path))) {
 				exec('git rev-list -1 HEAD -- "' . $path . '" 2>&1', $output);
 				return $output[0];
 			}
