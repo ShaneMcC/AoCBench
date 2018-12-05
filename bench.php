@@ -45,9 +45,8 @@
 
 	// Ensure we save if we exit:
 	$shutdownFunc = function() {
-		global $resultsFile, $data;
-
-		saveData($resultsFile, $data);
+		global $resultsFile, $data, $hasRun;
+		saveData($resultsFile, $data, $hasRun);
 		die();
 	};
 
@@ -204,7 +203,7 @@
 			}
 
 			// Save the data.
-			saveData($resultsFile, $data);
+			saveData($resultsFile, $data, $hasRun);
 		}
 
 		echo 'Cleanup.', "\n";

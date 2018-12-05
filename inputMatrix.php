@@ -9,6 +9,8 @@
 
 	$data = loadData($outputResultsFile);
 
+	$hasRun = false;
+
 	// Get CLI Options.
 	$__CLIOPTS = getopt('fp:d:i:h', ['force', 'participant:', 'day:', 'input:', 'help', 'no-update']);
 
@@ -134,6 +136,7 @@
 
 				$participant->setInput($day, $input['input']);
 				list($ret, $result) = $participant->run($day);
+				$hasRun = true;
 
 				$thisDay['outputs'][$inputPerson] = ['version' => $input['version'], 'return' => $ret, 'output' => $result];
 
@@ -151,7 +154,7 @@
 			$data['results'][$person]['days'][$day] = $thisDay;
 
 			// Save the data.
-			saveData($outputResultsFile, $data);
+			saveData($outputResultsFile, $data, $hasRun);
 		}
 
 		echo 'Cleanup.', "\n";

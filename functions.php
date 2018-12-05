@@ -24,8 +24,8 @@
 	}
 
 	// Save Data.
-	function saveData($file, $data) {
-		if (!isset($data['time'])) { $data['time'] = time(); }
+	function saveData($file, $data, $setTime = false) {
+		if ($setTime || !isset($data['time'])) { $data['time'] = time(); }
 
 		// Output results to disk.
 		file_put_contents($file, json_encode($data));
