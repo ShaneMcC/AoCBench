@@ -192,7 +192,7 @@
 				if ($failedRun) {
 					unset($thisDay['times']);
 				} else {
-					$thisDay['times'] = getSortedTimes($thisDay['times']);
+					// $thisDay['times'] = getSortedTimes($thisDay['times']);
 					if ($checkOutput) {
 						$thisDay['checkedOutput'] = true;
 					}
