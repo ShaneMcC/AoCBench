@@ -64,7 +64,7 @@
 
 					$tooltip = 'Min: ' . formatTime($min) . '<br>' . 'Max: ' . formatTime($max);
 
-					echo '<td class="participant time ', ($time == $best ? 'table-success' : ''), '" data-toggle="tooltip" data-placement="bottom" data-html="true" title="', htmlspecialchars($tooltip), '">';
+					echo '<td class="participant time ', ($time == $best ? 'table-success' : ''), '" data-ms="', $time ,'" data-toggle="tooltip" data-placement="bottom" data-html="true" title="', htmlspecialchars($tooltip), '">';
 					echo formatTime($time);
 					echo '</td>';
 				} else {
