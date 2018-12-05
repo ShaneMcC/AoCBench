@@ -9,7 +9,13 @@
 		for ($day = 1; $day <= 25; $day++) {
 			// Build day matrix.
 			$dayMatrix = [];
-			$dayParticipants = array_keys($matrix['results']);
+
+			$dayParticipants = [];
+			if (empty($displayParticipants)) { $displayParticipants = array_keys($matrix['results']); }
+			foreach ($displayParticipants as $participant) {
+				if (!isset($matrix['results'][$participant])) { continue; }
+				$dayParticipants[] = $participant;
+			}
 
 			$hasDay = false;
 			foreach ($dayParticipants as $p1) {
@@ -83,8 +89,8 @@
 		}
 
 		echo '<p class="text-muted text-right">';
-		if (isset($data['time'])) {
-			echo '<small>Last updated: ', date('r', $data['time']), '</small>';
+		if (isset($matrix['time'])) {
+			echo '<small>Last updated: ', date('r', $matrix['time']), '</small>';
 		}
 		echo '</p>';
 

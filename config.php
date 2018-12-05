@@ -15,6 +15,7 @@
 	$normaliseInput = true;
 	$inputsDir = __DIR__ . '/inputs/';
 
+	$displayParticipants = [];
 	$participants = [];
 
 	// Local configuration.
