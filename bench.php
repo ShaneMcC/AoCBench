@@ -1,22 +1,13 @@
 #!/usr/bin/php
 <?php
-	require_once(__DIR__ . '/config.php');
+	require_once(__DIR__ . '/functions.php');
 
-	if (!file_exists($lockfile)) { file_put_contents($lockfile, ''); }
-	$fp = fopen($lockfile, 'r+');
-	if (!flock($fp, LOCK_EX | LOCK_NB)) {
-		echo 'Unable to get lock on ', $lockfile, "\n";
-		exit(1);
-	}
+	getLock();
 
 	$startTime = time();
-	echo 'Bench starting at: ', date('r'), "\n";
+	echo 'Bench starting at: ', date('r', $startTime), "\n";
 
-	// Load old data file.
-	$data = ['results' => []];
-	if (file_exists($resultsFile)) {
-		$data = json_decode(file_get_contents($resultsFile), true);
-	}
+	$data = loadData($resultsFile);
 
 	// Set our hardware.
 	$hardware = [];
@@ -26,30 +17,8 @@
 
 	$hasRun = false;
 
-	// Save Data.
-	function saveData() {
-		global $data, $resultsFile, $hasRun;
-
-		if ($hasRun || !isset($data['time'])) { $data['time'] = time(); }
-
-		// Output results to disk.
-		file_put_contents($resultsFile, json_encode($data));
-	}
-
 	// Get CLI Options.
 	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help']);
-
-	function getOptionValue($short = NULL, $long = NULL, $default = '') {
-		global $__CLIOPTS;
-
-		if ($short !== NULL && array_key_exists($short, $__CLIOPTS)) { $val = $__CLIOPTS[$short]; }
-		else if ($long !== NULL && array_key_exists($long, $__CLIOPTS)) { $val = $__CLIOPTS[$long]; }
-		else { $val = $default; }
-
-		if (is_array($val)) { $val = array_pop($val); }
-
-		return $val;
-	}
 
 	$wantedParticipant = getOptionValue('p', 'participant', '.*');
 	$wantedDay = getOptionValue('d', 'day', '.*');
@@ -75,7 +44,13 @@
 	}
 
 	// Ensure we save if we exit:
-	$shutdownFunc = function() { saveData(); die(); };
+	$shutdownFunc = function() {
+		global $resultsFile, $data;
+
+		saveData($resultsFile, $data);
+		die();
+	};
+
 	register_shutdown_function($shutdownFunc);
 	pcntl_signal(SIGINT, $shutdownFunc);
 	pcntl_signal(SIGTERM, $shutdownFunc);
@@ -146,7 +121,7 @@
 
 			// Should we skip this?
 			$skip = !empty($thisDay['times']);
-			$skip &= ($currentVersion == $participant->getVersion($day));
+			$skip &= ($currentVersion == $participant->getDayVersion($day));
 			$skip &= (!$checkOutput || $checkOutput == $checkedOutput);
 
 			if ($force) {
@@ -218,41 +193,22 @@
 				if ($failedRun) {
 					unset($thisDay['times']);
 				} else {
-					sort($thisDay['times']);
+					$thisDay['times'] = getSortedTimes($thisDay['times']);
 					if ($checkOutput) {
 						$thisDay['checkedOutput'] = true;
 					}
 				}
 
-				$thisDay['version'] = $participant->getVersion($day);
+				$thisDay['version'] = $participant->getDayVersion($day);
 				$data['results'][$person]['days'][$day] = $thisDay;
 			}
 
 			// Save the data.
-			saveData();
+			saveData($resultsFile, $data);
 		}
 
 		echo 'Cleanup.', "\n";
 		$participant->cleanup();
-	}
-
-	function secondsToDuration($seconds) {
-		$result = '';
-		if ($seconds > 60 * 60) {
-			$hours = floor($seconds / (60 * 60));
-			$seconds -= $hours * 60 * 60;
-			$result .= $hours . ' hour' . ($hours != 1 ? 's' : '');
-		}
-
-		if ($seconds > 60) {
-			$minutes = floor($seconds / 60);
-			$seconds -= $minutes * 60;
-			$result .= ' ' . $minutes . ' minute' . ($minutes != 1 ? 's' : '');
-		}
-
-		$result .= ' ' . $seconds . ' second' . ($seconds != 1 ? 's' : '');
-
-		return trim($result);
 	}
 
 	$endTime = time();

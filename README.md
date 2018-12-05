@@ -6,7 +6,7 @@ There are 2 parts to this, the web frontend (under `www`) and the benchmarker (`
 
 The benchmarker should be run on a cron and is responsible for generating a `results.json` file that is then used by the web frontend to display the data.
 
-There is additionally `inputMatrix.php` which will attempt to run each participant against all the inputs from all participants for each day for comparison. 
+There is additionally `inputMatrix.php` which will attempt to run each participant against all the inputs from all participants for each day for comparison.
 
 ## Installing
 
@@ -26,32 +26,25 @@ An example participant:
 
 ```php
 	$participants[] = new class extends Participant {
-		public function getName() { return 'Dataforce'; }
-		public function getRepo() { return 'https://github.com/ShaneMcC/aoc-2018'; }
-		public function getInputFilename($day) { return $day . '/input.txt'; }
-
-		public function getVersion($day) {
-			if (file_exists($day)) {
-				exec('git rev-list -1 HEAD -- "' . $day . '" 2>&1', $output);
-				return $output[0];
-			}
-
-			return NULL;
-		}
-
-		public function run($day) { return $this->doRun('./docker.sh --time ' . $day . ' 2>&1'); }
+      public function getName() { return 'Dataforce'; }
+      public function getRepo() { return 'https://github.com/ShaneMcC/aoc-2018'; }
+      public function getDayFilename($day) { return $day; }
+      public function getInputFilename($day) { return $this->getDayFilename($day) . '/input.txt'; }
+      public function getRunCommand($day) { return './docker.sh --time ' . $day; }
 	};
 ```
 
 The important bits are:
  - The participant name (Spaces will be removed and used as the folder name for the repo on disk)
  - The participant repo (This will be automatically checked out)
- - The `getVersion($day)` function should return the most recent commit that changed a given day.
-   - This usually checks the version of the directory or a specific per-day file.
+ - The `getDayFilename($day)` function should return the path to the directory or file containing the day.
+ - The `getInputFilename($day)` function should return the path to the input file for the day.
+   - Shown here is the default implementation of this, which if sufficient, can be ignored.
  - The input for each day needs to be a text file on disk (If all participants are to be benchmarked against the same input)
  - It is assumed (Though not explicitly required) that each participant's code will run in Docker.
    - In most cases, the Docker image is just a basic runtime environment for the language of choice, with the code mounted as a bind-mount from the on-disk repo.
    - At the very least `getInputFilename($day)` should return a (relative to the repo root) path that will ultimately be mounted inside the container.
+ - `getInputAnswer($day, $part)` can also be defined, by default this will look for answers.txt within `getDayFilename($day)` with part 1 on line 1 and part 2 on line 2.
 
 When benchmarking, the following happens per-participant:
  - The `updateRepo($dir)` method of the Participant is called.
@@ -60,13 +53,14 @@ When benchmarking, the following happens per-participant:
    - The default implementation will run docker.sh or run.sh if found.
    - This should build the required docker container for the Participant for example.
  - `hasDay($day)` will be checked for the participant.
-   - The default implementation checks if getVersion($day) returns non-null
+   - The default implementation checks the git version of `getDayFilename($day)` returns non-null
  - If `$normaliseInput` is set, then the file specified by `getInputFilename($day)` will be overwritten with the input for the day.
    - This will either be taken from `./inputs/<day>.txt` or fallback to the file referenced by `getInputFilename($day)` on the first-defined participant.
    - The user should implement `getInputAnswer($day, $part)` as either a global function `config.local.php` or within the first-defined participant.
      - This should return a non-`NULL` string to look for in the output to allow for validation.
  - `run($day)` will be called multiple times to run the day the required number of times
-   - This should return `[$returnCode, $outputArray]`. A non-0 `$returnCode` is considered a fail and `$outputArray` will be displayed for debugging.
+   - By default this will call `getRunCommand($day)` and then run that and return the output.
+   - If a custom `run($day)` implementation is required, this should return `[$returnCode, $outputArray]`. A non-0 `$returnCode` is considered a fail and `$outputArray` will be displayed for debugging.
  - `extractTime($outputArray)` will be called on the result from `run($day)` to extract the time value.
    - The default implementation assumes that the 3rd-from-last line of the output will contain `real 0m0.000s` or so as per the `time` function in `bash`.
    - If the output time is not in `real` format, it should be converted to `0m0.000s` format for the frontend to understand.

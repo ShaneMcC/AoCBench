@@ -1,5 +1,5 @@
 <?php
-	require_once(__DIR__ . '/../config.php');
+	require_once(__DIR__ . '/../functions.php');
 
 	$hasResults = false;
 	if (file_exists($resultsFile)) {
@@ -15,19 +15,6 @@
 		if (isset($matrix['results'])) {
 			$hasMatrix = true;
 		}
-	}
-
-	function parseTime($time) {
-		if (preg_match('#^([0-9]+)m\s?([0-9]+).([0-9]+)s$#', $time, $match)) {
-			list($all, $m, $s, $ms) = $match;
-
-			$ms = str_pad($ms, 3, '0');
-			$time = $ms + ($s * 1000) + ($m * 60 * 1000);
-
-			return $time;
-		}
-
-		return NULL;
 	}
 
 	function getDayBestTime($day, $method) {
@@ -46,14 +33,7 @@
 	}
 
 	function getParticipantTime($times, $method) {
-		$parsedTimes = [];
-		foreach ($times as $time) {
-			$time = parseTime($time);
-			if ($time !== NULL) {
-				$parsedTimes[] = $time;
-			}
-		}
-		sort($parsedTimes);
+		$parsedTimes = getSortedTimes($times, false);
 
 		switch ($method) {
 			case 'SPECIAL':
@@ -87,24 +67,4 @@
 				}
 		}
 
-	}
-
-	function formatTime($time) {
-		if (empty($time)) { return ''; }
-
-		$m = $s = $ms = 0;
-
-		if ($time > 60 * 1000) {
-			$m = floor($time / (60 * 1000));
-			$time -= $m * 60 * 1000;
-		}
-
-		if ($time > 1000) {
-			$s = floor($time / (1000));
-			$time -= $s * 1000;
-		}
-
-		$ms = $time;
-
-		return sprintf('%dm%d.%03ds', $m, $s, $ms);
 	}
