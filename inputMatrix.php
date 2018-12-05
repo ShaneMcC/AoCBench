@@ -126,6 +126,10 @@
 
 				$thisInputVersion = isset($thisDay['outputs'][$inputPerson]['version']) ? $thisDay['outputs'][$inputPerson]['version'] : 'Unknown';
 
+				if ($input['answer1'] !== NULL && $input['answer2'] !== NULL && !isset($thisDay['outputs'][$inputPerson]['correct'])) {
+					$skip = false;
+				}
+
 				if ($skip && $thisInputVersion == $input['version']) { echo 'Up to date.', "\n"; continue; }
 
 				$participant->setInput($day, $input['input']);
