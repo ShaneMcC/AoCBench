@@ -65,7 +65,28 @@ When benchmarking, the following happens per-participant:
    - The default implementation assumes that the 3rd-from-last line of the output will contain `real 0m0.000s` or so as per the `time` function in `bash`.
    - If the output time is not in `real` format, it should be converted to `0m0.000s` format for the frontend to understand.
  - After all the days are run, `cleanup()` will be called.
-   - The default implementation runs `git reset --hard origin`
+   - The default implementation runs `cleanup.sh` if it exists, and then `git reset --hard origin`
+
+
+## Repo Requirements
+A repo that conforms to the following behaviour should just work "out of the box" with a `Participant` that consists of just a `getName()` and `getRepo()` configuration.
+
+  - Days are stored in directories named `1`, `2`, ... `24`, `25`
+  - Input file for each day is stored as `input.txt` within the appropriate directory (eg `1/input.txt`)
+  - Expected answers for each day optionally within `answers.txt` within the appropriate directory (eg `1/answers.txt`)
+  - A script in the root repo called `run.sh` or `docker.sh`
+    - This will be run with the checked out repo as `pwd`
+    - When run without any arguments, this should build any required containers. It is expected that this container can be built infrequently and reused.
+    - When run with a day argument (eg `./run.sh 1`) this will compile (if required) and then run that day using bash `time`.
+      - Any compilation output should be stored between runs of the same day for speed/efficiency between test runs.
+        - Compilation should happen within the docker container.
+      - `time` output should be the very last 3 lines in the result of the `./run.sh 1` command.
+        - `time` should not include any time spent compiling, just the time to run the script or compiled binary
+      - The code should always use `${pwd}/<day>/input.txt` as the input source.
+        - The input file may be overwritten before running to ensure the same input is tested for each participant in case some yield a faster solve time.
+        - The input file should be mounted within the container (either on it's own or the whole `pwd` or so)
+      - The container should exit as soon as the single-run has finished.
+  - A `cleanup.sh` script can optionally exist in the repo to run any post-test cleanup required beyond `git reset --hard origin`
 
 
 ## Updating
