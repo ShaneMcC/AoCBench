@@ -176,7 +176,7 @@
 			if (file_exists($dir)) {
 				echo 'Updating Repo.', "\n";
 				chdir($dir);
-				chmod($dir, 777); // YOLO.
+				chmod($dir, 0777); // YOLO.
 				exec('git reset --hard origin 2>&1');
 				exec('git pull 2>&1');
 			} else {
@@ -184,7 +184,7 @@
 				mkdir($dir, 0755, true);
 				exec('git clone ' . $this->getRepo() . ' ' . $dir . ' 2>&1');
 				chdir($dir);
-				chmod($dir, 777); // YOLO.
+				chmod($dir, 0777); // YOLO.
 			}
 		}
 
