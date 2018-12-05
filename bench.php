@@ -176,7 +176,7 @@
 				}
 
 				// If this was a long-running day, run future days less often.
-				if ($end - $start > $longTimeout) { $long = true; }
+				if ($end - $start > $longTimeout) { $long = true; echo 'L'; }
 
 				// Get the `real` time output.
 				$time = $participant->extractTime($result);
