@@ -197,9 +197,8 @@
 					unset($thisDay['times']);
 				} else {
 					// $thisDay['times'] = getSortedTimes($thisDay['times']);
-					if ($checkOutput) {
-						$thisDay['checkedOutput'] = true;
-					}
+					$thisDay['checkedOutput'] = $checkOutput;
+					$thisDay['long'] = $long;
 				}
 
 				$thisDay['version'] = $participant->getDayVersion($day);
