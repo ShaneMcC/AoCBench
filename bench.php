@@ -18,8 +18,9 @@
 	$hasRun = false;
 
 	// Get CLI Options.
-	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help']);
+	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help', 'no-update']);
 
+	$noUpdate = getOptionValue(NULL, 'no-update', NULL) !== NULL;
 	$wantedParticipant = getOptionValue('p', 'participant', '.*');
 	$wantedDay = getOptionValue('d', 'day', '.*');
 	$force = getOptionValue('f', 'force', NULL) !== NULL;
@@ -37,6 +38,7 @@
 		echo '                                is automatically anchored start/end)', "\n";
 		echo '  -d, --day <regex>             Only look at days matching <regex> (This is', "\n";
 		echo '                                automatically anchored start/end)', "\n";
+		echo '      --no-update               Do not update repos.', "\n";
 		echo '', "\n";
 		echo 'If not specified, day and participant both default to ".*" to match all', "\n";
 		echo 'participants/days.', "\n";
@@ -85,7 +87,9 @@
 		echo "\n", $participant->getName() , ': ', "\n";
 
 		$dir = $participantsDir . '/' . $person;
-		$participant->updateRepo($dir);
+		if (!$noUpdate) {
+			$participant->updateRepo($dir);
+		}
 		chdir($dir);
 
 		// Prepare.
