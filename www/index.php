@@ -77,13 +77,14 @@
 
 					$classes = ['participant', 'time'];
 					if ($podium) {
-						foreach (array_reverse(['first', 'second', 'third']) as $pos) {
+						foreach (['first', 'second', 'third'] as $pos) {
 							if (isset($podiumTime[$pos]) && $time == $podiumTime[$pos]) {
 								$classes[] = 'table-' . $pos;
 								$podiumCounts[$participant][$pos]++;
 								if ($podiumCounts[$participant][$pos] > $most[$pos]) {
 									$most[$pos] = $podiumCounts[$participant][$pos];
 								}
+								break;
 							}
 						}
 					}
