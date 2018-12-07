@@ -60,7 +60,7 @@
 			$podiumTime['third'] = array_shift($best);
 
 			echo '<tr>';
-			echo '<th class="day"><a class="daylink" href="/matrix.php?day=', $day, '">Day ', $day, '</a></th>';
+			echo '<th class="day"><a class="daylink" href="./matrix.php?day=', $day, '">Day ', $day, '</a></th>';
 
 			foreach ($displayParticipants as $participant) {
 				if (!isset($data['results'][$participant])) { continue; }
