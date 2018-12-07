@@ -17,7 +17,7 @@
 		}
 	}
 
-	function getDayBestTime($day, $method) {
+	function getDayBestTimes($day, $method) {
 		global $data;
 
 		$times = [];
@@ -26,10 +26,10 @@
 				$times[] = getParticipantTime($pdata['days'][$day]['times'], $method);
 			}
 		}
-		if (empty($times)) { return NULL; }
 
 		sort($times);
-		return $times[0];
+		array_unique($times);
+		return $times;
 	}
 
 	function getParticipantTime($times, $method) {

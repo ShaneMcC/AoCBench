@@ -34,3 +34,20 @@ main {
 td.day, th.day {
   width: 100px;
 }
+
+
+.table-best, .table-best>td, .table-best>th {
+    background-color: #c3e6cb;
+}
+
+.table-first, .table-first>td, .table-first>th {
+    background-color: gold;
+}
+
+.table-second, .table-second>td, .table-second>th {
+    background-color: silver;
+}
+
+.table-third, .table-third>td, .table-third>th {
+    background-color: #996633;
+}

@@ -47,8 +47,11 @@
 		echo '<tbody>';
 
 		for ($day = 1; $day <= 25; $day++) {
-			$best = getDayBestTime($day, $method);
-			if ($best === NULL) { continue; }
+			$best = getDayBestTimes($day, $method);
+			if (empty($best)) { continue; }
+			$first = array_shift($best);
+			$second = array_shift($best);
+			$third = array_shift($best);
 
 			echo '<tr>';
 			echo '<th class="day">Day ', $day, '</th>';
@@ -64,7 +67,12 @@
 
 					$tooltip = 'Min: ' . formatTime($min) . '<br>' . 'Max: ' . formatTime($max);
 
-					echo '<td class="participant time ', ($time == $best ? 'table-success' : ''), '" data-ms="', $time ,'" data-toggle="tooltip" data-placement="bottom" data-html="true" title="', htmlspecialchars($tooltip), '">';
+					$classes = ['participant', 'time'];
+					if ($time == $first) { $classes[] = $podium ? 'table-first' : 'table-best'; }
+					if ($podium && $time == $second) { $classes[] = 'table-second'; }
+					if ($podium && $time == $third) { $classes[] = 'table-third'; }
+
+					echo '<td class="', implode(' ', $classes), '" data-ms="', $time ,'" data-toggle="tooltip" data-placement="bottom" data-html="true" title="', htmlspecialchars($tooltip), '">';
 					echo formatTime($time);
 					echo '</td>';
 				} else {

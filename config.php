@@ -7,6 +7,7 @@
 
 	$leaderboardID = '';
 	$leaderboardYear = '';
+	$podium = false;
 
 	$repeatCount = 20;
 	$longTimeout = 10;
