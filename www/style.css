@@ -41,13 +41,13 @@ td.day, th.day {
 }
 
 .table-first, .table-first>td, .table-first>th {
-    background-color: gold;
+    background-color: #FFDF32;
 }
 
 .table-second, .table-second>td, .table-second>th {
-    background-color: silver;
+    background-color: #DFDFDF;
 }
 
 .table-third, .table-third>td, .table-third>th {
-    background-color: #996633;
+    background-color: #CD7F32;
 }
