@@ -77,7 +77,7 @@
 
 					$classes = ['participant', 'time'];
 					if ($podium) {
-						foreach (['first', 'second', 'third'] as $pos) {
+						foreach (array_reverse(['first', 'second', 'third']) as $pos) {
 							if (isset($podiumTime[$pos]) && $time == $podiumTime[$pos]) {
 								$classes[] = 'table-' . $pos;
 								$podiumCounts[$participant][$pos]++;
@@ -108,7 +108,7 @@
 				foreach ($displayParticipants as $participant) {
 					$count = $podiumCounts[$participant][$pos];
 					$highest = $most[$pos] == $count;
-					echo '<td class="participant ', ($highest ? 'table-'.$pos : ''), '">' , ($highest ? '<strong>' : ''), $count, ($highest ? '</strong>' : ''), '</td>';
+					echo '<td class="participant ', ($highest ? 'table-'.$pos : ''), '">', $count, '</td>';
 				}
 				echo '</tr>';
 			}
