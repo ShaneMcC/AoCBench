@@ -179,8 +179,10 @@
 					}
 				}
 
-				// If this was a long-running day, run future days less often.
-				if ($end - $start > $longTimeout) { $long = true; echo 'L'; }
+				// If this was a long-running day that wasn't the first run,
+				// run future days less often. (First run is allowed to allow
+				// for compile-time)
+				if ($end - $start > $longTimeout) { echo 'L'; $long = ($i > 0); }
 
 				// Get the `real` time output.
 				$time = $participant->extractTime($result);
