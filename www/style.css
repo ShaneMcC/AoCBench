@@ -8,7 +8,7 @@ html {
 }
 
 body {
-  padding-top: 60px;
+  padding-top: 70px;
   margin-bottom: 60px;
 }
 
@@ -35,9 +35,16 @@ td.day, th.day {
   width: 100px;
 }
 
+td.who, th.who {
+  width: 200px;
+}
+
+table {
+  table-layout: fixed;
+}
 
 .table-best, .table-best>td, .table-best>th {
-    background-color: #c3e6cb;
+    background-color: #C3E6CB;
 }
 
 .table-first, .table-first>td, .table-first>th {
@@ -49,5 +56,5 @@ td.day, th.day {
 }
 
 .table-third, .table-third>td, .table-third>th {
-    background-color: #CD7F32;
+    background-color: #DCA671;
 }

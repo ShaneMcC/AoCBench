@@ -28,7 +28,6 @@
 		}
 
 		sort($times);
-		array_unique($times);
 		return $times;
 	}
 

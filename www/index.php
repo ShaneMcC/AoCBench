@@ -46,18 +46,26 @@
 
 		echo '<tbody>';
 
+		$podiumCounts = [];
+		$most['first'] = 0;
+		$most['second'] = 0;
+		$most['third'] = 0;
+
 		for ($day = 1; $day <= 25; $day++) {
 			$best = getDayBestTimes($day, $method);
 			if (empty($best)) { continue; }
-			$first = array_shift($best);
-			$second = array_shift($best);
-			$third = array_shift($best);
+
+			$podiumTime['first'] = array_shift($best);
+			$podiumTime['second'] = array_shift($best);
+			$podiumTime['third'] = array_shift($best);
 
 			echo '<tr>';
 			echo '<th class="day">Day ', $day, '</th>';
 
 			foreach ($displayParticipants as $participant) {
 				if (!isset($data['results'][$participant])) { continue; }
+				if ($podium && !isset($podiumCounts[$participant])) { $podiumCounts[$participant] = ['first' => 0, 'second' => 0, 'third' => 0]; }
+
 				$pdata = $data['results'][$participant];
 				$time = isset($pdata['days'][$day]['times']) ? getParticipantTime($pdata['days'][$day]['times'], $method) : '';
 
@@ -68,9 +76,19 @@
 					$tooltip = 'Min: ' . formatTime($min) . '<br>' . 'Max: ' . formatTime($max);
 
 					$classes = ['participant', 'time'];
-					if ($time == $first) { $classes[] = $podium ? 'table-first' : 'table-best'; }
-					if ($podium && $time == $second) { $classes[] = 'table-second'; }
-					if ($podium && $time == $third) { $classes[] = 'table-third'; }
+					if ($podium) {
+						foreach (['first', 'second', 'third'] as $pos) {
+							if (isset($podiumTime[$pos]) && $time == $podiumTime[$pos]) {
+								$classes[] = 'table-' . $pos;
+								$podiumCounts[$participant][$pos]++;
+								if ($podiumCounts[$participant][$pos] > $most[$pos]) {
+									$most[$pos] = $podiumCounts[$participant][$pos];
+								}
+							}
+						}
+					}
+
+					if (!$podium && $time == $first) { $classes[] = 'table-best'; }
 
 					echo '<td class="', implode(' ', $classes), '" data-ms="', $time ,'" data-toggle="tooltip" data-placement="bottom" data-html="true" title="', htmlspecialchars($tooltip), '">';
 					echo formatTime($time);
@@ -80,6 +98,20 @@
 				}
 			}
 			echo '</tr>', "\n";
+		}
+
+		if ($podium) {
+			echo '<tr><td colspan=', count($displayParticipants) + 1, '></td></tr>';
+			foreach (['first', 'second', 'third'] as $pos) {
+				echo '<tr>';
+				echo '<th class="day table-', $pos, '">', ucfirst($pos), '</th>';
+				foreach ($displayParticipants as $participant) {
+					$count = $podiumCounts[$participant][$pos];
+					$highest = $most[$pos] == $count;
+					echo '<td class="participant ', ($highest ? 'table-'.$pos : ''), '">' , ($highest ? '<strong>' : ''), $count, ($highest ? '</strong>' : ''), '</td>';
+				}
+				echo '</tr>';
+			}
 		}
 
 		echo '</tbody>';
