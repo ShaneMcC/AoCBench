@@ -28,6 +28,14 @@
 				}
 			}
 
+			if (isset($_REQUEST['day'])) {
+				if ($_REQUEST['day'] == $day) {
+					$hasDay = true;
+				} else {
+					continue;
+				}
+			}
+
 			if (!$hasDay) { continue; }
 
 			echo '<h2>Day ', $day, '</h2>', "\n";

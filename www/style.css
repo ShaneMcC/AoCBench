@@ -58,3 +58,7 @@ table {
 .table-third, .table-third>td, .table-third>th {
     background-color: #DCA671;
 }
+
+a.daylink {
+  color: #212529;
+}
