@@ -76,10 +76,12 @@ A repo that conforms to the following behaviour should just work "out of the box
   - Expected answers for each day optionally within `answers.txt` within the appropriate directory (eg `1/answers.txt`)
   - A script in the root repo called `run.sh` or `docker.sh`
     - This will be run with the checked out repo as `pwd`
+      - This directory will be chmoded so that any user can write to it (eg if the container runs with `USER nobody`)
+      - You should not assume any other directory is writable.
     - When run without any arguments, this should build any required containers. It is expected that this container can be built infrequently and reused.
     - When run with a day argument (eg `./run.sh 1`) this will compile (if required) and then run that day using bash `time`.
       - Any compilation output should be stored between runs of the same day for speed/efficiency between test runs.
-        - Compilation should happen within the docker container.
+        - Compilation should happen within the docker container, and store the output within the mounted `pwd` directory so that it will be rediscovered by future runs of the container.
       - `time` output should be the very last 3 lines in the result of the `./run.sh 1` command.
         - `time` should not include any time spent compiling, just the time to run the script or compiled binary
       - The code should always use `${pwd}/<day>/input.txt` as the input source.
