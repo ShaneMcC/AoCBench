@@ -7,7 +7,6 @@
 
 	if ($hasMatrix) {
 		for ($day = 1; $day <= 25; $day++) {
-			if ($day != 7) { continue; }
 			// Build day matrix.
 			$dayMatrix = [];
 
@@ -43,10 +42,6 @@
 			}
 
 			if (!$hasDay) { continue; }
-
-			echo '<pre>';
-			var_dump($dayInputs);
-			echo '</pre>';
 
 			echo '<h2>Day ', $day, '</h2>', "\n";
 
