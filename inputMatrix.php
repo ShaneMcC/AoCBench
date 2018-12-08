@@ -169,6 +169,15 @@
 
 				echo 'Done!', "\n";
 			}
+
+			// Clear out any inputs that no longer exist
+			foreach (array_keys($thisDay['outputs']) as $inputName) {
+				if (!isset($inputs[$day][$inputName])) {
+					echo '        ', $inputName, ': Removed.', "\n";
+					unset($thisDay['outputs'][$inputName]);
+				}
+			}
+
 			echo "\n";
 
 			// Update data
