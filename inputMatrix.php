@@ -83,7 +83,7 @@
 
 					$id++;
 					$inputs[$day]['custom-' . $id]['input'] = file_get_contents($customDir . '/' . $dir . '/input.txt');
-					$inputs[$day]['custom-' . $id]['version'] = sha1($input);
+					$inputs[$day]['custom-' . $id]['version'] = sha1($input . implode("\n", $answers));
 					$inputs[$day]['custom-' . $id]['answer1'] = $answers[0];
 					$inputs[$day]['custom-' . $id]['answer2'] = $answers[1];
 				}
