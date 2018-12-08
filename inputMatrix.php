@@ -79,10 +79,11 @@
 				if ($dir{0} == '.') { continue; }
 				if (file_exists($customDir . '/' . $dir . '/input.txt') && file_exists($customDir . '/' . $dir . '/answers.txt')) {
 					$answers = file($customDir . '/' . $dir . '/answers.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+					$input = file_get_contents($customDir . '/' . $dir . '/input.txt');
 					if (!isset($answers[1])) { continue; }
 
 					$id++;
-					$inputs[$day]['custom-' . $id]['input'] = file_get_contents($customDir . '/' . $dir . '/input.txt');
+					$inputs[$day]['custom-' . $id]['input'] = $input;
 					$inputs[$day]['custom-' . $id]['version'] = sha1($input . implode("\n", $answers));
 					$inputs[$day]['custom-' . $id]['answer1'] = $answers[0];
 					$inputs[$day]['custom-' . $id]['answer2'] = $answers[1];
