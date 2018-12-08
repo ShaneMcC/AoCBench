@@ -7,6 +7,7 @@
 
 	if ($hasMatrix) {
 		for ($day = 1; $day <= 25; $day++) {
+			if ($day != 7) { continue; }
 			// Build day matrix.
 			$dayMatrix = [];
 
@@ -17,13 +18,18 @@
 				$dayParticipants[] = $participant;
 			}
 
+			$dayInputs = $dayParticipants;
+
 			$hasDay = false;
 			foreach ($dayParticipants as $p1) {
-				foreach ($dayParticipants as $p2) {
-					if (isset($matrix['results'][$p1]['days'][$day]['outputs'][$p2])) {
+				if (isset($matrix['results'][$p1]['days'][$day])) {
+					foreach (array_keys($matrix['results'][$p1]['days'][$day]['outputs']) as $p2) {
 						$hasDay = true;
-
 						$dayMatrix[$p1][$p2] = $matrix['results'][$p1]['days'][$day]['outputs'][$p2];
+
+						if (!in_array($p2, $dayInputs)) {
+							$dayInputs[] = $p2;
+						}
 					}
 				}
 			}
@@ -37,6 +43,10 @@
 			}
 
 			if (!$hasDay) { continue; }
+
+			echo '<pre>';
+			var_dump($dayInputs);
+			echo '</pre>';
 
 			echo '<h2>Day ', $day, '</h2>', "\n";
 
@@ -61,10 +71,14 @@
 			echo '</tr>', "\n";
 
 			$p = 1;
-			foreach ($dayParticipants as $p2) {
+			foreach ($dayInputs as $p2) {
 				echo '<tr>';
-				$pdata = $matrix['results'][$p2];
-				$name = isset($_REQUEST['anon']) ? 'Participant ' . $p++ : $pdata['name'];
+				if (isset($matrix['results'][$p2])) {
+					$pdata = $matrix['results'][$p2];
+					$name = isset($_REQUEST['anon']) ? 'Participant ' . $p++ : $pdata['name'];
+				} else {
+					$name = $p2;
+				}
 				echo '<th class="who">', $name, '</th>';
 				foreach ($dayParticipants as $p1) {
 					$classes = ['output'];
