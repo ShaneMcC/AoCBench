@@ -72,7 +72,7 @@
 					$pdata = $matrix['results'][$p2];
 					$name = isset($_REQUEST['anon']) ? 'Participant ' . $p++ : $pdata['name'];
 				} else {
-					$name = $p2;
+					$name = ucwords(preg_replace('#^custom-#', 'custom input: ', $p2));
 				}
 				echo '<th class="who">', $name, '</th>';
 				foreach ($dayParticipants as $p1) {

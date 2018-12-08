@@ -73,7 +73,6 @@
 	// Load any custom inputs.
 	for ($day = 1; $day <= 25; $day++) {
 		$customDir = $inputsDir . '/custom/' . $day;
-		$id = 0;
 		if (file_exists($customDir)) {
 			foreach (scandir($customDir) as $dir) {
 				if ($dir{0} == '.') { continue; }
@@ -82,11 +81,10 @@
 					$input = file_get_contents($customDir . '/' . $dir . '/input.txt');
 					if (!isset($answers[1])) { continue; }
 
-					$id++;
-					$inputs[$day]['custom-' . $id]['input'] = $input;
-					$inputs[$day]['custom-' . $id]['version'] = sha1($input . implode("\n", $answers));
-					$inputs[$day]['custom-' . $id]['answer1'] = $answers[0];
-					$inputs[$day]['custom-' . $id]['answer2'] = $answers[1];
+					$inputs[$day]['custom-' . $dir]['input'] = $input;
+					$inputs[$day]['custom-' . $dir]['version'] = sha1($input . implode("\n", $answers));
+					$inputs[$day]['custom-' . $dir]['answer1'] = $answers[0];
+					$inputs[$day]['custom-' . $dir]['answer2'] = $answers[1];
 				}
 			}
 		}
