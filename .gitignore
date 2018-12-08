@@ -6,3 +6,4 @@ config.local.*.php
 .benchlock
 outputresults.json
 outputresults.*.json
+inputs
