@@ -69,6 +69,28 @@
 
 		echo 'Done.', "\n";
 	}
+
+	// Load any custom inputs.
+	for ($day = 1; $day <= 25; $day++) {
+		$customDir = $inputsDir . '/custom/' . $day;
+		$id = 0;
+		if (file_exists($customDir)) {
+			foreach (scandir($customDir) as $dir) {
+				if ($dir{0} == '.') { continue; }
+				if (file_exists($customDir . '/' . $dir . '/input.txt') && file_exists($customDir . '/' . $dir . '/answers.txt')) {
+					$answers = file($customDir . '/' . $dir . '/answers.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+					if (!isset($answers[1])) { continue; }
+
+					$id++;
+					$inputs[$day]['custom-' . $id]['input'] = file_get_contents($customDir . '/' . $dir . '/input.txt');
+					$inputs[$day]['custom-' . $id]['version'] = sha1($input);
+					$inputs[$day]['custom-' . $id]['answer1'] = $answers[0];
+					$inputs[$day]['custom-' . $id]['answer2'] = $answers[1];
+				}
+			}
+		}
+	}
+
 	chdir($cwd);
 
 	// Remove days with no inputs.
