@@ -44,6 +44,9 @@
 			if (!$hasDay) { continue; }
 
 			echo '<h2>Day ', $day, '</h2>', "\n";
+			if (isset($leaderboardYear) && !empty($leaderboardYear)) {
+				echo '<a href="https://adventofcode.com/', (isset($leaderboardYear) ? $leaderboardYear : date('Y')), '/day/', $day, '">Problem</a><br><br>';
+			}
 
 			echo '<table class="table table-striped table-bordered">';
 			// Participants
