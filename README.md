@@ -104,7 +104,10 @@ I can be found idling on various different IRC Networks, but the best way to get
 ## Screenshots
 
 ### Benchmark Results
-![Benchmark Results](/AoCBench.png?raw=true "Benchmark Results")
+![Benchmark Results](/screenshots/AoCBench.png?raw=true "Benchmark Results")
+
+### Podium Mode
+![Podium Mode](/screenshots/PodiumMode.png?raw=true "Podium Mode")
 
 ### Output Comparison Matrix
-![Output Matrix](AoCBenchMatrix.png?raw=true "Output Comparison Matrix")
+![Output Matrix](/screenshots/AoCBenchMatrix.png?raw=true "Output Comparison Matrix")
