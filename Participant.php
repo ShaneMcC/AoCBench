@@ -123,6 +123,16 @@
 		}
 
 		/**
+		 * Get the filename to find answers for a given day.
+		 *
+		 * @param int $day Day number.
+		 * @return String Answers file name
+		 */
+		public function getInputAnswerFilename($day) {
+			return $this->getDayFilename($day) . '/answers.txt';
+		}
+
+		/**
 		 * Get the answer for a given day/part.
 		 *
 		 * @param int $day Day number.
@@ -130,9 +140,9 @@
 		 * @return String Expected answer for the day.
 		 */
 		public function getInputAnswer($day, $part) {
-			$dayFile = $this->getDayFilename($day);
-			if (file_exists($dayFile) && is_dir($dayFile) && file_exists($dayFile . '/answers.txt')) {
-				$answers = file($dayFile . '/answers.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+			$answerFile = $this->getInputAnswerFilename($day);
+			if ($answerFile !== NULL && file_exists($answerFile)) {
+				$answers = file($answerFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 				if (isset($answers[$part - 1])) {
 					return $answers[$part - 1];
 				}
