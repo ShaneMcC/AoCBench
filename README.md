@@ -88,7 +88,7 @@ A repo that conforms to the following behaviour should just work "out of the box
         - The input file may be overwritten before running to ensure the same input is tested for each participant in case some yield a faster solve time.
         - The input file should be mounted within the container (either on it's own or the whole `pwd` or so)
       - The container should exit as soon as the single-run has finished.
-  - A `cleanup.sh` script can optionally exist in the repo to run any post-test cleanup required beyond `git reset --hard origin`
+  - A `cleanup.sh` script can optionally exist in the repo to run any post-test cleanup required beyond `git reset --hard origin; git clean -fx`
 
 
 ## Updating

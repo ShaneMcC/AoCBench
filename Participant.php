@@ -203,6 +203,7 @@
 		 */
 		public function cleanup() {
 			exec('git reset --hard origin 2>&1');
+			exec('git clean -fx 2>&1');
 			if (file_exists('./cleanup.sh')) {
 				exec('bash ./cleanup.sh 2>&1');
 			}
