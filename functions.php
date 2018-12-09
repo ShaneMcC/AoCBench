@@ -76,7 +76,7 @@
 	}
 
 	function formatTime($time) {
-		if (empty($time)) { return ''; }
+		if ($time === FALSE) { return ''; }
 
 		$m = $s = $ms = 0;
 
