@@ -134,7 +134,7 @@
 
 			if ($skip) { echo ' Up to date.', "\n"; continue; }
 
-			if ($input !== FALSE) {
+			if ($input !== FALSE && $input !== NULL && $input !== '') {
 				$participant->setInput($day, $input);
 			}
 
