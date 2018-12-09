@@ -18,10 +18,12 @@
 	}
 
 	function getDayBestTimes($day, $method) {
-		global $data;
+		global $data, $displayParticipants;
 
 		$times = [];
 		foreach ($data['results'] as $participant => $pdata) {
+			if (!empty($displayParticipants) && !in_array($participant, $displayParticipants)) { continue; }
+
 			if (isset($pdata['days'][$day]['times'])) {
 				$times[] = getParticipantTime($pdata['days'][$day]['times'], $method);
 			}
