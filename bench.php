@@ -145,7 +145,7 @@
 			$thisDay['times'] = [];
 			$failedRun = false;
 
-			for ($i = 0; $i < ($long ? $longRepeatCount : $repeatCount); $i++) {
+			for ($i = 0; $i <= ($long ? $longRepeatCount : $repeatCount); $i++) {
 				$start = time();
 				list($ret, $result) = $participant->run($day);
 				$end = time();
@@ -184,11 +184,13 @@
 				// for compile-time)
 				if ($end - $start > $longTimeout) { echo 'L'; $long = ($i > 0); }
 
-				// Get the `real` time output.
-				$time = $participant->extractTime($result);
+				if ($i > 0) {
+					// Get the `real` time output.
+					$time = $participant->extractTime($result);
 
-				$thisDay['times'][] = $time;
-				$hasRun = true;
+					$thisDay['times'][] = $time;
+					$hasRun = true;
+				}
 			}
 			echo "\n";
 
