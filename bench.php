@@ -115,7 +115,7 @@
 				[$input, $answer1, $answer2] = getInput($day);
 				$checkOutput = ($answer1 !== NULL && $answer2 !== NULL);
 
-				if (in_array($day, $ignoreResult)) { $checkOutput = false; }
+				if (in_array($day . '', $ignoreResult, true)) { $checkOutput = false; }
 				if (in_array($day . '/1', $ignoreResult)) { $answer1 = ''; }
 				if (in_array($day . '/2', $ignoreResult)) { $answer2 = ''; }
 			} else {
