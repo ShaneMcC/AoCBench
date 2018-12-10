@@ -59,7 +59,7 @@
 
 	// Get input for a given day.
 	function getInput($day) {
-		global $participants, $participantsDir, $inputsDir;
+		global $participants, $participantsDir, $inputsDir, $ignoreResult;
 
 		if (file_exists($inputsDir . '/' . $day . '.txt')) {
 			$input = file_get_contents($inputsDir . '/' . $day . '.txt');
