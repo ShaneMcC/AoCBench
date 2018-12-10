@@ -74,6 +74,11 @@
 			$input = $source->getInput($day);
 			$answer1 = $input !== FALSE ? $source->getInputAnswer($day, 1) : null;
 			$answer2 = $input !== FALSE ? $source->getInputAnswer($day, 2) : null;
+
+			if (in_array($day . '', $ignoreResult)) { $answer1 = NULL; $answer2 = NULL; }
+			if (in_array($day . '/1', $ignoreResult)) { $answer1 = ''; }
+			if (in_array($day . '/2', $ignoreResult)) { $answer2 = ''; }
+
 			chdir($cwd);
 		}
 
@@ -114,10 +119,6 @@
 			if ($normaliseInput) {
 				[$input, $answer1, $answer2] = getInput($day);
 				$checkOutput = ($answer1 !== NULL && $answer2 !== NULL);
-
-				if (in_array($day . '', $ignoreResult, true)) { $checkOutput = false; }
-				if (in_array($day . '/1', $ignoreResult)) { $answer1 = ''; }
-				if (in_array($day . '/2', $ignoreResult)) { $answer2 = ''; }
 			} else {
 				$input = $answer1 = $answer2 = NULL;
 				$checkOutput = FALSE;

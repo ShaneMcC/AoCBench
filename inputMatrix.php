@@ -63,8 +63,13 @@
 
 			$inputs[$day][$person]['input'] = $input;
 			$inputs[$day][$person]['version'] = $participant->getInputVersion($day);
-			$inputs[$day][$person]['answer1'] = $participant->getInputAnswer($day, 1);
-			$inputs[$day][$person]['answer2'] = $participant->getInputAnswer($day, 2);
+			if (in_array($day . '', $ignoreResult)) {
+				$inputs[$day][$person]['answer1'] = null;
+				$inputs[$day][$person]['answer2'] = null;
+			} else {
+				$inputs[$day][$person]['answer1'] = in_array($day . '/1', $ignoreResult) ? '' : $participant->getInputAnswer($day, 1);
+				$inputs[$day][$person]['answer2'] = in_array($day . '/2', $ignoreResult) ? '' : $participant->getInputAnswer($day, 2);
+			}
 		}
 
 		echo 'Done.', "\n";
@@ -83,8 +88,14 @@
 
 					$inputs[$day]['custom-' . $dir]['input'] = $input;
 					$inputs[$day]['custom-' . $dir]['version'] = sha1($input . implode("\n", $answers));
-					$inputs[$day]['custom-' . $dir]['answer1'] = $answers[0];
-					$inputs[$day]['custom-' . $dir]['answer2'] = $answers[1];
+
+					if (in_array($day . '', $ignoreResult)) {
+						$inputs[$day]['custom-' . $dir]['answer1'] = null;
+						$inputs[$day]['custom-' . $dir]['answer2'] = null;
+					} else {
+						$inputs[$day]['custom-' . $dir]['answer1'] = in_array($day . '/1', $ignoreResult) ? '' : $answers[0];
+						$inputs[$day]['custom-' . $dir]['answer2'] = in_array($day . '/2', $ignoreResult) ? '' : $answers[1];
+					}
 				}
 			}
 		}
@@ -161,10 +172,6 @@
 				$hasRun = true;
 
 				$thisDay['outputs'][$inputPerson] = ['version' => $input['version'], 'return' => $ret, 'output' => $result];
-
-				if (in_array($day . '', $ignoreResult, true)) { $answer1 = NULL; $answer2 = NULL; }
-				if (in_array($day . '/1', $ignoreResult)) { $answer1 = ''; }
-				if (in_array($day . '/2', $ignoreResult)) { $answer2 = ''; }
 
 				if ($input['answer1'] !== NULL && $input['answer2'] !== NULL) {
 					$rightAnswer = preg_match('#' . preg_quote($input['answer1'], '#') . '.+' . preg_quote($input['answer2'], '#') . '#', implode(' ', $result));
