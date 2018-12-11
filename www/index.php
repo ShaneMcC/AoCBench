@@ -46,10 +46,8 @@
 
 		echo '<tbody>';
 
-		$podiumCounts = [];
-		$most['first'] = 0;
-		$most['second'] = 0;
-		$most['third'] = 0;
+		$podiumPoints = ['first' => 4, 'second' => 3, 'third' => 2];
+		$personPoints = [];
 
 		for ($day = 1; $day <= 25; $day++) {
 			$best = getDayBestTimes($day, $method);
@@ -77,15 +75,19 @@
 
 					$classes = ['participant', 'time'];
 					if ($podium) {
+						$onPodium = false;
+						if (!isset($personPoints[$participant])) { $personPoints[$participant] = 0; }
+
 						foreach (['first', 'second', 'third'] as $pos) {
 							if (isset($podiumTime[$pos]) && $time == $podiumTime[$pos]) {
 								$classes[] = 'table-' . $pos;
-								$podiumCounts[$participant][$pos]++;
-								if ($podiumCounts[$participant][$pos] > $most[$pos]) {
-									$most[$pos] = $podiumCounts[$participant][$pos];
-								}
+								$personPoints[$participant] += $podiumPoints[$pos];
+								$onPodium = true;
 								break;
 							}
+						}
+						if (!$onPodium) {
+							$personPoints[$participant] += 1;
 						}
 					}
 
@@ -102,17 +104,35 @@
 		}
 
 		if ($podium) {
-			echo '<tr><td colspan=', count($displayParticipants) + 1, '></td></tr>';
-			foreach (['first', 'second', 'third'] as $pos) {
-				echo '<tr>';
-				echo '<th class="day table-', $pos, '">', ucfirst($pos), '</th>';
-				foreach ($displayParticipants as $participant) {
-					$count = $podiumCounts[$participant][$pos];
-					$highest = $most[$pos] == $count;
-					echo '<td class="participant ', ($highest ? 'table-'.$pos : ''), '">', $count, '</td>';
-				}
-				echo '</tr>';
+			$pointsBest = array_values($personPoints);
+			rsort($pointsBest);
+
+			$points = [];
+			if (!empty($pointsBest)) {
+				$points['first'] = array_shift($pointsBest);
+				$points['second'] = array_shift($pointsBest);
+				$points['third'] = array_shift($pointsBest);
 			}
+
+			var_dump($pointsBest);
+
+			echo '<tr><td colspan=', count($displayParticipants) + 1, '></td></tr>';
+			echo '<tr>';
+			echo '<th class="day">Points</th>';
+			foreach ($displayParticipants as $participant) {
+				$count = $personPoints[$participant];
+
+				$classes = [];
+				foreach (['first', 'second', 'third'] as $pos) {
+					if (isset($points[$pos]) && $count == $points[$pos]) {
+						$classes[] = 'table-' . $pos;
+						break;
+					}
+				}
+
+				echo '<td class="participant ', implode(' ', $classes), '">', $count, '</td>';
+			}
+			echo '</tr>';
 		}
 
 		echo '</tbody>';
