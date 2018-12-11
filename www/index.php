@@ -114,8 +114,6 @@
 				$points['third'] = array_shift($pointsBest);
 			}
 
-			var_dump($pointsBest);
-
 			echo '<tr><td colspan=', count($displayParticipants) + 1, '></td></tr>';
 			echo '<tr>';
 			echo '<th class="day">Points</th>';
