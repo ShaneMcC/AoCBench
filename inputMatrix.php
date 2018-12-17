@@ -12,13 +12,14 @@
 	$hasRun = false;
 
 	// Get CLI Options.
-	$__CLIOPTS = getopt('fp:d:i:h', ['force', 'participant:', 'day:', 'input:', 'help', 'no-update']);
+	$__CLIOPTS = getopt('fp:d:i:h', ['force', 'participant:', 'day:', 'input:', 'help', 'no-update', 'remove']);
 
 	$noUpdate = getOptionValue(NULL, 'no-update', NULL) !== NULL;
 	$wantedParticipant = getOptionValue('p', 'participant', '.*');
 	$wantedDay = getOptionValue('d', 'day', '.*');
 	$wantedInput = getOptionValue('i', 'input', '.*');
 	$force = getOptionValue('f', 'force', NULL) !== NULL;
+	$removeMatching = getOptionValue(NULL, 'remove', NULL) !== NULL;
 
 	if (getOptionValue('h', 'help', NULL) !== NULL) {
 		echo 'AoCBench input matrix generator.', "\n";
@@ -36,6 +37,7 @@
 		echo '  -d, --day <regex>             Only look at days matching <regex> (This is', "\n";
 		echo '                                automatically anchored start/end)', "\n";
 		echo '      --no-update               Do not update repos.', "\n";
+		echo '      --remove                  Remove matching.', "\n";
 		echo '', "\n";
 		echo 'If not specified, day, participant, input all default to ".*" to match all', "\n";
 		echo 'participants/days/inputs.', "\n";
@@ -157,6 +159,12 @@
 				if (!preg_match('#^' . $wantedInput. '$#', $inputPerson)) { continue; }
 
 				echo '        ', $inputPerson, ': ';
+
+				if ($removeMatching) {
+					echo 'Removing.', "\n";
+					unset($thisDay['outputs'][$inputPerson]);
+					continue;
+				}
 
 				$thisInputVersion = isset($thisDay['outputs'][$inputPerson]['version']) ? $thisDay['outputs'][$inputPerson]['version'] : 'Unknown';
 

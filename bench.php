@@ -18,12 +18,13 @@
 	$hasRun = false;
 
 	// Get CLI Options.
-	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help', 'no-update']);
+	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help', 'no-update', 'remove']);
 
 	$noUpdate = getOptionValue(NULL, 'no-update', NULL) !== NULL;
 	$wantedParticipant = getOptionValue('p', 'participant', '.*');
 	$wantedDay = getOptionValue('d', 'day', '.*');
 	$force = getOptionValue('f', 'force', NULL) !== NULL;
+	$removeMatching = getOptionValue(NULL, 'remove', NULL) !== NULL;
 
 	if (getOptionValue('h', 'help', NULL) !== NULL) {
 		echo 'AoCBench Benchmarker.', "\n";
@@ -39,6 +40,7 @@
 		echo '  -d, --day <regex>             Only look at days matching <regex> (This is', "\n";
 		echo '                                automatically anchored start/end)', "\n";
 		echo '      --no-update               Do not update repos.', "\n";
+		echo '      --remove                  Remove matching.', "\n";
 		echo '', "\n";
 		echo 'If not specified, day and participant both default to ".*" to match all', "\n";
 		echo 'participants/days.', "\n";
@@ -115,6 +117,12 @@
 
 			$thisDay = isset($data['results'][$person]['days'][$day]) ? $data['results'][$person]['days'][$day] : ['times' => []];
 			echo 'Day ', $day, ':';
+
+			if ($removeMatching) {
+				echo 'Removing.', "\n";
+				unset($data['results'][$person]['days'][$day]);
+				continue;
+			}
 
 			if ($normaliseInput) {
 				[$input, $answer1, $answer2] = getInput($day);
