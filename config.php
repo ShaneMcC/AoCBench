@@ -10,8 +10,12 @@
 	$podium = false;
 
 	$repeatCount = 20;
+
 	$longTimeout = 10;
 	$longRepeatCount = 10;
+
+	$reallyLongTimeout = 120;
+	$reallyLongRepeatCount = 1;
 
 	$sleepTime = 250000;
 

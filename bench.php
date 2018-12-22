@@ -153,12 +153,13 @@
 
 			// Run the day.
 			$long = false;
+			$reallyLong = false;
 
 			// Reset the times.
 			$thisDay['times'] = [];
 			$failedRun = false;
 
-			for ($i = 0; $i <= ($long ? $longRepeatCount : $repeatCount); $i++) {
+			for ($i = 0; $i <= ($reallyLong ? $reallyLongRepeatCount : ($long ? $longRepeatCount : $repeatCount)); $i++) {
 				$start = time();
 				list($ret, $result) = $participant->run($day);
 				$end = time();
@@ -196,6 +197,9 @@
 				// run future days less often. (First run is allowed to allow
 				// for compile-time)
 				if ($end - $start > $longTimeout) { echo 'L'; $long = ($i > 0); }
+
+				// Same for really-long.
+				if ($end - $start > $reallyLongTimeout) { echo 'LL'; $reallyLong = ($i > 0); }
 
 				if ($i > 0) {
 					// Get the `real` time output.
