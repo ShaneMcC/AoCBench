@@ -33,7 +33,7 @@
 			$pdata = $data['results'][$participant];
 
 			if (isset($pdata['repo'])) {
-				$link = '<a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="https://github.com/favicon.ico" alt="github"></a>';
+				$link = '<a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="github.ico" alt="github"></a>';
 			} else {
 				$link = '';
 			}
