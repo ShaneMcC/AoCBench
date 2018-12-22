@@ -157,8 +157,13 @@
 		 * @return String time-taken to run this day according to the output.
 		 */
 		public function extractTime($output) {
-			$time = $output[count($output) - 3];
-			$time = trim(preg_replace('#^real#', '', $time));
+			$time = '999m9.999s';
+			for ($i = max(0, count($output) - 5); $i < count($output) - 1; $i++) {
+				if (preg_match('#^real(.*)$#', $output[$i], $m)) {
+					$time = trim($m[1]);
+				}
+			}
+
 			return $time;
 		}
 
