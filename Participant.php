@@ -169,9 +169,11 @@
 		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of lines of output.
 		 */
 		public function run($day) {
+			global $execTimeout;
+
 			$output = [];
 			$ret = -1;
-			exec($this->getRunCommand($day) . ' 2>&1', $output, $ret);
+			dockerTimedExec($this->getRunCommand($day) . ' 2>&1', $output, $ret, $execTimeout);
 
 			return [$ret, $output];
 		}

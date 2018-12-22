@@ -113,3 +113,77 @@
 
 		return $parsedTimes;
 	}
+
+	function appexec($path, &$process, $stderr = false, $cwd = null, $env = null, $options = null) {
+		$descriptorspec = array(0 => array("pty"),
+		                        1 => array("pipe", "w"),
+		                        2 => ($stderr ? array("pipe", "w") : array("file", "/dev/null", "a"))
+		                       );
+		$process = array();
+		$process['process'] = proc_open($path, $descriptorspec, $process['pipes'], $cwd, $env, $options);
+		return is_resource($process['process']);
+	}
+
+	function getLastContainerID() {
+		$out = [];
+		exec('docker ps -n 1', $out);
+		return isset($out[1]) ? explode(' ', $out[1])[0] : '';
+	}
+
+	function dockerTimedExec($command, &$output = array(), &$return_var = 0, $timeout = 0) {
+		$before = getLastContainerID();
+
+		$options = '';
+		appexec($command.' 2>&1', $proc, false);
+
+		sleep(1);
+		$after = getLastContainerID();
+
+		$commandout = '';
+		$timedout = false;
+		if ($timeout > 0) {
+			$endtime = time() + $timeout;
+			while (true) {
+				$r = array($proc['pipes'][1]);
+				$w = null;
+				$e = null;
+				$num = @stream_select($r, $w, $e, 0, 200000);
+				if ($num !== false && $num > 0) {
+					$line = fgets($proc['pipes'][1]);
+					$commandout .= rtrim($line, "\r");
+					if (strlen($line) == 0) { break; }
+				}
+
+				if (time() > $endtime) {
+					$commandout .= "\n\n".'*** Command timeout ('.$timeout.') exceeded.';
+					$timedout = true;
+					break;
+				}
+			}
+		} else {
+			$commandout = stream_get_contents($proc['pipes'][0]);
+		}
+		$commandout = explode("\n", $commandout);
+
+		foreach ($proc['pipes'] as $p) { fclose($p); }
+		if ($timedout) {
+			if ($before != $after) {
+				// Kill the docker container (we think) we started.
+				exec('docker kill ' . $after);
+			}
+
+			proc_terminate($proc['process']);
+			proc_close($proc['process']);
+			$return_var = 124;
+		} else {
+			$return_var = proc_close($proc['process']);
+		}
+		$output = array_merge($output, $commandout);
+
+		if ($timedout) {
+			return FALSE;
+		} else {
+			$lines = count($commandout);
+			return ($lines > 0) ? $commandout[$lines - 1] : '';
+		}
+	}

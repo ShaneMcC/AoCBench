@@ -179,6 +179,12 @@
 				usleep($sleepTime); // Sleep a bit so that we're not constantly running.
 				$hasRun = true;
 
+				if ($ret == 124) {
+					// We timed-out, abort.
+					echo 'Timeout.', "\n";
+					break;
+				}
+
 				$thisDay['outputs'][$inputPerson] = ['version' => $input['version'], 'return' => $ret, 'output' => $result];
 
 				if ($input['answer1'] !== NULL && $input['answer2'] !== NULL) {

@@ -17,6 +17,8 @@
 	$reallyLongTimeout = 120;
 	$reallyLongRepeatCount = 1;
 
+	$execTimeout = 240;
+
 	$sleepTime = 250000;
 
 	$normaliseInput = true;
