@@ -41,6 +41,7 @@ td.who, th.who {
 
 table {
   table-layout: fixed;
+  word-break: break-word;
 }
 
 .table-best, .table-best>td, .table-best>th {
