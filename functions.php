@@ -163,7 +163,7 @@
 		} else {
 			$commandout = stream_get_contents($proc['pipes'][0]);
 		}
-		$commandout = explode("\n", $commandout);
+		$commandout = explode("\n", trim($commandout));
 
 		foreach ($proc['pipes'] as $p) { fclose($p); }
 		if ($timedout) {
