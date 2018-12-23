@@ -199,7 +199,7 @@
 				if ($end - $start > $longTimeout) { echo 'L'; $long = ($i > 0); }
 
 				// Same for really-long.
-				if ($end - $start > $reallyLongTimeout) { echo 'LL'; $reallyLong = ($i > 0); }
+				if ($end - $start > $reallyLongTimeout) { echo 'L'; $reallyLong = ($i > 0); }
 
 				if ($i > 0) {
 					// Get the `real` time output.
