@@ -158,6 +158,7 @@
 			// Reset the times.
 			$thisDay['times'] = [];
 			$failedRun = false;
+			$saveResult = false;
 
 			for ($i = 0; $i <= ($reallyLong ? $reallyLongRepeatCount : ($long ? $longRepeatCount : $repeatCount)); $i++) {
 				$start = time();
@@ -206,18 +207,18 @@
 					$time = $participant->extractTime($result);
 
 					$thisDay['times'][] = $time;
+					$saveResult = true;
 					$hasRun = true;
 				}
 			}
 			echo "\n";
 
 			// Update data if we've actually ran enough times or if we failed.
-			if ($failedRun || count($thisDay['times']) >= ($long ? $longRepeatCount : $repeatCount)) {
+			if ($failedRun || $saveResult) {
 				// Invalidate any times if we failed or sort them for later.
 				if ($failedRun) {
 					unset($thisDay['times']);
 				} else {
-					// $thisDay['times'] = getSortedTimes($thisDay['times']);
 					$thisDay['checkedOutput'] = $checkOutput;
 					$thisDay['long'] = $long;
 				}
