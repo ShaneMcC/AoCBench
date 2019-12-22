@@ -63,3 +63,7 @@ table {
 a.daylink {
   color: #212529;
 }
+
+pre {
+  line-height: 1.1em;
+}
