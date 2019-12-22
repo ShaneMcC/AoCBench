@@ -112,7 +112,13 @@
 
 		// Run day.
 		for ($day = 1; $day <= 25; $day++) {
-			if (!$participant->hasDay($day)) { continue; }
+			if (!$participant->hasDay($day) || $participant->isWIP($day)) {
+				// If this day no longer exists, remove it.
+				if (isset($data['results'][$person]['days'][$day])) {
+					echo 'Removing missing/wip day ', $day, '.', "\n";
+				}
+				continue;
+			}
 			if (!preg_match('#^' . $wantedDay. '$#', $day)) { continue; }
 
 			$thisDay = isset($data['results'][$person]['days'][$day]) ? $data['results'][$person]['days'][$day] : ['times' => []];

@@ -93,6 +93,25 @@
 		}
 
 		/**
+		 * Check if a day is marked as WIP
+		 *
+		 * @param int $day Day number.
+		 * @return boolean True if the day is known but marked WIP.
+		 */
+		public function isWIP($day) {
+			if ($this->hasDay($day)) {
+				$file = glob($this->getDayFilename($day))[0];
+				if (is_dir($file)) {
+					return file_exists($file . '/.wip');
+				} else {
+					return !empty(glob($this->getDayFilename($day) . '.wip'));
+				}
+			}
+
+			return FALSE;
+		}
+
+		/**
 		 * Get the input for the given day from this participant.
 		 *
 		 * @param int $day Day number.
