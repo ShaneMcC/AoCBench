@@ -62,15 +62,18 @@
 		for ($day = 1; $day <= 25; $day++) {
 			$input = $participant->getInput($day);
 			if (empty($input)) { continue; }
+			if (in_array($day, $participant->getIgnoredInputs())) { continue; }
+
+			$thisIgnoreResult = array_merge($ignoreResult, $participant->getIgnoredAnswers());
 
 			$inputs[$day][$person]['input'] = $input;
 			$inputs[$day][$person]['version'] = $participant->getInputVersion($day);
-			if (in_array($day . '', $ignoreResult)) {
+			if (in_array($day . '', $thisIgnoreResult)) {
 				$inputs[$day][$person]['answer1'] = null;
 				$inputs[$day][$person]['answer2'] = null;
 			} else {
-				$inputs[$day][$person]['answer1'] = in_array($day . '/1', $ignoreResult) ? '' : $participant->getInputAnswer($day, 1);
-				$inputs[$day][$person]['answer2'] = in_array($day . '/2', $ignoreResult) ? '' : $participant->getInputAnswer($day, 2);
+				$inputs[$day][$person]['answer1'] = in_array($day . '/1', $thisIgnoreResult) ? '' : $participant->getInputAnswer($day, 1);
+				$inputs[$day][$person]['answer2'] = in_array($day . '/2', $thisIgnoreResult) ? '' : $participant->getInputAnswer($day, 2);
 			}
 		}
 

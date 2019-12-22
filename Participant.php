@@ -172,9 +172,23 @@
 		/**
 		 * Get array of days to ignore for this participant.
 		 *
-		 * @return Array of ignored entryies/
+		 * @return Array of ignored entries
 		 */
 		public function getIgnored() { return []; }
+
+		/**
+		 * Get array of inputs to ignore for this participant for inputMatrix
+		 *
+		 * @return Array of ignored entries
+		 */
+		public function getIgnoredInputs() { return []; }
+
+		/**
+		 * Get array of answers for inputs to ignore for this participant for inputMatrix
+		 *
+		 * @return Array of ignored entries
+		 */
+		public function getIgnoredAnswers() { return []; }
 
 		/**
 		 * Extract the time-taken from the output.
