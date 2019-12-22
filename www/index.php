@@ -49,6 +49,8 @@
 		$podiumPoints = ['first' => 4, 'second' => 3, 'third' => 2];
 		$personPoints = [];
 
+		$personTotalTime = [];
+
 		for ($day = 1; $day <= 25; $day++) {
 			$best = getDayBestTimes($day, $method);
 			if (empty($best)) { continue; }
@@ -68,6 +70,9 @@
 				$time = isset($pdata['days'][$day]['times']) ? getParticipantTime($pdata['days'][$day]['times'], $method) : FALSE;
 
 				if ($time !== FALSE) {
+					if (!isset($personTotalTime[$participant])) { $personTotalTime[$participant] = 0; }
+					$personTotalTime[$participant] += $time;
+
 					$min = isset($pdata['days'][$day]['times']) ? getParticipantTime($pdata['days'][$day]['times'], 'MIN') : '';
 					$max = isset($pdata['days'][$day]['times']) ? getParticipantTime($pdata['days'][$day]['times'], 'MAX') : '';
 
@@ -91,7 +96,7 @@
 						}
 					}
 
-					if (!$podium && $time == $first) { $classes[] = 'table-best'; }
+					if (!$podium && $time == $podiumTime['first']) { $classes[] = 'table-best'; }
 
 					echo '<td class="', implode(' ', $classes), '" data-ms="', $time ,'" data-toggle="tooltip" data-placement="bottom" data-html="true" title="', htmlspecialchars($tooltip), '">';
 					echo formatTime($time);
@@ -132,6 +137,39 @@
 			}
 			echo '</tr>';
 		}
+
+		$totalTimesBest = array_values($personTotalTime);
+		sort($totalTimesBest);
+
+		$totalTimes = [];
+		if (!empty($totalTimesBest)) {
+			$totalTimes['first'] = array_shift($totalTimesBest);
+			$totalTimes['second'] = array_shift($totalTimesBest);
+			$totalTimes['third'] = array_shift($totalTimesBest);
+		}
+
+		echo '<tr><td colspan=', count($displayParticipants) + 1, '></td></tr>';
+		echo '<tr>';
+		echo '<th class="day">Runtime</th>';
+		foreach ($displayParticipants as $participant) {
+			$time = $personTotalTime[$participant];
+
+			$classes = [];
+
+			if (!$podium && $time == $totalTimes['first']) {
+				$classes[] = 'table-best';
+			} else if ($podium) {
+				foreach (['first', 'second', 'third'] as $pos) {
+					if (isset($totalTimes[$pos]) && $time == $totalTimes[$pos]) {
+						$classes[] = 'table-' . $pos;
+						break;
+					}
+				}
+			}
+
+			echo '<td class="participant ', implode(' ', $classes), '">', formatTime($time), '</td>';
+		}
+		echo '</tr>';
 
 		echo '</tbody>';
 		echo '</table>';
