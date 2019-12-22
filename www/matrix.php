@@ -86,6 +86,9 @@
 							$classes[] = 'table-warning';
 						} else if ($p1 == $p2) {
 							$classes[] = 'table-primary';
+							if (isset($dayMatrix[$p1][$p2]['correct']) && !$dayMatrix[$p1][$p2]['correct']) {
+								$classes[] = 'table-danger';
+							}
 						} else if (isset($dayMatrix[$p1][$p2]['correct']) && $dayMatrix[$p1][$p2]['correct']) {
 							$classes[] = 'table-success';
 						} else if (isset($dayMatrix[$p1][$p2]['correct']) && !$dayMatrix[$p1][$p2]['correct']) {
