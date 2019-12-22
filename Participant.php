@@ -170,6 +170,13 @@
 		}
 
 		/**
+		 * Get array of days to ignore for this participant.
+		 *
+		 * @return Array of ignored entryies/
+		 */
+		public function getIgnored() { return []; }
+
+		/**
 		 * Extract the time-taken from the output.
 		 *
 		 * @param Array Output from running the day.
