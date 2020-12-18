@@ -4,6 +4,9 @@ results.*.json
 config.local.php
 config.local.*.php
 .benchlock
+.runlock
+.running
 outputresults.json
 outputresults.*.json
 inputs
+upload.sh
