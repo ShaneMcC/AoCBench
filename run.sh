@@ -16,6 +16,10 @@ cd ${MYDIR}
 		${MYDIR}/inputMatrix.php --no-update | tee -a /tmp/${SLUGNAME}.log
 
 		rm ${MYDIR}/.running
+		exit 0;
 	fi;
+	exit 42;
 
 ) 200>/tmp/.aocbench-runlock
+
+exit ${?}
