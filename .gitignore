@@ -10,3 +10,6 @@ outputresults.json
 outputresults.*.json
 inputs
 upload.sh
+vendor
+test.php
+test.sh

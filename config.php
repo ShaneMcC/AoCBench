@@ -7,6 +7,8 @@
 
 	$leaderboardID = '';
 	$leaderboardYear = '';
+	$instanceid = NULL;
+
 	$podium = false;
 
 	$repeatCount = 20;
@@ -28,11 +30,32 @@
 	$displayParticipants = [];
 	$participants = [];
 
+	$rabbitmq = [];
+	$rabbitmq['server'] = 'localhost';
+	$rabbitmq['port'] = '5672';
+	$rabbitmq['username'] = 'aocbench';
+	$rabbitmq['password'] = 'aocbench';
+	$rabbitmq['vhost'] = 'aocbench';
+
 	// Local configuration.
 	if (file_exists(dirname(__FILE__) . '/config.local.php')) {
 		include(dirname(__FILE__) . '/config.local.php');
 	}
 
+	if ($instanceid == NULL) {
+		$instanceid = 'aocbench-' . $leaderboardID . '-' . $leaderboardYear;
+	}
+
 	if (!function_exists('getInputAnswer')) {
 		function getInputAnswer($day, $part) { return NULL; }
+	}
+
+	if (!function_exists('handleScheduledUpdate')) {
+		function handleScheduledUpdate($instance) {
+			global $instanceid;
+			echo 'hsu: ', $instance, "\n";
+			if ($instance == $instanceid) {
+
+			}
+		}
 	}

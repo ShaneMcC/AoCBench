@@ -2,6 +2,10 @@
 	require_once(__DIR__ . '/Participant.php');
 	require_once(__DIR__ . '/config.php');
 
+	if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+		require_once(__DIR__ . '/vendor/autoload.php');
+	}
+
 	function getLock() {
 		global $lockfile, $__LOCK;
 
