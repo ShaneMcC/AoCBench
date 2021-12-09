@@ -1,6 +1,8 @@
 <?php
 	require_once(__DIR__ . '/functions.php');
 
+	if (!$enableScheduledUpdates) { die('Scheduled updates not enabled for this instance.'); }
+
 	use PhpAmqpLib\Connection\AMQPStreamConnection;
 	use PhpAmqpLib\Message\AMQPMessage;
 

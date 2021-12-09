@@ -30,6 +30,7 @@
 	$displayParticipants = [];
 	$participants = [];
 
+	$enableScheduledUpdates = false;
 	$rabbitmq = [];
 	$rabbitmq['server'] = 'localhost';
 	$rabbitmq['port'] = '5672';
