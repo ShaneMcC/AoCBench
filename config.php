@@ -54,6 +54,7 @@
 		function handleScheduledUpdate($instance) {
 			global $instanceid;
 			if ($instance == $instanceid) {
+				echo date('r'), ' - Got run request for our instanceid: ', $instanceid, "\n";
 				touch(__DIR__ . '/.doRun');
 			}
 		}
