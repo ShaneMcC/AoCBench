@@ -53,9 +53,8 @@
 	if (!function_exists('handleScheduledUpdate')) {
 		function handleScheduledUpdate($instance) {
 			global $instanceid;
-			echo 'hsu: ', $instance, "\n";
 			if ($instance == $instanceid) {
-
+				touch(__DIR__ . '/.doRun');
 			}
 		}
 	}
