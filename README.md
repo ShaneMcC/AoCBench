@@ -12,8 +12,8 @@ There is additionally `inputMatrix.php` which will attempt to run each participa
 
  - Check out the code somewhere.
  - Configure `config.local.php` (See `Configuration` section)
- - Cron `bench.php`
- - Optionally Cron `inputMatrix.php`
+ - Cron `checkRun.sh` every minute (This will look for a `.doRun` file to know when to run, and handle not clobbering existing runs)
+ - Either cron `checkScheduledUpdates.php` (and enable appropriate configuration options) or periodically touch a `.doRun` file to actually schedule the runs
  - Make `www` available via a web server.
 
 ## Configuration
@@ -69,7 +69,7 @@ When benchmarking, the following happens per-participant:
 
 
 ## Repo Requirements
-A repo that conforms to the following behaviour should just work "out of the box" with a `Participant` that consists of just a `getName()` and `getRepo()` configuration.
+A repo that conforms to the following behaviour should just work "out of the box" with a `Participant` that consists of just a `getName()` and `getRepo()` configuration. Most bits can be changed with the additional functions mentioned above.
 
   - Days are stored in directories named `1`, `2`, ... `24`, `25`
   - Input file for each day is stored as `input.txt` within the appropriate directory (eg `1/input.txt`)
@@ -99,7 +99,7 @@ A repo that conforms to the following behaviour should just work "out of the box
 
 Bugs and Feature Requests should be raised on the [issue tracker on github](https://github.com/ShaneMcC/aocbench/issues), and I'm happy to receive code pull requests via github (Though I do not guarantee that all will be merged.)
 
-I can be found idling on various different IRC Networks, but the best way to get in touch would be to message "Dataforce" on Quakenet, or drop me a mail (email address is in my [github profile](https://github.com/ShaneMcC)). I can also probably be found on the unofficial AoC Discord and IRC Channels as Dataforce and on the subreddit.
+I can be found idling on various different IRC Networks, but the best way to get in touch would be to message "Dataforce" on Quakenet, or drop me a mail (email address is in my [github profile](https://github.com/ShaneMcC)). I can also probably be found on the unofficial AoC Discord (Dataforce#4726) and IRC Channels as Dataforce and on the subreddit.
 
 ## Screenshots
 
