@@ -85,7 +85,7 @@
 		$customDir = $inputsDir . '/custom/' . $day;
 		if (file_exists($customDir)) {
 			foreach (scandir($customDir) as $dir) {
-				if ($dir{0} == '.') { continue; }
+				if ($dir[0] == '.') { continue; }
 				if (file_exists($customDir . '/' . $dir . '/input.txt') && file_exists($customDir . '/' . $dir . '/answers.txt')) {
 					$answers = file($customDir . '/' . $dir . '/answers.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 					$input = file_get_contents($customDir . '/' . $dir . '/input.txt');
