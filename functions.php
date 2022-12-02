@@ -165,7 +165,7 @@
 				}
 			}
 		} else {
-			$commandout = stream_get_contents($proc['pipes'][0]);
+			$commandout = stream_get_contents($proc['pipes'][1]);
 		}
 		$commandout = explode("\n", trim($commandout));
 
