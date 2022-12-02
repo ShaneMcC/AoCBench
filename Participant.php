@@ -218,7 +218,7 @@
 
 			$output = [];
 			$ret = -1;
-			dockerTimedExec($this->getRunCommand($day) . ' 2>&1 </dev/null', $output, $ret, $execTimeout);
+			dockerTimedExec($this->getRunCommand($day) . ' 2>&1', $output, $ret, $execTimeout);
 
 			return [$ret, $output];
 		}
