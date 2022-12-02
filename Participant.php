@@ -38,9 +38,9 @@
 		 */
 		public function prepare() {
 			if (file_exists('./docker.sh')) {
-				exec('bash ./docker.sh 2>&1');
+				exec('bash ./docker.sh 2>&1 </dev/null');
 			} else if (file_exists('./run.sh')) {
-				exec('bash ./run.sh 2>&1');
+				exec('bash ./run.sh 2>&1 </dev/null');
 			}
 		}
 
@@ -218,7 +218,7 @@
 
 			$output = [];
 			$ret = -1;
-			dockerTimedExec($this->getRunCommand($day) . ' 2>&1', $output, $ret, $execTimeout);
+			dockerTimedExec($this->getRunCommand($day) . ' 2>&1 </dev/null', $output, $ret, $execTimeout);
 
 			return [$ret, $output];
 		}
@@ -252,7 +252,7 @@
 			exec('git reset --hard origin 2>&1');
 			exec('git clean -fx 2>&1');
 			if (file_exists('./cleanup.sh')) {
-				exec('bash ./cleanup.sh 2>&1');
+				exec('bash ./cleanup.sh 2>&1 </dev/null');
 			}
 		}
 	}
