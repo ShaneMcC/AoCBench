@@ -1,9 +1,9 @@
 #!/bin/bash
 
 MYDIR=$(dirname "$0")
-SLUGNAME=$(basename "${MYDIR}")
-
 cd ${MYDIR}
+
+SLUGNAME=$(basename "${PWD}")
 
 (
 	flock -x -n 200
