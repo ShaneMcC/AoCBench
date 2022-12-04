@@ -32,13 +32,13 @@
 			if (!isset($data['results'][$participant])) { continue; }
 			$pdata = $data['results'][$participant];
 
-			if (isset($pdata['repo'])) {
+			if (isset($pdata['repo']) && !empty($pdata['repo'])) {
 				$link = '<a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="github.ico" alt="github"></a>';
 			} else {
 				$link = '';
 			}
 
-			if (isset($pdata['subheading'])) {
+			if (isset($pdata['subheading']) && !empty($pdata['subheading'])) {
 				$subheading = '<br><small>' . $pdata['subheading'] . '</small>';
 			} else {
 				$subheading = '';
