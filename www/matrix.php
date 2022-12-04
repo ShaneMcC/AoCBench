@@ -63,8 +63,14 @@
 					$link = '';
 				}
 
+				if (isset($pdata['subheading'])) {
+					$subheading = '<br><small>' . $pdata['subheading'] . '</small>';
+				} else {
+					$subheading = '';
+				}
+
 				$name = $name = isset($_REQUEST['anon']) ? 'Participant ' . $p++ : $pdata['name'];
-				echo '<th class="output">', $name, ' ', $link, '</th>';
+				echo '<th class="output">', $name, ' ', $link, ' ', $subheading, '</th>';
 			}
 			echo '</tr>', "\n";
 

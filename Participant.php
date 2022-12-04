@@ -15,6 +15,13 @@
 		abstract function getRepo();
 
 		/**
+		 * Subheading for participant
+		 *
+		 * @return String Sub heading for participant
+		 */
+		function getSubheading() { return ''; }
+
+		/**
 		 * Get the filename that should be versioned for this day.
 		 * This can be either a file or a directory.
 		 *

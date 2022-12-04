@@ -139,6 +139,7 @@
 		}
 		$data['results'][$person]['name'] = $participant->getName();
 		$data['results'][$person]['repo'] = $participant->getRepo();
+		$data['results'][$person]['subheading'] = $participant->getSubheading();
 
 		// Run day.
 		for ($day = 1; $day <= 25; $day++) {
