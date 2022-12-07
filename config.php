@@ -4,6 +4,7 @@
 	$resultsFile = __DIR__ . '/results.json';
 	$outputResultsFile = __DIR__ . '/outputresults.json';
 	$participantsDir = __DIR__ . '/participants/';
+	$logFile = __DIR__ . '/run.log';
 
 	$leaderboardID = '';
 	$leaderboardYear = '';

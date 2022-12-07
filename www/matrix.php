@@ -117,11 +117,14 @@
 			echo '</table>';
 		}
 
-		echo '<p class="text-muted text-right">';
+		echo '<p class="text-muted text-right"><small>';
 		if (isset($matrix['time'])) {
-			echo '<small>Last updated: ', date('r', $matrix['time']), '</small>';
+			echo ' <span>Last updated: ', date('r', $matrix['time']), '</span>';
 		}
-		echo '</p>';
+		if (file_exists($logFile)) {
+			echo ' <span><a href="log.php">log</a></span>';
+		}
+		echo '</small></p>';
 
 		echo '<script src="./index.js"></script>';
 	} else {

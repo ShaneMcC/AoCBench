@@ -13,3 +13,4 @@ upload.sh
 vendor
 test.php
 test.sh
+*.log
