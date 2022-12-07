@@ -184,7 +184,7 @@
 		if (isset($data['time'])) {
 			echo ' <span>Last updated: ', date('r', $data['time']), '</span>';
 		}
-		if (file_exists($logFile)) {
+		if (!empty($logFile) && file_exists($logFile)) {
 			echo ' <span><a href="log.php">log</a></span>';
 		}
 		echo '</small></p>';

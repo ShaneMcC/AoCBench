@@ -8,7 +8,7 @@
 		require_once(__DIR__ . '/header.php');
 	}
 
-	if (file_exists($logFile)) {
+	if (!empty($logFile) && file_exists($logFile)) {
 		if (isset($_REQUEST['raw'])) {
 			echo file_get_contents($logFile);
 		} else {
