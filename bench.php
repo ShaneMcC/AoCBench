@@ -186,7 +186,7 @@
 				} else {
 					echo ' ', $i;
 					if ($checkOutput) {
-						$rightAnswer = preg_match('#' . preg_quote($answer1, '#') . '.+' . preg_quote($answer2, '#') . '#', implode(' ', $result));
+						$rightAnswer = preg_match('#' . preg_quote($answer1, '#') . '.+' . preg_quote($answer2, '#') . '#i', implode(' ', $result));
 						if (!$rightAnswer) {
 							echo 'F';
 							echo "\n";
