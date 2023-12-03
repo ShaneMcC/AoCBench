@@ -5,13 +5,32 @@
 	$fluid = true;
 	require_once(__DIR__ . '/header.php');
 
+	$lang = isset($_REQUEST['lang']) ? (is_array($_REQUEST['lang']) ? $_REQUEST['lang'] : [$_REQUEST['lang']]) : True;
+
 	if ($hasMatrix) {
 		for ($day = 1; $day <= 25; $day++) {
 			// Build day matrix.
 			$dayMatrix = [];
 
 			$dayParticipants = [];
-			if (empty($displayParticipants)) { $displayParticipants = array_keys($matrix['results']); }
+
+			if (empty($displayParticipants)) {
+				if ($lang === True) {
+					$displayParticipants = array_keys($matrix['results']);
+				} else {
+					$displayParticipants = [];
+					foreach ($matrix['results'] as $person => $pdata) {
+						if (!isset($pdata['language']) || empty($pdata['language'])) { continue; }
+						$langList = is_array($pdata['language']) ? $pdata['language'] : [$pdata['language']];
+						foreach ($langList as $thisLang) {
+							if (in_array($thisLang, $lang)) {
+								$displayParticipants[] = $person;
+								break;
+							}
+						}
+					}
+				}
+			}
 			foreach ($displayParticipants as $participant) {
 				if (!isset($matrix['results'][$participant])) { continue; }
 				$dayParticipants[] = $participant;
@@ -69,8 +88,20 @@
 					$subheading = '';
 				}
 
+				if (isset($pdata['language']) && !empty($pdata['language'])) {
+					$language = '<br><small>';
+					$langList = is_array($pdata['language']) ? $pdata['language'] : [$pdata['language']];
+					foreach ($langList as $l) {
+						$language .= '<a href="?method=' . urlencode($method) . '&lang[]=' . urlencode($l) . '">' . $l . '</a> / ';
+					}
+					$language = rtrim($language, ' /');
+					$language .= '</small>';
+				} else {
+					$language = '';
+				}
+
 				$name = $name = isset($_REQUEST['anon']) ? 'Participant ' . $p++ : $pdata['name'];
-				echo '<th class="output">', $name, ' ', $link, ' ', $subheading, '</th>';
+				echo '<th class="output">', $name, ' ', $link, ' ', $subheading, ' ', $language, '</th>';
 			}
 			echo '</tr>', "\n";
 

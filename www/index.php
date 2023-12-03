@@ -6,12 +6,20 @@
 
 
 	$method = isset($_REQUEST['method']) ? $_REQUEST['method'] : 'MEDIAN';
+	$lang = isset($_REQUEST['lang']) ? (is_array($_REQUEST['lang']) ? $_REQUEST['lang'] : [$_REQUEST['lang']]) : True;
 
 	if ($hasResults) {
 		echo '<h2>Results</h2>', "\n";
 
+		$langLink = '';
+		if ($lang !== True) {
+			foreach ($lang as $l) {
+				$langLink .= '&lang[]=' . urlencode($l);
+			}
+		}
+
 		foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'SPECIAL' => 'MeanBest', 'MAX' => 'Maximum'] as $m => $title) {
-			$link = '<a href="?method=' . $m . '">' . $title . '</a>';
+			$link = '<a href="?method=' . $m . $langLink . '">' . $title . '</a>';
 			if ($m == $method) { $link = '<strong>' . $link . '</strong>'; }
 
 			$links[] = $link;
@@ -27,7 +35,23 @@
 		echo '<tr>';
 		echo '<th class="day">&nbsp;</th>';
 		$p = 1;
-		if (empty($displayParticipants)) { $displayParticipants = array_keys($data['results']); }
+		if (empty($displayParticipants)) {
+			if ($lang === True) {
+				$displayParticipants = array_keys($data['results']);
+			} else {
+				$displayParticipants = [];
+				foreach ($data['results'] as $person => $pdata) {
+					if (!isset($pdata['language']) || empty($pdata['language'])) { continue; }
+					$langList = is_array($pdata['language']) ? $pdata['language'] : [$pdata['language']];
+					foreach ($langList as $thisLang) {
+						if (in_array($thisLang, $lang)) {
+							$displayParticipants[] = $person;
+							break;
+						}
+					}
+				}
+			}
+		}
 		foreach ($displayParticipants as $participant) {
 			if (!isset($data['results'][$participant])) { continue; }
 			$pdata = $data['results'][$participant];
@@ -43,9 +67,20 @@
 			} else {
 				$subheading = '';
 			}
+			if (isset($pdata['language']) && !empty($pdata['language'])) {
+				$language = '<br><small>';
+				$langList = is_array($pdata['language']) ? $pdata['language'] : [$pdata['language']];
+				foreach ($langList as $l) {
+					$language .= '<a href="?method=' . urlencode($method) . '&lang[]=' . urlencode($l) . '">' . $l . '</a> / ';
+				}
+				$language = rtrim($language, ' /');
+				$language .= '</small>';
+			} else {
+				$language = '';
+			}
 
 			$name = $name = isset($_REQUEST['anon']) ? 'Participant ' . $p++ : $pdata['name'];
-			echo '<th class="participant">', $name, ' ', $link, ' ', $subheading, '</th>';
+			echo '<th class="participant">', $name, ' ', $link, ' ', $subheading, ' ', $language, '</th>';
 		}
 		echo '</tr>', "\n";
 		echo '</thead>';
