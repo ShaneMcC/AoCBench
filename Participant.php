@@ -22,6 +22,13 @@
 		function getSubheading() { return ''; }
 
 		/**
+		 * Language for participant
+		 *
+		 * @return String Languages for participant
+		 */
+		function getLanguage() { return ''; }
+
+		/**
 		 * Get the filename that should be versioned for this day.
 		 * This can be either a file or a directory.
 		 *
