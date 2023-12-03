@@ -1,4 +1,5 @@
 participants
+results/*
 results.json
 results.*.json
 config.local.php
