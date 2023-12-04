@@ -213,7 +213,9 @@
 		public function extractTime($output) {
 			$time = '999m9.999s';
 			for ($i = max(0, count($output) - 5); $i < count($output) - 1; $i++) {
-				if (preg_match('#^real(.*)$#', $output[$i], $m)) {
+				//if (preg_match('#^real(.*)$#', $output[$i], $m)) {
+				// Look specifically for bash's 3dp time output
+				if (preg_match('#^real\s+([0-9]+m[0-9]+\.[0-9]{3}s)$#', trim($output[$i]), $m)) {
 					$time = trim($m[1]);
 				}
 			}
