@@ -93,9 +93,13 @@
 
 		$personTotalTime = [];
 
+		$maxValidDays = 0;
+		$completedDays = [];
+
 		for ($day = 1; $day <= 25; $day++) {
 			$best = getDayBestTimes($day, $method);
 			if (empty($best)) { continue; }
+			$maxValidDays++;
 
 			$podiumTime['first'] = array_shift($best);
 			$podiumTime['second'] = array_shift($best);
@@ -114,6 +118,7 @@
 				if ($time !== FALSE) {
 					if (!isset($personTotalTime[$participant])) { $personTotalTime[$participant] = 0; }
 					$personTotalTime[$participant] += $time;
+					$completedDays[$participant] = ($completedDays[$participant] ?? 0) + 1;
 
 					$min = isset($pdata['days'][$day]['times']) ? getParticipantTime($pdata['days'][$day]['times'], 'MIN') : '';
 					$max = isset($pdata['days'][$day]['times']) ? getParticipantTime($pdata['days'][$day]['times'], 'MAX') : '';
@@ -150,6 +155,15 @@
 			echo '</tr>', "\n";
 		}
 
+		$allPersonPoints = $personPoints;
+		$allPersonTotalTime = $personTotalTime;
+		foreach ($completedDays as $participant => $days) {
+			if ($days != $maxValidDays) {
+				unset($personPoints[$participant]);
+				unset($personTotalTime[$participant]);
+			}
+		}
+
 		if ($podium) {
 			$pointsBest = array_values($personPoints);
 			rsort($pointsBest);
@@ -165,13 +179,15 @@
 			echo '<tr>';
 			echo '<th class="day">Points</th>';
 			foreach ($displayParticipants as $participant) {
-				$count = $personPoints[$participant];
+				$count = $allPersonPoints[$participant];
 
 				$classes = [];
-				foreach (['first', 'second', 'third'] as $pos) {
-					if (isset($points[$pos]) && $count == $points[$pos]) {
-						$classes[] = 'table-' . $pos;
-						break;
+				if (isset($personPoints[$participant])) {
+					foreach (['first', 'second', 'third'] as $pos) {
+						if (isset($points[$pos]) && $count == $points[$pos]) {
+							$classes[] = 'table-' . $pos;
+							break;
+						}
 					}
 				}
 
@@ -194,17 +210,19 @@
 		echo '<tr>';
 		echo '<th class="day">Runtime</th>';
 		foreach ($displayParticipants as $participant) {
-			$time = $personTotalTime[$participant];
+			$time = $allPersonTotalTime[$participant];
 
 			$classes = [];
 
-			if (!$podium && $time == $totalTimes['first']) {
-				$classes[] = 'table-best';
-			} else if ($podium) {
-				foreach (['first', 'second', 'third'] as $pos) {
-					if (isset($totalTimes[$pos]) && $time == $totalTimes[$pos]) {
-						$classes[] = 'table-' . $pos;
-						break;
+			if (isset($personTotalTime[$participant])) {
+				if (!$podium && $time == $totalTimes['first']) {
+					$classes[] = 'table-best';
+				} else if ($podium) {
+					foreach (['first', 'second', 'third'] as $pos) {
+						if (isset($totalTimes[$pos]) && $time == $totalTimes[$pos]) {
+							$classes[] = 'table-' . $pos;
+							break;
+						}
 					}
 				}
 			}
