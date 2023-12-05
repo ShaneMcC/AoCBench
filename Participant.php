@@ -407,54 +407,66 @@
 			return $this->canary;
 		}
 
-		private function getRunScript($day, $runOnce = false) {
-			$runOnceCommand = $this->getValueWithReplacements('runonce', $day);
+		private function getRunScript($day, $scriptVersion) {
+			$runOnce = $this->getValueWithReplacements('runonce', $day);
 			$cmd = $this->getValueWithReplacements('cmd', $day);;
 			$workdir = $this->getValueWithReplacements('workdir', $day) ?? $this->getAOCBenchConfig()['code'];
 			$canary = $this->getCanary();
 			$hyperfineOutput = '/tmp/' . uniqid('aocbench-hyperfine-', true) . '.csv';
-			if ($runOnce && $runOnceCommand) {
-				return <<<RUNSCRIPT
-#!/bin/bash
 
-cd $workdir
-echo '### $canary START - ONCE ###';
-$runOnceCommand
-echo '### $canary END ###';
-RUNSCRIPT;
+			switch ($scriptVersion) {
+				case 'runonce':
+					return <<<RUNSCRIPT
+						#!/bin/bash
+
+						cd $workdir
+						echo '### $canary START - ONCE ###';
+						$runOnce
+						echo '### $canary END ###';
+						RUNSCRIPT;
+
+				case 'hyperfine':
+					return <<<RUNSCRIPT
+						#!/bin/bash
+
+						cd $workdir
+
+						HYPERFINE=\$(which hyperfine)
+						if [ -e "/aocbench-hyperfine" ]; then
+							HYPERFINE=/aocbench-hyperfine
+						elif [ "\${HYPERFINE}" == "" ]; then
+							HYPERFINE=hyperfine
+						fi;
+
+						echo '### $canary START - HYPERFINEPATH ###';
+						echo \$HYPERFINE
+						echo '### $canary END ###';
+
+						echo '### $canary START - HYPERFINEVERSION ###';
+						\$HYPERFINE --version
+						echo '### $canary END ###';
+
+						echo '### $canary START - HYPERFINE ###';
+						\$HYPERFINE -w 1 -m 5 -M 20  --export-json $hyperfineOutput -- "$cmd"
+						echo '### $canary END ###';
+
+						echo '### $canary START - HYPERFINEDATA ###';
+						cat $hyperfineOutput;
+						echo '### $canary END ###';
+						RUNSCRIPT;
+
+				case 'time':
+				default:
+					return <<<RUNSCRIPT
+						#!/bin/bash
+
+						cd $workdir
+
+						echo '### $canary START - TIME ###';
+						time $cmd
+						echo '### $canary END ###';
+						RUNSCRIPT;
 			}
-
-			return <<<RUNSCRIPT
-#!/bin/bash
-
-cd $workdir
-
-if [ "\${1}" == "hyperfine" ]; then
-	HYPERFINE=\$(which hyperfine)
-	if [ -e "/aocbench-hyperfine" ]; then
-		HYPERFINE=/aocbench-hyperfine
-	elif [ "\${HYPERFINE}" == "" ]; then
-		HYPERFINE=hyperfine
-	fi;
-
-	echo '### $canary START - HYPERFINEPATH ###';
-	echo \$HYPERFINE
-	echo '### $canary END ###';
-	echo '### $canary START - HYPERFINEVERSION ###';
-	\$HYPERFINE --version
-	echo '### $canary END ###';
-	echo '### $canary START - HYPERFINE ###';
-	\$HYPERFINE -w 1 -m 5 -M 20  --export-json $hyperfineOutput -- "$cmd"
-	echo '### $canary END ###';
-	echo '### $canary START - HYPERFINEDATA ###';
-	cat $hyperfineOutput;
-	echo '### $canary END ###';
-else
-	echo '### $canary START - TIME ###';
-	time $cmd
-	echo '### $canary END ###';
-fi;
-RUNSCRIPT;
 		}
 
 		private function getReplacements($day, $includeInput = true) {
@@ -576,7 +588,13 @@ RUNSCRIPT;
 
 			$runScriptFilename = './.aocbench_run/aocbench-' . uniqid(true) . '.sh';
 			// $runScriptFilename = './.aocbench_run/aocbench.sh';
-			file_put_contents($runScriptFilename, $this->getRunScript($day, $doRunOnce));
+
+			if ($useHyperfine) { $scriptVersion = 'hyperfine'; }
+			else if ($doRunOnce) { $scriptVersion = 'runonce'; }
+			else { $scriptVersion = 'time'; }
+			$runScriptFilename = './.aocbench_run/aocbench-' . $scriptVersion . '.sh';
+
+			file_put_contents($runScriptFilename, $this->getRunScript($day, $scriptVersion));
 			chmod($runScriptFilename, 0777);
 
 			$replacements = $this->getReplacements($day);
@@ -608,15 +626,12 @@ RUNSCRIPT;
 			}
 
 			$cmd .= ' ' . escapeshellarg($imageName);
-			if ($useHyperfine) {
-				$cmd .= ' hyperfine';
-			}
 			$cmd .= ' 2>&1';
 
 			$output = [];
 			$ret = -1;
 			dockerTimedExec($containerName, $cmd, $output, $ret, $execTimeout);
-			@unlink($runScriptFilename);
+			// @unlink($runScriptFilename);
 
 			return [$ret, $this->parseRunOutput($output)];
 		}
