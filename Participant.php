@@ -116,9 +116,9 @@
 			if ($this->hasDay($day)) {
 				$file = glob($this->getDayFilename($day))[0];
 				if (is_dir($file)) {
-					return file_exists($file . '/.wip');
+					return file_exists($file . '/.wip') || file_exists($file . '/.nobench');
 				} else {
-					return !empty(glob($this->getDayFilename($day) . '.wip'));
+					return !empty(glob($this->getDayFilename($day) . '.wip')) || !empty(glob($this->getDayFilename($day) . '.nobench'));
 				}
 			}
 
