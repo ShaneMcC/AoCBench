@@ -430,8 +430,18 @@ RUNSCRIPT;
 cd $workdir
 
 if [ "\${1}" == "hyperfine" ]; then
+	HYPERFINE=\$(which hyperfine)
+	if [ -e "/aocbench-hyperfine" ]; then
+		HYPERFINE=/aocbench-hyperfine
+	elif [ "\${HYPERFINE}" == "" ]; then
+		HYPERFINE=hyperfine
+	fi;
+
+	echo '### $canary START - HYPERFINEPATH ###';
+	echo \$HYPERFINE
+	echo '### $canary END ###';
 	echo '### $canary START - HYPERFINE ###';
-	hyperfine -w 1 -m 5 -M 20  --export-json $hyperfineOutput -- "$cmd"
+	\$HYPERFINE -w 1 -m 5 -M 20  --export-json $hyperfineOutput -- "$cmd"
 	echo '### $canary END ###';
 	echo '### $canary START - HYPERFINEDATA ###';
 	cat $hyperfineOutput;
@@ -537,11 +547,11 @@ RUNSCRIPT;
 		 *
 		 * @param int $day Day number.
 		 * @param bool $doRunOnce Do runOnce commands rather than reqular commands.
-		 * @param bool $useHyperfine Use hyperfine for this run.
+		 * @param bool $useHyperfine Use hyperfine for this run if possible.
 		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of arrays of sections of output.
 		 */
 		private function doRun($day, $doRunOnce, $useHyperfine) {
-			global $execTimeout;
+			global $execTimeout, $localHyperfine;
 
 			if ($this->getAOCBenchConfig()['version'] != "1") {
 				return [1, ['TIME' => ['AoCBench Error: Unknown config file version (Got: "' . $this->getAOCBenchConfig()['version'] . '" - Wanted: "1").']]];
@@ -582,6 +592,9 @@ RUNSCRIPT;
 				if (!file_exists($path)) { mkdir($path); }
 				chmod($path, 0777);
 				$cmd .= ' -v ' . escapeshellarg($path . ':' . $location);
+			}
+			if (file_exists($localHyperfine) && $this->useHyperfine() === true) {
+				$cmd .= ' -v ' . escapeshellarg($localHyperfine . ':/aocbench-hyperfine');
 			}
 			$cmd .= ' -v ' . escapeshellarg($pwd . '/' . $runScriptFilename . ':/aocbench.sh');
 

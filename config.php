@@ -24,6 +24,8 @@
 
 	$sleepTime = 250000;
 
+	$localHyperfine = null;
+
 	$normaliseInput = true;
 	$inputsDir = __DIR__ . '/inputs/';
 	$ignoreResult = []; // '10' or '10/1' etc.

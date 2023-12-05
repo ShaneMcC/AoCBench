@@ -185,6 +185,7 @@
 					// Check if hyperfine actually got complete data, if not we'll fallback to not using hyperfine.
 					if (isset($result['HYPERFINEDATA']['results'][0]['times']) && count($result['HYPERFINEDATA']['results'][0]['times']) > 1 && array_sum($result['HYPERFINEDATA']['results'][0]['exit_codes']) == 0) {
 						$thisDay['hyperfine'] = $result['HYPERFINEDATA']['results'][0];
+						$thisDay['hyperfine']['bin'] = $result['HYPERFINEPATH'][0];
 						$thisDay['times'] = [];
 						foreach ($thisDay['hyperfine']['times'] as $time) {
 							$thisDay['times'][] = '0m' . $time . 's';
