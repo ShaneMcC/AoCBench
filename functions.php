@@ -5,6 +5,7 @@
 	if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 		require_once(__DIR__ . '/vendor/autoload.php');
 	}
+	require_once(__DIR__ . '/Spyc.php');
 
 	function getLock() {
 		global $lockfile, $__LOCK;
@@ -71,7 +72,7 @@
 			list($all, $m, $s, $ms) = $match;
 
 			$ms = str_pad($ms, 3, '0');
-			$time = $ms + ($s * 1000) + ($m * 60 * 1000);
+			$time = ("0.$ms" * 1000) + ($s * 1000) + ($m * 60 * 1000);
 
 			return $time;
 		}
@@ -82,11 +83,14 @@
 	function formatTime($time) {
 		if ($time === FALSE) { return ''; }
 
+		$newms = preg_replace('/^[0-9]+\./', '', sprintf('%s', $time));
+		if ($newms == $time) { $newms = ''; }
+
 		$m = $s = $ms = 0;
 
 		if ($time > 60 * 1000) {
 			$m = floor($time / (60 * 1000));
-			$time -= $m * 60 * 1000;
+			$time -= ((int)$m) * 60 * 1000;
 		}
 
 		if ($time > 1000) {
@@ -96,7 +100,7 @@
 
 		$ms = $time;
 
-		return sprintf('%dm%d.%03ds', $m, $s, $ms);
+		return sprintf('%dm%d.%03d%ss', $m, $s, $ms, $newms);
 	}
 
 	function getSortedTimes($times, $format = true) {
@@ -134,14 +138,19 @@
 		return isset($out[1]) ? explode(' ', $out[1])[0] : '';
 	}
 
-	function dockerTimedExec($command, &$output = array(), &$return_var = 0, $timeout = 0) {
-		$before = getLastContainerID();
+	function dockerTimedExec($containerName, $command, &$output = array(), &$return_var = 0, $timeout = 0) {
+		if ($containerName == null) { $before = getLastContainerID(); }
 
 		$options = '';
 		appexec($command.' 2>&1', $proc, false);
 
-		sleep(1);
-		$after = getLastContainerID();
+		if ($containerName == null) {
+			sleep(1);
+			$after = getLastContainerID();
+			if ($before != $after) {
+				$containerName = $after;
+			}
+		}
 
 		$commandout = '';
 		$timedout = false;
@@ -171,9 +180,9 @@
 
 		foreach ($proc['pipes'] as $p) { fclose($p); }
 		if ($timedout) {
-			if ($before != $after) {
+			if ($containerName != null) {
 				// Kill the docker container (we think) we started.
-				exec('docker kill ' . $after);
+				exec('docker kill ' . $containerName);
 			}
 
 			proc_terminate($proc['process']);

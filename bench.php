@@ -18,13 +18,14 @@
 	$hasRun = false;
 
 	// Get CLI Options.
-	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help', 'no-update', 'remove']);
+	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help', 'no-update', 'no-hyperfine', 'remove']);
 
 	$noUpdate = getOptionValue(NULL, 'no-update', NULL) !== NULL;
 	$wantedParticipant = getOptionValue('p', 'participant', '.*');
 	$wantedDay = getOptionValue('d', 'day', '.*');
 	$force = getOptionValue('f', 'force', NULL) !== NULL;
 	$removeMatching = getOptionValue(NULL, 'remove', NULL) !== NULL;
+	$noHyperfine = getOptionValue(NULL, 'no-hyperfine', NULL) !== NULL;
 
 	if (getOptionValue('h', 'help', NULL) !== NULL) {
 		echo 'AoCBench Benchmarker.', "\n";
@@ -40,6 +41,7 @@
 		echo '  -d, --day <regex>             Only look at days matching <regex> (This is', "\n";
 		echo '                                automatically anchored start/end)', "\n";
 		echo '      --no-update               Do not update repos.', "\n";
+		echo '      --no-hyperfine            Do not use hyperfine even if available.', "\n";
 		echo '      --remove                  Remove matching.', "\n";
 		echo '', "\n";
 		echo 'If not specified, day and participant both default to ".*" to match all', "\n";
@@ -166,10 +168,38 @@
 
 			// Reset the times.
 			$thisDay['times'] = [];
+			unset($thisDay['hyperfine']);
 			$failedRun = false;
 			$saveResult = false;
+			$allowHyperfine = !$noHyperfine && ($participant instanceof V2Participant) && $participant->useHyperfine();
 
 			for ($i = 0; $i <= ($reallyLong ? $reallyLongRepeatCount : ($long ? $longRepeatCount : $repeatCount)); $i++) {
+				if ($i == 1 && $allowHyperfine) {
+					echo ' ', $i, 'H';
+					list($ret, $result) = $participant->runHyperfine($day);
+
+					// Check if hyperfine actually got complete data, if not we'll fallback to not using hyperfine.
+					if (isset($result['HYPERFINEDATA']['results'][0]['times']) && count($result['HYPERFINEDATA']['results'][0]['times']) > 1 && array_sum($result['HYPERFINEDATA']['results'][0]['exit_codes']) == 0) {
+						$thisDay['hyperfine'] = $result['HYPERFINEDATA']['results'][0];
+						$thisDay['times'] = [];
+						foreach ($thisDay['hyperfine']['times'] as $time) {
+							$thisDay['times'][] = '0m' . $time . 's';
+						}
+
+						unset($thisDay['hyperfine']['times']);
+						unset($thisDay['hyperfine']['exit_codes']);
+						unset($thisDay['hyperfine']['command']);
+						$saveResult = true;
+						$hasRun = true;
+						echo "\n";
+						break;
+					} else {
+						// Make us try again without hyperfine and behave normally.
+						$allowHyperfine = true;
+						echo 'F';
+					}
+				}
+
 				$start = time();
 				list($ret, $result) = $participant->run($day);
 				$end = time();

@@ -234,9 +234,9 @@
 
 			$output = [];
 			$ret = -1;
-			dockerTimedExec($this->getRunCommand($day) . ' 2>&1', $output, $ret, $execTimeout);
+			dockerTimedExec(null, $this->getRunCommand($day) . ' 2>&1', $output, $ret, $execTimeout);
 
-			return [$ret, $output];
+			return [$ret, ['TIME' => $output]];
 		}
 
 		/**
@@ -271,4 +271,297 @@
 				exec('bash ./cleanup.sh 2>&1 </dev/null');
 			}
 		}
+	}
+
+	abstract class V2Participant extends Participant {
+		private $yaml = null;
+		private $canary = null;
+
+		public function useHyperfine() {
+			return $this->getAOCBenchConfig()['hyperfine'] ?? true;
+		}
+
+		public final function getAOCBenchConfig() {
+			global $participantsDir;
+
+			if ($this->yaml === null) {
+				if (file_exists($participantsDir . '/' . $this->getName() . '.yaml')) {
+					$filename = $participantsDir . '/' . $this->getName() . '.yaml';
+				} else if (file_exists('.aocbench.yaml')) {
+					$filename = $participantsDir . '/' . $this->getName() . '/.aocbench.yaml';
+				}
+
+				$this->yaml = $filename != null ? spyc_load_file($filename) : [];
+			}
+
+			return $this->yaml;
+		}
+
+		function getLanguage() { $this->getAOCBenchConfig()['language'] ?? ''; }
+
+		final function getRunCommand($day) {
+			/* Do Nothing, but don't allow this to be overridden anymore. */
+		}
+
+		public function getDockerfile() {
+			$locations = $this->getAOCBenchConfig()['dockerfile'] ?? [];
+
+			if (empty($locations)) {
+				$locations[] = '.docker/Dockerfile';
+				$locations[] = 'docker/Dockerfile';
+				$locations[] = 'Dockerfile';
+				$locations[] = '.docker/Containerfile';
+				$locations[] = 'docker/Containerfile';
+				$locations[] = 'Containerfile';
+			} else if (!is_array($locations)) {
+				$locations = [$locations];
+			}
+
+			foreach ($locations as $l) {
+				if (file_exists($l)) {
+					return $l;
+				}
+			}
+
+			return null;
+		}
+
+		public final function getDockerImageName() {
+			$imageName = $this->getAOCBenchConfig()['image'] ?? null;
+
+			if ($imageName == null) {
+				$dockerFile = $this->getDockerfile();
+				if ($dockerFile != null) {
+					$imageName = 'aocbench-' . strtolower($this->getName()) . '-' . crc32($this->getRepo()) . ':' . crc32($dockerFile) . '-' . filemtime($dockerFile);
+				}
+			}
+
+			return $imageName;
+		}
+
+		/**
+		 * Prepare this participant.
+		 *
+		 * This will build the required docker container for the participant.
+		 */
+		public function prepare() {
+			$imageName = $this->getAOCBenchConfig()['image'] ?? null;
+			$dockerFile = $this->getDockerfile();
+			if ($imageName != null) {
+				exec('docker pull ' . escapeshellarg($imageName) . ' >/dev/null 2>&1');
+			}
+
+			if ($imageName == null && $dockerFile != null) {
+				$imageName = $this->getDockerImageName();
+				$out = [];
+				$ret = -1;
+				exec('docker image inspect ' . escapeshellarg($imageName) . ' >/dev/null 2>&1', $out, $ret);
+				if ($ret != 0) {
+					$pwd = getcwd();
+					chdir(dirname($dockerFile));
+					exec('docker build . -t ' . escapeshellarg($imageName) . ' --file ' . escapeshellarg(basename($dockerFile)) . '  >/dev/null 2>&1');
+					chdir($pwd);
+				}
+			}
+
+			// Create temporary storage directory.
+			if (!file_exists('./.aocbench_run/')) {
+				mkdir('./.aocbench_run/');
+			}
+		}
+
+		public function getCodeDir() { return $this->getAOCBenchConfig()['code'] ?? '/code'; }
+		public function getPersistence() { return $this->getAOCBenchConfig()['persistence'] ?? []; }
+		public function getEnvironment() { return $this->getAOCBenchConfig()['environment'] ?? []; }
+
+		private function getCanary() {
+			if ($this->canary == null) {
+				$this->canary = uniqid('AOCBENCH-CANARY-', true);
+			}
+			return $this->canary;
+		}
+
+		private function getRunScript($day) {
+			$runOnce = $this->getValueWithReplacements('runonce', $day);
+			$cmd = $this->getValueWithReplacements('cmd', $day);;
+			$workdir = $this->getValueWithReplacements('workdir', $day) ?? $this->getAOCBenchConfig()['code'];
+			$canary = $this->getCanary();
+			$hyperfineOutput = '/tmp/' . uniqid('aocbench-hyperfine-', true) . '.csv';
+			return <<<RUNSCRIPT
+#!/bin/bash
+
+cd $workdir
+$runOnce
+cd $workdir
+
+if [ "\${1}" == "hyperfine" ]; then
+	echo '### $canary START - HYPERFINE ###';
+	hyperfine -w 1 -m 5 -M 20  --export-json $hyperfineOutput -- "$cmd"
+	echo '### $canary END ###';
+	echo '### $canary START - HYPERFINEDATA ###';
+	cat $hyperfineOutput;
+	echo '### $canary END ###';
+else
+	echo '### $canary START - TIME ###';
+	time $cmd
+	echo '### $canary END ###';
+fi;
+RUNSCRIPT;
+		}
+
+		private function getReplacements($day, $includeInput = true) {
+			global $leaderboardYear;
+
+			$replacements = [];
+			$replacements['%year%'] = $leaderboardYear;
+			$replacements['%day%'] = $day;
+			$replacements['%zeroday%'] = sprintf('%0d', $day);
+			if ($includeInput) {
+				$replacements['%input%'] = $this->getCodeDir() . '/' . $this->getInputFilename($day);
+			}
+
+			return $replacements;
+		}
+
+		private function getValueWithReplacements($value, $day) {
+			$config = $this->getAOCBenchConfig();
+			if (isset($config[$value])) {
+				$replacements = $this->getReplacements($day, ($value != 'inputfile'));
+				return str_replace(array_keys($replacements), array_values($replacements), $config[$value]);
+			}
+			return null;
+		}
+
+		private function parseRunOutput($output) {
+			$realOutput = [];
+			$canary = $this->getCanary();
+			$section = null;
+			foreach ($output as $line) {
+				if (preg_match('/^### ' . preg_quote($canary) . ' START - (.*) ###$/', trim($line), $m)) {
+					$section = $m[1];
+					$realOutput[$section] = [];
+				} else if (trim($line) == "### $canary END ###") {
+					$section = null;
+				} else if ($section != null) {
+					$realOutput[$section][] = $line;
+				}
+			}
+			return $realOutput;
+		}
+
+		public function getInputFilename($day) {
+			return $this->getValueWithReplacements('inputfile', $day) ?? $this->getDayFilename($day) . '/input.txt';
+		}
+
+		public function getInputAnswerFilename($day) {
+			return $this->getValueWithReplacements('answerfile', $day) ?? $this->getDayFilename($day) . '/answers.txt';
+		}
+
+		public function getDayFilename($day) {
+			return $this->getValueWithReplacements('daypath', $day) ?? $day;
+		}
+
+		/**
+		 * Run the given day.
+		 *
+		 * @param int $day Day number.
+		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of lines of output.
+		 */
+		public function run($day) {
+			[$ret, $result] = $this->doRun($day, false);
+			return [$ret, $result['TIME'] ?? []];
+		}
+
+		/**
+		 * Run the given day with hyperfine
+		 *
+		 * @param int $day Day number.
+		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of lines of output.
+		 */
+		public function runHyperfine($day) {
+			[$ret, $result] = $this->doRun($day, true);
+
+			foreach (array_keys($result) as $key) {
+				foreach ($result[$key] as &$data) {
+					$data = preg_replace("/\r$/D", '', $data);
+				}
+			}
+
+			$result['HYPERFINEDATA'] = json_decode(implode("\n", $result['HYPERFINEDATA']), true);
+
+			return [$ret, $result];
+		}
+
+		/**
+		 * Run the given day.
+		 *
+		 * @param int $day Day number.
+		 * @param bool $useHyperfine Use hyperfine for this run.
+		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of arrays of sections of output.
+		 */
+		private function doRun($day, $useHyperfine) {
+			global $execTimeout;
+
+			if ($this->getAOCBenchConfig()['version'] != "1") {
+				return [1, ['TIME' => ['AoCBench Error: Unknown config file version (Got: "' . $this->getAOCBenchConfig()['version'] . '" - Wanted: "1").']]];
+			}
+
+			$imageName = $this->getDockerImageName();
+			if ($imageName == null) {
+				return [1, ['TIME' => ['AoCBench Error: Unable to find docker image name']]];
+			}
+
+			$containerName = 'aocbench_' . uniqid(strtolower($this->getName()), true);
+
+			// Run Command:
+			$pwd = getcwd();
+
+			$runScriptFilename = './.aocbench_run/aocbench-' . uniqid(true) . '.sh';
+			// $runScriptFilename = './.aocbench_run/aocbench.sh';
+			file_put_contents($runScriptFilename, $this->getRunScript($day));
+			chmod($runScriptFilename, 0777);
+
+			$replacements = $this->getReplacements($day);
+
+			$cmd = 'docker run --rm ';
+			if (!($this->getAOCBenchConfig()['notty'] ?? false)) {
+				$cmd .= ' -it';
+			}
+			$cmd .= ' --name ' . escapeshellarg($containerName);
+			$cmd .= ' -v ' . escapeshellarg($pwd . ':' . $this->getCodeDir());
+			foreach ($this->getPersistence() as $location) {
+				$location = str_replace(array_keys($replacements), array_values($replacements), $location);
+				$path = $pwd . '/.aocbench_run/' . crc32($location) . '_' . basename($location);
+				if (!file_exists($path)) { mkdir($path); }
+				chmod($path, 0777);
+				$cmd .= ' -v ' . escapeshellarg($path . ':' . $location);
+			}
+			$cmd .= ' -v ' . escapeshellarg($pwd . '/' . $runScriptFilename . ':/aocbench.sh');
+			foreach ($this->getEnvironment() as $env) {
+				$env = explode('=', $env, 2);
+				$env[1] = str_replace(array_keys($replacements), array_values($replacements), $env[1] ?? '');
+				$cmd .= ' -e ' . escapeshellarg(implode('=', $env));
+			}
+			$cmd .= ' ' . escapeshellarg($imageName);
+			$cmd .= ' ' . '/aocbench.sh';
+			if ($useHyperfine) {
+				$cmd .= ' hyperfine';
+			}
+			$cmd .= ' 2>&1';
+
+			$output = [];
+			$ret = -1;
+			dockerTimedExec($containerName, $cmd, $output, $ret, $execTimeout);
+			@unlink($runScriptFilename);
+
+			return [$ret, $this->parseRunOutput($output)];
+		}
+
+		/**
+		 * Get the arguments used to run the day.
+		 *
+		 * @param int $day Day to run.
+		 * @return String command to run to start the day.
+		 */
+		public function getRunArgs($day) { return $day; }
 	}
