@@ -440,6 +440,9 @@ if [ "\${1}" == "hyperfine" ]; then
 	echo '### $canary START - HYPERFINEPATH ###';
 	echo \$HYPERFINE
 	echo '### $canary END ###';
+	echo '### $canary START - HYPERFINEVERSION ###';
+	\$HYPERFINE --version
+	echo '### $canary END ###';
 	echo '### $canary START - HYPERFINE ###';
 	\$HYPERFINE -w 1 -m 5 -M 20  --export-json $hyperfineOutput -- "$cmd"
 	echo '### $canary END ###';
