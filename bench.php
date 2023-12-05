@@ -173,6 +173,10 @@
 			$saveResult = false;
 			$allowHyperfine = !$noHyperfine && ($participant instanceof V2Participant) && $participant->useHyperfine();
 
+			if ($participant instanceof V2Participant) {
+				$thisDay['image'] = $participant->getImageInfo();
+			}
+
 			for ($i = 0; $i <= ($reallyLong ? $reallyLongRepeatCount : ($long ? $longRepeatCount : $repeatCount)); $i++) {
 				if ($i == 1 && $allowHyperfine) {
 					echo ' ', $i, 'H';
@@ -197,6 +201,11 @@
 						$allowHyperfine = true;
 						echo 'F';
 					}
+				}
+
+				if ($i == 0) {
+					list($ret, $result) = $participant->runOnce($day);
+					$thisDay['runOnce'] = $result;
 				}
 
 				$start = time();
