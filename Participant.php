@@ -407,14 +407,14 @@
 			return $this->canary;
 		}
 
-		private function getRunScript($day, $scriptVersion) {
+		private function getRunScript($day, $scriptType) {
 			$runOnce = $this->getValueWithReplacements('runonce', $day);
 			$cmd = $this->getValueWithReplacements('cmd', $day);;
 			$workdir = $this->getValueWithReplacements('workdir', $day) ?? $this->getAOCBenchConfig()['code'];
 			$canary = $this->getCanary();
 			$hyperfineOutput = '/tmp/' . uniqid('aocbench-hyperfine-', true) . '.csv';
 
-			switch ($scriptVersion) {
+			switch ($scriptType) {
 				case 'runonce':
 					return <<<RUNSCRIPT
 						#!/bin/bash
@@ -484,11 +484,15 @@
 			return $replacements;
 		}
 
+		private function doReplacements($value, $day, $includeInput = true) {
+			$replacements = $this->getReplacements($day, $includeInput);
+			return str_replace(array_keys($replacements), array_values($replacements), $value);
+		}
+
 		private function getValueWithReplacements($value, $day) {
 			$config = $this->getAOCBenchConfig();
 			if (isset($config[$value])) {
-				$replacements = $this->getReplacements($day, ($value != 'inputfile'));
-				return str_replace(array_keys($replacements), array_values($replacements), $config[$value]);
+				return $this->doReplacements($config[$value], $day, ($value != 'inputfile'));
 			}
 			return null;
 		}
@@ -586,18 +590,16 @@
 			// Run Command:
 			$pwd = getcwd();
 
+			if ($useHyperfine) { $scriptType = 'hyperfine'; }
+			else if ($doRunOnce) { $scriptType = 'runonce'; }
+			else { $scriptType = 'time'; }
+
 			$runScriptFilename = './.aocbench_run/aocbench-' . uniqid(true) . '.sh';
 			// $runScriptFilename = './.aocbench_run/aocbench.sh';
+			// $runScriptFilename = './.aocbench_run/aocbench-' . $day . '-' . $scriptType . '.sh';
 
-			if ($useHyperfine) { $scriptVersion = 'hyperfine'; }
-			else if ($doRunOnce) { $scriptVersion = 'runonce'; }
-			else { $scriptVersion = 'time'; }
-			$runScriptFilename = './.aocbench_run/aocbench-' . $scriptVersion . '.sh';
-
-			file_put_contents($runScriptFilename, $this->getRunScript($day, $scriptVersion));
+			file_put_contents($runScriptFilename, $this->getRunScript($day, $scriptType));
 			chmod($runScriptFilename, 0777);
-
-			$replacements = $this->getReplacements($day);
 
 			$cmd = 'docker run --rm ';
 			if (!($this->getAOCBenchConfig()['notty'] ?? false)) {
@@ -607,13 +609,15 @@
 			$cmd .= ' --entrypoint ' . '/aocbench.sh';
 
 			$cmd .= ' -v ' . escapeshellarg($pwd . ':' . $this->getCodeDir());
+
 			foreach ($this->getPersistence() as $location) {
-				$location = str_replace(array_keys($replacements), array_values($replacements), $location);
+				$location = $this->doReplacements($location, $day);
 				$path = $pwd . '/.aocbench_run/' . crc32($location) . '_' . basename($location);
 				if (!file_exists($path)) { mkdir($path); }
 				chmod($path, 0777);
 				$cmd .= ' -v ' . escapeshellarg($path . ':' . $location);
 			}
+
 			if (file_exists($localHyperfine) && $this->useHyperfine() === true) {
 				$cmd .= ' -v ' . escapeshellarg($localHyperfine . ':/aocbench-hyperfine');
 			}
@@ -621,7 +625,7 @@
 
 			foreach ($this->getEnvironment() as $env) {
 				$env = explode('=', $env, 2);
-				$env[1] = str_replace(array_keys($replacements), array_values($replacements), $env[1] ?? '');
+				$env[1] = $this->doReplacements($env[1] ?? '', $day);
 				$cmd .= ' -e ' . escapeshellarg(implode('=', $env));
 			}
 
@@ -631,7 +635,7 @@
 			$output = [];
 			$ret = -1;
 			dockerTimedExec($containerName, $cmd, $output, $ret, $execTimeout);
-			// @unlink($runScriptFilename);
+			@unlink($runScriptFilename);
 
 			return [$ret, $this->parseRunOutput($output)];
 		}
