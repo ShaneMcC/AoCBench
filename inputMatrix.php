@@ -167,6 +167,8 @@
 				$skip = false;
 			}
 
+			list($ret, $result) = $participant->runOnce($day);
+
 			foreach ($inputs[$day] as $inputPerson => $input) {
 				if (!preg_match('#^' . $wantedInput. '$#', $inputPerson)) { continue; }
 
@@ -187,7 +189,6 @@
 				if ($skip && $thisInputVersion == $input['version']) { echo 'Up to date.', "\n"; continue; }
 
 				$participant->setInput($day, $input['input']);
-				list($ret, $result) = $participant->runOnce($day);
 				list($ret, $result) = $participant->run($day);
 				usleep($sleepTime); // Sleep a bit so that we're not constantly running.
 				$hasRun = true;
