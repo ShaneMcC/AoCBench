@@ -191,7 +191,6 @@
 						unset($thisDay['hyperfine']['command']);
 						$saveResult = true;
 						$hasRun = true;
-						echo "\n";
 						break;
 					} else {
 						// Make us try again without hyperfine and behave normally.

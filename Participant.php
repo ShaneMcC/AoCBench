@@ -236,7 +236,7 @@
 			$ret = -1;
 			dockerTimedExec(null, $this->getRunCommand($day) . ' 2>&1', $output, $ret, $execTimeout);
 
-			return [$ret, ['TIME' => $output]];
+			return [$ret, $output];
 		}
 
 		/**
