@@ -368,7 +368,7 @@
 			if ($imageName != null) {
 				exec('docker pull ' . escapeshellarg($imageName) . ' >/dev/null 2>&1');
 				$this->imageInfo['image'] = $imageName;
-				$this->imageInfo['hash'] = exec('docker image inspect ' . escapeshellarg($imageName) . ' --format "{{.Id}}" >/dev/null 2>&1');
+				$this->imageInfo['hash'] = exec('docker image inspect ' . escapeshellarg($imageName) . ' --format "{{.Id}}" 2>&1');
 			}
 
 			if ($imageName == null && $dockerFile != null) {
@@ -479,7 +479,7 @@ RUNSCRIPT;
 				} else if (trim($line) == "### $canary END ###") {
 					$section = null;
 				} else if ($section != null) {
-					$realOutput[$section][] = $line;
+					$realOutput[$section][] = preg_replace("/\r$/D", '', $line);
 				}
 			}
 			return $realOutput;
@@ -527,13 +527,6 @@ RUNSCRIPT;
 		 */
 		public function runHyperfine($day) {
 			[$ret, $result] = $this->doRun($day, false, true);
-
-			foreach (array_keys($result) as $key) {
-				foreach ($result[$key] as &$data) {
-					$data = preg_replace("/\r$/D", '', $data);
-				}
-			}
-
 			$result['HYPERFINEDATA'] = json_decode(implode("\n", $result['HYPERFINEDATA']), true);
 
 			return [$ret, $result];
