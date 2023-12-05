@@ -297,7 +297,7 @@
 			return $this->yaml;
 		}
 
-		function getLanguage() { $this->getAOCBenchConfig()['language'] ?? ''; }
+		function getLanguage() { return $this->getAOCBenchConfig()['language'] ?? ''; }
 
 		final function getRunCommand($day) {
 			/* Do Nothing, but don't allow this to be overridden anymore. */
