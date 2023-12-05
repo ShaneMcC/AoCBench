@@ -2,7 +2,7 @@
 	require_once(__DIR__ . '/functions.php');
 
 	$pageid = 'matrix';
-	$fluid = true;
+	$fluid = count($data['results']) > 4;
 	require_once(__DIR__ . '/header.php');
 
 	$lang = isset($_REQUEST['lang']) ? (is_array($_REQUEST['lang']) ? $_REQUEST['lang'] : [$_REQUEST['lang']]) : True;

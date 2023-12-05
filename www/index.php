@@ -2,6 +2,7 @@
 	require_once(__DIR__ . '/functions.php');
 
 	$pageid = 'index';
+	$fluid = count($data['results']) > 4;
 	require_once(__DIR__ . '/header.php');
 
 
