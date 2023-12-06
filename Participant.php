@@ -8,6 +8,24 @@
 		abstract function getName();
 
 		/**
+		 * Get the directory name that we should use for this participant.
+		 *
+		 * This is a "safe" version of the name (remove all non-alphanumeric characters.)
+		 *
+		 * This name is also used for other things such as the key in the results or
+		 * docker container names etc.
+		 *
+		 * @param $full Also include the full $participantsDir path not just the name.
+		 */
+		final function getDirName($full = false) {
+			global $participantsDir;
+			$name = preg_replace('#[^A-Z0-9-_]#i', '', $this->getName());
+
+			if ($full) { $name = $participantsDir . '/' . $name; }
+			return $name;
+		}
+
+		/**
 		 * URL to check out repo.
 		 *
 		 * @return String Repo URL
@@ -307,10 +325,10 @@
 
 			if ($this->yaml === null) {
 				$validFiles = [];
-				$validFiles[] = $participantsDir . '/' . $this->getName() . '.yaml';
-				$validFiles[] = $participantsDir . '/' . $this->getName() . '.yml';
-				$validFiles[] = $participantsDir . '/' . $this->getName() . '/.aocbench.yaml';
-				$validFiles[] = $participantsDir . '/' . $this->getName() . '/.aocbench.yml';
+				$validFiles[] = $participantsDir . '/' . $this->getDirName(false) . '.yaml';
+				$validFiles[] = $participantsDir . '/' . $this->getDirName(false) . '.yml';
+				$validFiles[] = $this->getDirName(true) . '/.aocbench.yaml';
+				$validFiles[] = $this->getDirName(true) . '/.aocbench.yml';
 
 				$filename = null;
 				foreach ($validFiles as $f) {
@@ -361,7 +379,7 @@
 			if ($imageName == null) {
 				$dockerFile = $this->getDockerfile();
 				if ($dockerFile != null) {
-					$imageName = 'aocbench-' . strtolower($this->getName()) . '-' . crc32($this->getRepo()) . ':' . crc32($dockerFile) . '-' . filemtime($dockerFile);
+					$imageName = 'aocbench-' . strtolower($this->getDirName(false)) . '-' . crc32($this->getRepo()) . ':' . crc32($dockerFile) . '-' . filemtime($dockerFile);
 				}
 			}
 
@@ -622,7 +640,7 @@
 				return [1, ['TIME' => ['AoCBench Error: Unable to find docker image.']]];
 			}
 
-			$containerName = 'aocbench_' . uniqid(strtolower($this->getName()), true);
+			$containerName = 'aocbench_' . uniqid(strtolower($this->getDirName(false)), true);
 
 			// Run Command:
 			$pwd = getcwd();

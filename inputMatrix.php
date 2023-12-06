@@ -49,7 +49,7 @@
 	$cwd = getcwd();
 	echo 'Getting inputs.', "\n";
 	foreach ($participants as $participant) {
-		$person = preg_replace('#[^A-Z0-9-_]#i', '', $participant->getName());
+		$person = $participant->getDirName(false);
 
 		echo $participant->getName() , ': ', "\n";
 		$dir = $participantsDir . '/' . $person;
@@ -122,7 +122,7 @@
 	echo "\n", 'Running.', "\n";
 
 	foreach ($participants as $participant) {
-		$person = preg_replace('#[^A-Z0-9-_]#i', '', $participant->getName());
+		$person = $participant->getDirName(false);
 		if (!preg_match('#^' . $wantedParticipant. '$#', $person)) { continue; }
 
 		echo "\n", $participant->getName() , ': ', "\n";

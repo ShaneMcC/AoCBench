@@ -73,7 +73,7 @@
 		} else {
 			$source = $participants[0];
 			$cwd = getcwd();
-			$person = preg_replace('#[^A-Z0-9-_]#i', '', $source->getName());
+			$person = $source->getDirName(false);
 			chdir($participantsDir . '/' . $person);
 			$input = $source->getInput($day);
 			$answer1 = $input !== FALSE ? $source->getInputAnswer($day, 1) : null;
@@ -90,7 +90,7 @@
 	}
 
 	foreach ($participants as $participant) {
-		$person = preg_replace('#[^A-Z0-9-_]#i', '', $participant->getName());
+		$person = $participant->getDirName(false);
 		if (!preg_match('#^' . $wantedParticipant. '$#', $person)) { continue; }
 
 		echo "\n", $participant->getName() , ': ', "\n";
