@@ -194,9 +194,11 @@
 
 					$hyperfineOpts = [];
 					if ($lastRunTime > $reallyLongTimeout) {
+						echo 'LL';
 						$hyperfineOpts['max'] = $reallyLongRepeatCount;
 						$hyperfineOpts['warmup'] = 0;
 					} else if ($lastRunTime > $longTimeout) {
+						echo 'L';
 						$hyperfineOpts['max'] = $longRepeatCount;
 						$hyperfineOpts['warmup'] = 0;
 					} else {
@@ -234,6 +236,7 @@
 
 				if ($i == 0) {
 					list($ret, $result) = $participant->runOnce($day);
+					echo 'R';
 					$thisDay['runOnce'] = $result;
 
 					if ($ret != 0) {
@@ -249,6 +252,7 @@
 				}
 
 				$start = time();
+				echo ' ', $i;
 				list($ret, $result) = $participant->run($day);
 				$end = time();
 				$lastRunTime = ($end - $start);
@@ -256,7 +260,7 @@
 
 				// Output to show the day ran.
 				if ($ret != 0) {
-					echo ' !';
+					echo 'F';
 					echo "\n";
 					echo 'Exited with error.', "\n";
 					echo 'Output:', "\n";
@@ -264,7 +268,6 @@
 					$failedRun = true;
 					break;
 				} else {
-					echo ' ', $i;
 					if ($checkOutput) {
 						$rightAnswer = preg_match('#' . preg_quote($answer1, '#') . '.+' . preg_quote($answer2, '#') . '#i', implode(' ', $result));
 						if (!$rightAnswer) {
