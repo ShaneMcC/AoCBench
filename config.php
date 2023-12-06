@@ -31,6 +31,8 @@
 	$inputsDir = __DIR__ . '/inputs/';
 	$ignoreResult = []; // '10' or '10/1' etc.
 
+	$runDebugMode = false;
+
 	$displayParticipants = [];
 	$participants = [];
 

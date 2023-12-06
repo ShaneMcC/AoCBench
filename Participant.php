@@ -676,7 +676,7 @@
 		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of arrays of sections of output.
 		 */
 		private function doRun($day, $doRunOnce, $useHyperfine) {
-			global $execTimeout, $localHyperfine;
+			global $execTimeout, $localHyperfine, $runDebugMode;
 
 			if ($this->getAOCBenchConfig()['version'] != "1") {
 				return [1, ['TIME' => ['AoCBench Error: Unknown config file version (Got: "' . $this->getAOCBenchConfig()['version'] . '" - Wanted: "1").']]];
@@ -702,7 +702,9 @@
 
 			$runScriptFilename = './.aocbench_run/aocbench-' . uniqid(true) . '.sh';
 			// $runScriptFilename = './.aocbench_run/aocbench.sh';
-			// $runScriptFilename = './.aocbench_run/aocbench-' . $day . '-' . $scriptType . '.sh';
+			if (!$runDebugMode) {
+				$runScriptFilename = './.aocbench_run/aocbench-' . $day . '-' . $scriptType . '.sh';
+			}
 
 			file_put_contents($runScriptFilename, $this->getRunScript($day, $scriptType));
 			chmod($runScriptFilename, 0777);
@@ -743,10 +745,16 @@
 			$cmd .= ' ' . escapeshellarg($imageName);
 			$cmd .= ' 2>&1';
 
+			if ($runDebugMode) {
+				echo "\n=[DEBUG]=========\n", $cmd, "\n=========[DEBUG]=\n";
+			}
+
 			$output = [];
 			$ret = -1;
 			dockerTimedExec($containerName, $cmd, $output, $ret, $execTimeout);
-			@unlink($runScriptFilename);
+			if (!$runDebugMode) {
+				@unlink($runScriptFilename);
+			}
 
 			return [$ret, $this->parseRunOutput($output)];
 		}

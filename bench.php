@@ -18,7 +18,7 @@
 	$hasRun = false;
 
 	// Get CLI Options.
-	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help', 'no-update', 'no-hyperfine', 'remove']);
+	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help', 'no-update', 'no-hyperfine', 'remove', 'debug']);
 
 	$noUpdate = getOptionValue(NULL, 'no-update', NULL) !== NULL;
 	$wantedParticipant = getOptionValue('p', 'participant', '.*');
@@ -26,6 +26,7 @@
 	$force = getOptionValue('f', 'force', NULL) !== NULL;
 	$removeMatching = getOptionValue(NULL, 'remove', NULL) !== NULL;
 	$noHyperfine = getOptionValue(NULL, 'no-hyperfine', NULL) !== NULL;
+	$runDebugMode = getOptionValue(NULL, 'debug', NULL) !== NULL;
 
 	if (getOptionValue('h', 'help', NULL) !== NULL) {
 		echo 'AoCBench Benchmarker.', "\n";
@@ -43,6 +44,7 @@
 		echo '      --no-update               Do not update repos.', "\n";
 		echo '      --no-hyperfine            Do not use hyperfine even if available.', "\n";
 		echo '      --remove                  Remove matching.', "\n";
+		echo '      --debug                   Enable extra debugging in various places.', "\n";
 		echo '', "\n";
 		echo 'If not specified, day and participant both default to ".*" to match all', "\n";
 		echo 'participants/days.', "\n";

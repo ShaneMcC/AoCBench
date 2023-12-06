@@ -12,7 +12,7 @@
 	$hasRun = false;
 
 	// Get CLI Options.
-	$__CLIOPTS = getopt('fp:d:i:h', ['force', 'participant:', 'day:', 'input:', 'help', 'no-update', 'remove']);
+	$__CLIOPTS = getopt('fp:d:i:h', ['force', 'participant:', 'day:', 'input:', 'help', 'no-update', 'remove', 'debug']);
 
 	$noUpdate = getOptionValue(NULL, 'no-update', NULL) !== NULL;
 	$wantedParticipant = getOptionValue('p', 'participant', '.*');
@@ -20,6 +20,7 @@
 	$wantedInput = getOptionValue('i', 'input', '.*');
 	$force = getOptionValue('f', 'force', NULL) !== NULL;
 	$removeMatching = getOptionValue(NULL, 'remove', NULL) !== NULL;
+	$runDebugMode = getOptionValue(NULL, 'debug', NULL) !== NULL;
 
 	if (getOptionValue('h', 'help', NULL) !== NULL) {
 		echo 'AoCBench input matrix generator.', "\n";
@@ -38,6 +39,7 @@
 		echo '                                automatically anchored start/end)', "\n";
 		echo '      --no-update               Do not update repos.', "\n";
 		echo '      --remove                  Remove matching.', "\n";
+		echo '      --debug                   Enable extra debugging in various places.', "\n";
 		echo '', "\n";
 		echo 'If not specified, day, participant, input all default to ".*" to match all', "\n";
 		echo 'participants/days/inputs.', "\n";
