@@ -22,11 +22,18 @@
 					foreach ($matrix['results'] as $person => $pdata) {
 						if (!isset($pdata['language']) || empty($pdata['language'])) { continue; }
 						$langList = is_array($pdata['language']) ? $pdata['language'] : [$pdata['language']];
+						$includeMe = false;
 						foreach ($langList as $thisLang) {
-							if (in_array($thisLang, $lang)) {
-								$displayParticipants[] = $person;
+							if (in_array($thisLang, $lang) || in_array('*', $lang)) {
+								$includeMe = true;
+							}
+							if (in_array('!' . $thisLang, $lang)) {
+								$includeMe = false;
 								break;
 							}
+						}
+						if ($includeMe) {
+							$displayParticipants[] = $person;
 						}
 					}
 				}
