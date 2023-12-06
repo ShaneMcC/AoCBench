@@ -415,6 +415,8 @@
 		 * This will build the required docker container for the participant.
 		 */
 		public function prepare() {
+			global $runDebugMode;
+
 			$this->imageInfo = [];
 			$imageName = $this->getAOCBenchConfig()['image'] ?? null;
 			$dockerFile = $this->getDockerfile();
@@ -432,7 +434,14 @@
 				if ($ret != 0) {
 					$pwd = getcwd();
 					chdir(dirname($dockerFile));
-					exec('docker build . -t ' . escapeshellarg($imageName) . ' --file ' . escapeshellarg(basename($dockerFile)) . '  >/dev/null 2>&1');
+					$cmd = 'docker build . -t ' . escapeshellarg($imageName) . ' --file ' . escapeshellarg(basename($dockerFile));
+					if ($runDebugMode) {
+						$cmd .= ' 2>&1';
+						echo "\n=[DEBUG]=========\n", $cmd, "\n=========[DEBUG]=\n";
+					} else {
+						$cmd .= ' >/dev/null 2>&1';
+					}
+					exec($cmd);
 					chdir($pwd);
 				}
 
