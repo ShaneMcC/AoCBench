@@ -426,6 +426,14 @@
 			}
 		}
 
+		/**
+		 * Clean up after running the day(s).
+		 */
+		public function cleanup() {
+			exec('git reset --hard origin 2>&1');
+			exec('git clean -fx 2>&1');
+		}
+
 		public function getImageInfo() {
 			return $this->imageInfo;
 		}
