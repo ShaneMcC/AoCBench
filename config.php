@@ -22,7 +22,8 @@
 
 	$execTimeout = 300;
 
-	$sleepTime = 250000;
+	// $sleepTime = 250000;
+	$sleepTime = 100;
 
 	$localHyperfine = null;
 
