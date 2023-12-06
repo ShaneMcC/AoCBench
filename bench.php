@@ -214,6 +214,15 @@
 				if ($i == 0) {
 					list($ret, $result) = $participant->runOnce($day);
 					$thisDay['runOnce'] = $result;
+
+					if ($ret != 0) {
+						echo "\n";
+						echo 'RunOnce exited with error.', "\n";
+						echo 'Output:', "\n";
+						foreach ($result as $out) { echo '        > ', $out, "\n"; }
+						$failedRun = true;
+						break;
+					}
 				}
 
 				$start = time();

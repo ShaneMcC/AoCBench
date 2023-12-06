@@ -197,6 +197,11 @@
 				if ($needsRunOnce) {
 					list($ret, $result) = $participant->runOnce($day);
 					$needsRunOnce = False;
+
+					if ($ret != 0) {
+						echo 'RunOnce error.', "\n";
+						break;
+					}
 				}
 				list($ret, $result) = $participant->run($day);
 				usleep($sleepTime); // Sleep a bit so that we're not constantly running.
