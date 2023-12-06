@@ -302,7 +302,7 @@
 			return $this->getAOCBenchConfig()['hyperfine'] ?? true;
 		}
 
-		public final function getAOCBenchConfig() {
+		public function getAOCBenchConfig() {
 			global $participantsDir;
 
 			if ($this->yaml === null) {
@@ -517,7 +517,7 @@
 		private function getValueWithReplacements($value, $day) {
 			$config = $this->getAOCBenchConfig();
 			if (isset($config[$value])) {
-				return $this->doReplacements($config[$value], $day, ($value != 'inputfile'));
+				return $this->doReplacements($config[$value], $day, !in_array($value, ['daypath', 'inputfile', 'answerfile']));
 			}
 			return null;
 		}
