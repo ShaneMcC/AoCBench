@@ -236,7 +236,7 @@
 
 				if ($i == 0) {
 					list($ret, $result) = $participant->runOnce($day);
-					echo 'R';
+					echo ' R';
 					$thisDay['runOnce'] = $result;
 
 					if ($ret != 0) {
