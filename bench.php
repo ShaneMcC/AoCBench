@@ -105,7 +105,11 @@
 
 		// Prepare.
 		echo 'Preparing.', "\n";
-		$participant->prepare();
+		$prepResult = $participant->prepare();
+		if ($prepResult !== true) {
+			echo "\n=[Failed to prepare]=========\n", implode("\n", $prepResult), "\n==========\n";
+			continue;
+		}
 
 		if (!isset($data['results'][$person])) {
 			$data['results'][$person] = [];

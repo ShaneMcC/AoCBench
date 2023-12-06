@@ -88,11 +88,14 @@
 		 * This will run either `docker.sh` or `run.sh` with no arguments.
 		 */
 		public function prepare() {
+			$out = [];
+			$ret = 0;
 			if (file_exists('./docker.sh')) {
-				exec('bash ./docker.sh 2>&1 </dev/null');
+				exec('bash ./docker.sh 2>&1 </dev/null', $out, $ret);
 			} else if (file_exists('./run.sh')) {
-				exec('bash ./run.sh 2>&1 </dev/null');
+				exec('bash ./run.sh 2>&1 </dev/null', $out, $ret);
 			}
+			return $ret == 0 ? true : $out;
 		}
 
 		/**
@@ -434,16 +437,13 @@
 				if ($ret != 0) {
 					$pwd = getcwd();
 					chdir(dirname($dockerFile));
-					$cmd = 'docker build . -t ' . escapeshellarg($imageName) . ' --file ' . escapeshellarg(basename($dockerFile));
+					$cmd = 'docker build . -t ' . escapeshellarg($imageName) . ' --file ' . escapeshellarg(basename($dockerFile)) . ' 2>&1';
 					if ($runDebugMode) {
-						$cmd .= ' 2>&1';
 						echo "\n=[DEBUG]=========\n", $cmd, "\n=========[DEBUG]=\n";
-					} else {
-						$cmd .= ' >/dev/null 2>&1';
 					}
-					exec($cmd, $out);
-					if ($runDebugMode) {
-						echo "\n=[DEBUG]=========\n", implode("\n", $out), "\n=========[DEBUG]=\n";
+					exec($cmd, $out, $ret);
+					if ($ret != 0) {
+						return $out;
 					}
 					chdir($pwd);
 				}
@@ -455,6 +455,8 @@
 			if (!file_exists('./.aocbench_run/')) {
 				mkdir('./.aocbench_run/');
 			}
+
+			return true;
 		}
 
 		/**
