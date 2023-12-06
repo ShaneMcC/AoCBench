@@ -449,8 +449,6 @@
 		 * Clean up after running the day(s).
 		 */
 		public function cleanup() {
-			return;
-
 			exec('git reset --hard origin 2>&1');
 			exec('git clean -fx 2>&1');
 		}
