@@ -320,6 +320,10 @@
 			return $this->getAOCBenchConfig()['hyperfine'] ?? true;
 		}
 
+		public function getAOCBenchConfigOverride($config) {
+			return $config;
+		}
+
 		public function getAOCBenchConfig() {
 			global $participantsDir;
 
@@ -338,7 +342,7 @@
 					}
 				}
 
-				$this->yaml = $filename != null ? spyc_load_file($filename) : [];
+				$this->yaml = $this->getAOCBenchConfigOverride($filename != null ? spyc_load_file($filename) : []);
 			}
 
 			return $this->yaml;
