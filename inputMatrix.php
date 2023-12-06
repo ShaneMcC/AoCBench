@@ -57,7 +57,10 @@
 		$dir = $participantsDir . '/' . $person;
 		if (!$noUpdate) {
 			chdir($cwd);
-			$participant->updateRepo($dir);
+			if (!$participant->updateRepo($dir)) {
+				echo 'Failed to clone/update repo.', "\n";
+				continue;
+			}
 		}
 		chdir($dir);
 

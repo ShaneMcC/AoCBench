@@ -52,6 +52,13 @@
 		}
 
 		/**
+		 * Branch to use if not-default for checking out repo.
+		 *
+		 * @return String Branch name
+		 */
+		function getBranch() { return null; }
+
+		/**
 		 * Subheading for participant
 		 *
 		 * @return String Sub heading for participant
@@ -306,19 +313,39 @@
 		 * @param String $dir Directory to use for repo.
 		 */
 		public function updateRepo($dir) {
-			if (file_exists($dir)) {
+			global $runDebugMode;
+			$out = [];
+			$ret = 0;
+			if (file_exists($dir . '/.git')) {
 				echo 'Updating Repo.', "\n";
 				chdir($dir);
-				chmod($dir, 0777); // YOLO.
-				exec('git reset --hard origin 2>&1');
-				exec('git pull 2>&1');
+				@chmod($dir, 0777); // YOLO.
+				$branch = $this->getBranch();
+				if (empty($branch)) {
+					exec('git reset --hard origin 2>&1', $out, $ret);
+				} else {
+					exec('git reset --hard origin/' . $branch . ' 2>&1', $out, $ret);
+				}
+				if ($ret != 0) { return false; }
+				exec('git pull 2>&1', $out, $ret);
 			} else {
 				echo 'Cloning Repo.', "\n";
-				mkdir($dir, 0755, true);
-				exec('git clone ' . $this->getRepo() . ' ' . $dir . ' 2>&1');
+				@mkdir($dir, 0755, true);
+				$branch = $this->getBranch();
+				if (empty($branch)) {
+					exec('git clone ' . $this->getRepo() . ' ' . $dir . ' 2>&1', $out, $ret);
+				} else {
+					exec('git clone --branch ' . $branch . ' '. $this->getRepo() . ' ' . $dir . ' 2>&1', $out, $ret);
+				}
 				chdir($dir);
-				chmod($dir, 0777); // YOLO.
+				@chmod($dir, 0777); // YOLO.
 			}
+
+			if ($runDebugMode) {
+				echo "\n=[DEBUG]=========\n", implode("\n", $out), "\n=========[DEBUG]=\n";
+			}
+
+			return $ret == 0 ? file_exists($dir . '/.git') : false;
 		}
 
 		/**
@@ -463,7 +490,12 @@
 		 * Clean up after running the day(s).
 		 */
 		public function cleanup() {
-			exec('git reset --hard origin 2>&1');
+			$branch = $this->getBranch();
+			if (empty($branch)) {
+				exec('git reset --hard origin 2>&1');
+			} else {
+				exec('git reset --hard origin/' . $branch . ' 2>&1');
+			}
 			exec('git clean -fx 2>&1');
 		}
 
@@ -716,7 +748,7 @@
 
 			$runScriptFilename = './.aocbench_run/aocbench-' . uniqid(true) . '.sh';
 			// $runScriptFilename = './.aocbench_run/aocbench.sh';
-			if (!$runDebugMode) {
+			if ($runDebugMode) {
 				$runScriptFilename = './.aocbench_run/aocbench-' . $day . '-' . $scriptType . '.sh';
 			}
 
@@ -760,7 +792,7 @@
 			$cmd .= ' 2>&1';
 
 			if ($runDebugMode) {
-				echo "\n=[DEBUG]=========\n", $cmd, "\n=========[DEBUG]=\n";
+				echo "\n=[DEBUG {$scriptType}]=========\n", $cmd, "\n=========[DEBUG]=\n";
 			}
 
 			$output = [];

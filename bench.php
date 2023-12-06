@@ -99,7 +99,10 @@
 
 		$dir = $participantsDir . '/' . $person;
 		if (!$noUpdate) {
-			$participant->updateRepo($dir);
+			if (!$participant->updateRepo($dir)) {
+				echo 'Failed to clone/update repo.', "\n";
+				continue;
+			}
 		}
 		chdir($dir);
 
@@ -222,6 +225,8 @@
 						foreach ($result as $out) { echo '        > ', $out, "\n"; }
 						$failedRun = true;
 						break;
+					} else if ($runDebugMode) {
+						echo "\n=[DEBUG]=========\n", implode("\n", $result), "\n=========[DEBUG]=\n";
 					}
 				}
 
@@ -255,6 +260,9 @@
 							$failedRun = true;
 							break;
 						}
+					}
+					if ($runDebugMode && $i = 0) {
+						echo "\n=[DEBUG]=========\n", implode("\n", $result), "\n=========[DEBUG]=\n";
 					}
 				}
 
