@@ -449,6 +449,8 @@
 		 * Clean up after running the day(s).
 		 */
 		public function cleanup() {
+			return;
+
 			exec('git reset --hard origin 2>&1');
 			exec('git clean -fx 2>&1');
 		}
@@ -497,7 +499,10 @@
 						cd $workdir
 						echo '### $canary START - ONCE ###';
 						$runOnce
+						EXITCODE=\${?}
 						echo '### $canary END ###';
+
+						exit \${EXITCODE}
 						RUNSCRIPT;
 
 				case 'hyperfine':
@@ -528,11 +533,14 @@
 
 						echo '### $canary START - HYPERFINE ###';
 						\$HYPERFINE -w 1 -m 5 -M 20  --export-json $hyperfineOutput -- "$cmd"
+						EXITCODE=\${?}
 						echo '### $canary END ###';
 
 						echo '### $canary START - HYPERFINEDATA ###';
 						cat $hyperfineOutput;
 						echo '### $canary END ###';
+
+						exit \${EXITCODE}
 						RUNSCRIPT;
 
 				case 'time':
@@ -549,7 +557,10 @@
 
 						echo '### $canary START - TIME ###';
 						time $cmd
+						EXITCODE=\${?}
 						echo '### $canary END ###';
+
+						exit \${EXITCODE}
 						RUNSCRIPT;
 			}
 		}
