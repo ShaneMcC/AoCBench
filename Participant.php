@@ -73,13 +73,25 @@
 		/**
 		 * Get the latest commit id for a given path.
 		 *
-		 * @param String $path Path to check.
+		 * @param String $path Path to check (single or array).
 		 * @return String Git version or NULL.
 		 */
-		private function getGitVersion($path) {
-			if (!empty(glob($path))) {
-				exec('git rev-list -1 HEAD -- "' . $path . '" 2>&1', $output);
-				return $output[0];
+		protected function getGitVersion($path) {
+			$cmd = 'git rev-list -1 HEAD --';
+			if (!is_array($path)) { $path = [$path]; }
+
+			$hasValidPaths = false;
+			foreach ($path as $p) {
+				if (!empty(glob($p))) {
+					$hasValidPaths = true;
+					$cmd .= ' ' . escapeshellarg($p);
+				}
+			}
+			$cmd .= ' 2>&1';
+
+			if ($hasValidPaths) {
+				exec($cmd, $output);
+				return $output[0] ?? NULL;
 			}
 
 			return NULL;
@@ -399,6 +411,19 @@
 		public function getCodeDir() { return $this->getAOCBenchConfig()['code'] ?? '/code'; }
 		public function getPersistence() { return $this->getAOCBenchConfig()['persistence'] ?? []; }
 		public function getEnvironment() { return $this->getAOCBenchConfig()['environment'] ?? []; }
+		public function getCommonFiles() {
+			$common = $this->getAOCBenchConfig()['common'] ?? [];
+			if (!is_array($common)) { $common = [$common]; }
+			$dockerFile = $this->getDockerfile();
+
+			if ($dockerFile != null) {
+				$common[] = $dockerFile;
+			}
+			$common[] = './.aocbench.yaml';
+			$common[] = './.aocbench.yml';
+
+			return $common;
+		}
 
 		private function getCanary() {
 			if ($this->canary == null) {
@@ -524,6 +549,18 @@
 
 		public function getDayFilename($day) {
 			return $this->getValueWithReplacements('daypath', $day) ?? $day;
+		}
+
+		public function getDayVersion($day) {
+			$commonVersion = $this->getGitVersion($this->getCommonFiles());
+			$dayVersion = $this->getGitVersion($this->getDayFilename($day));
+
+			$versionPrefix = $this->getAOCBenchConfig()['versionprefix'] ?? '';
+			if (!empty($versionPrefix)) {
+				$commonVersion = $versionPrefix . ':' . $commonVersion;
+			}
+
+			return $commonVersion.':'.$dayVersion;
 		}
 
 		/**
