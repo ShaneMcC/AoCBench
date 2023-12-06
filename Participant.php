@@ -1,11 +1,26 @@
 <?php
-	abstract class Participant {
+	class Participant {
+		private $name;
+		private $repo;
+
+		/**
+		 * Create a basic participant.
+		 */
+		public function __construct($name = '', $repo = '') {
+			$this->name = $name;
+			$this->repo = $repo;
+		}
+
 		/**
 		 * Name of Participant
 		 *
 		 * @return String Participant Name
 		 */
-		abstract function getName();
+		function getName() {
+			if (empty($this->name)) { throw new Exception('Participant was created without a name.'); }
+
+			return $this->name;
+		}
 
 		/**
 		 * Get the directory name that we should use for this participant.
@@ -30,7 +45,11 @@
 		 *
 		 * @return String Repo URL
 		 */
-		abstract function getRepo();
+		function getRepo() {
+			if (empty($this->repo)) { throw new Exception('Participant was created without a repo.'); }
+
+			return $this->repo;
+		}
 
 		/**
 		 * Subheading for participant
@@ -311,7 +330,7 @@
 		}
 	}
 
-	abstract class V2Participant extends Participant {
+	class V2Participant extends Participant {
 		private $yaml = null;
 		private $canary = null;
 		private $imageInfo = null;
