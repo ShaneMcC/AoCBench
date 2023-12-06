@@ -463,6 +463,7 @@
 		}
 
 		private function getRunScript($day, $scriptType) {
+			$prerun = $this->getValueWithReplacements('prerun', $day);
 			$runOnce = $this->getValueWithReplacements('runonce', $day);
 			$cmd = $this->getValueWithReplacements('cmd', $day);;
 			$workdir = $this->getValueWithReplacements('workdir', $day) ?? $this->getAOCBenchConfig()['code'];
@@ -483,6 +484,11 @@
 				case 'hyperfine':
 					return <<<RUNSCRIPT
 						#!/bin/bash
+
+						cd $workdir
+						echo '### $canary START - PRE ###';
+						$prerun
+						echo '### $canary END ###';
 
 						cd $workdir
 
@@ -514,6 +520,11 @@
 				default:
 					return <<<RUNSCRIPT
 						#!/bin/bash
+
+						cd $workdir
+						echo '### $canary START - PRE ###';
+						$prerun
+						echo '### $canary END ###';
 
 						cd $workdir
 
