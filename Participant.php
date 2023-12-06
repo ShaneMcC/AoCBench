@@ -441,7 +441,10 @@
 					} else {
 						$cmd .= ' >/dev/null 2>&1';
 					}
-					exec($cmd);
+					exec($cmd, $out);
+					if ($runDebugMode) {
+						echo "\n=[DEBUG]=========\n", implode("\n", $out), "\n=========[DEBUG]=\n";
+					}
 					chdir($pwd);
 				}
 
