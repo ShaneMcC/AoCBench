@@ -106,6 +106,11 @@
 		}
 		chdir($dir);
 
+		$valid = $participant->isValidParticipant();
+		if ($valid !== true) {
+			echo 'Repo not valid: ', $valid, "\n";
+		}
+
 		// Prepare.
 		echo 'Preparing.', "\n";
 		$prepResult = $participant->prepare();

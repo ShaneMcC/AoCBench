@@ -11,6 +11,10 @@
 			$this->repo = $repo;
 		}
 
+		public function isValidParticipant() {
+			return (file_exists('./docker.sh') || file_exists('./run.sh')) ?? 'Missing docker.sh or run.sh file.';
+		}
+
 		/**
 		 * Name of Participant
 		 *
@@ -364,6 +368,16 @@
 		private $yaml = null;
 		private $canary = null;
 		private $imageInfo = null;
+
+		public function isValidParticipant() {
+			$config = $this->getAOCBenchConfig();
+			if (empty($config)) { return 'No config found.'; }
+			if (($config['version'] ?? '') != "1") {
+				return 'Unknown config file version (Got: "' . $this->getAOCBenchConfig()['version'] . '" - Wanted: "1").';
+			}
+
+			return true;
+		}
 
 		public function useHyperfine() {
 			return $this->getAOCBenchConfig()['hyperfine'] ?? true;
@@ -738,7 +752,7 @@
 				$hyperfineOpts = [];
 			}
 
-			if ($this->getAOCBenchConfig()['version'] != "1") {
+			if (($this->getAOCBenchConfig()['version'] ?? '') != "1") {
 				return [1, ['TIME' => ['AoCBench Error: Unknown config file version (Got: "' . $this->getAOCBenchConfig()['version'] . '" - Wanted: "1").']]];
 			}
 

@@ -64,6 +64,11 @@
 		}
 		chdir($dir);
 
+		$valid = $participant->isValidParticipant();
+		if ($valid !== true) {
+			echo 'Repo not valid: ', $valid, "\n";
+		}
+
 		for ($day = 1; $day <= 25; $day++) {
 			$input = $participant->getInput($day);
 			if (empty($input)) { continue; }
@@ -133,6 +138,11 @@
 		echo "\n", $participant->getName() , ': ', "\n";
 		$dir = $participantsDir . '/' . $person;
 		chdir($dir);
+
+		$valid = $participant->isValidParticipant();
+		if ($valid !== true) {
+			echo 'Repo not valid: ', $valid, "\n";
+		}
 
 		// Prepare.
 		echo 'Preparing.', "\n";
