@@ -17,7 +17,7 @@
 	$longTimeout = 10;
 	$longRepeatCount = 10;
 
-	$reallyLongTimeout = 120;
+	$reallyLongTimeout = 60;
 	$reallyLongRepeatCount = 2;
 
 	$execTimeout = 300;
