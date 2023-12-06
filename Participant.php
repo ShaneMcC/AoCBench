@@ -658,6 +658,11 @@
 			if (file_exists($localHyperfine) && $this->useHyperfine() === true) {
 				$cmd .= ' -v ' . escapeshellarg($localHyperfine . ':/aocbench-hyperfine');
 			}
+			if (file_exists('/usr/bin/bash-static')) {
+				$cmd .= ' -v ' . escapeshellarg('/usr/bin/bash-static:/bin/bash');
+			} else if (file_exists('/bin/bash-static')) {
+				$cmd .= ' -v ' . escapeshellarg('/bin/bash-static:/bin/bash');
+			}
 			$cmd .= ' -v ' . escapeshellarg($pwd . '/' . $runScriptFilename . ':/aocbench.sh');
 
 			foreach ($this->getEnvironment() as $env) {
