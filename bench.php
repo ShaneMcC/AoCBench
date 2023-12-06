@@ -186,15 +186,33 @@
 				$thisDay['image'] = $participant->getImageInfo();
 			}
 
+			$lastRunTime = 0;
+
 			for ($i = 0; $i <= ($reallyLong ? $reallyLongRepeatCount : ($long ? $longRepeatCount : $repeatCount)); $i++) {
 				if ($i == 1 && $allowHyperfine) {
 					echo ' ', $i, 'H';
-					list($ret, $result) = $participant->runHyperfine($day);
+
+					$hyperfineOpts = [];
+					if ($reallyLong) {
+						$hyperfineOpts['max'] = $reallyLongRepeatCount;
+						$hyperfineOpts['warmup'] = 0;
+					} else if ($long) {
+						$hyperfineOpts['max'] = $longRepeatCount;
+						$hyperfineOpts['warmup'] = 0;
+					} else {
+						$hyperfineOpts['max'] = $repeatCount;
+						$hyperfineOpts['warmup'] = 1;
+					}
+					$hyperfineOpts['min'] = min(5, $hyperfineOpts['max']);
+					$hyperfineOpts['estimated'] = $lastRunTime;
+
+					list($ret, $result) = $participant->runHyperfine($day, $hyperfineOpts);
 
 					// Check if hyperfine actually got complete data, if not we'll fallback to not using hyperfine.
 					if (isset($result['HYPERFINEDATA']['results'][0]['times']) && count($result['HYPERFINEDATA']['results'][0]['times']) > 1 && array_sum($result['HYPERFINEDATA']['results'][0]['exit_codes']) == 0) {
 						$thisDay['hyperfine'] = $result['HYPERFINEDATA']['results'][0];
 						$thisDay['hyperfine']['bin'] = $result['HYPERFINEPATH'][0];
+						$thisDay['hyperfine']['opts'] = $hyperfineOpts;
 						$thisDay['hyperfine']['version'] = $result['HYPERFINEVERSION'][0];
 						$thisDay['times'] = [];
 						foreach ($thisDay['hyperfine']['times'] as $time) {
@@ -233,6 +251,7 @@
 				$start = time();
 				list($ret, $result) = $participant->run($day);
 				$end = time();
+				$lastRunTime = ($end - $start);
 				usleep($sleepTime); // Sleep a bit so that we're not constantly running.
 
 				// Output to show the day ran.
@@ -269,10 +288,10 @@
 				// If this was a long-running day that wasn't the first run,
 				// run future days less often. (First run is allowed to allow
 				// for compile-time)
-				if ($end - $start > $longTimeout) { echo 'L'; $long = ($i > 0); }
+				if ($lastRunTime > $longTimeout) { echo 'L'; $long = ($i > 0); }
 
 				// Same for really-long.
-				if ($end - $start > $reallyLongTimeout) { echo 'L'; $reallyLong = ($i > 0); }
+				if ($lastRunTime > $reallyLongTimeout) { echo 'L'; $reallyLong = ($i > 0); }
 
 				if ($i > 0) {
 					// Get the `real` time output.

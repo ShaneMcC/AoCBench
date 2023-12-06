@@ -168,7 +168,7 @@
 				}
 
 				if (time() > $endtime) {
-					$commandout .= "\n\n".'*** Command timeout ('.$timeout.') exceeded.';
+					$commandout .= "\n\n".'*** AOCBench Command timeout ('.$timeout.') exceeded.';
 					$timedout = true;
 					break;
 				}

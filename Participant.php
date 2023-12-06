@@ -527,10 +527,11 @@
 			return $this->canary;
 		}
 
-		private function getRunScript($day, $scriptType) {
+		private function getRunScript($day, $scriptType, $opts) {
 			$prerun = $this->getValueWithReplacements('prerun', $day);
 			$runOnce = $this->getValueWithReplacements('runonce', $day);
-			$cmd = $this->getValueWithReplacements('cmd', $day);;
+			$cmd = $this->getValueWithReplacements('cmd', $day);
+			$cmdWrapped = escapeshellarg($cmd);
 			$workdir = $this->getValueWithReplacements('workdir', $day) ?? $this->getAOCBenchConfig()['code'];
 			$canary = $this->getCanary();
 			$hyperfineOutput = '/tmp/' . uniqid('aocbench-hyperfine-', true) . '.csv';
@@ -550,6 +551,11 @@
 						RUNSCRIPT;
 
 				case 'hyperfine':
+					$warmup = $opts['warmup'] ?? 1;
+					$min = $opts['min'] ?? ($opts['count'] ?? 5);
+					$max = $opts['max'] ?? ($opts['count'] ?? 20);
+					$shell = $opts['shell'] ?? 'default';
+
 					return <<<RUNSCRIPT
 						#!/bin/bash
 
@@ -576,7 +582,7 @@
 						echo '### $canary END ###';
 
 						echo '### $canary START - HYPERFINE ###';
-						\$HYPERFINE -w 1 -m 5 -M 20  --export-json $hyperfineOutput -- "$cmd"
+						\$HYPERFINE -S $shell -w $warmup -m $min -M $max --export-json $hyperfineOutput -- $cmdWrapped
 						EXITCODE=\${?}
 						echo '### $canary END ###';
 
@@ -704,10 +710,11 @@
 		 * Run the given day with hyperfine
 		 *
 		 * @param int $day Day number.
+		 * @param array $opts Options for hyperfine run.
 		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of lines of output.
 		 */
-		public function runHyperfine($day) {
-			[$ret, $result] = $this->doRun($day, false, true);
+		public function runHyperfine($day, $opts = null) {
+			[$ret, $result] = $this->doRun($day, false, empty($opts) ? true : $opts);
 			$result['HYPERFINEDATA'] = json_decode(implode("\n", $result['HYPERFINEDATA']), true);
 
 			return [$ret, $result];
@@ -718,11 +725,18 @@
 		 *
 		 * @param int $day Day number.
 		 * @param bool $doRunOnce Do runOnce commands rather than reqular commands.
-		 * @param bool $useHyperfine Use hyperfine for this run if possible.
+		 * @param bool|array $useHyperfine Use hyperfine for this run if possible. If this is an array then they are options for hyperfine.
 		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of arrays of sections of output.
 		 */
 		private function doRun($day, $doRunOnce, $useHyperfine) {
 			global $execTimeout, $localHyperfine, $runDebugMode;
+
+			if (is_array($useHyperfine)) {
+				$hyperfineOpts = $useHyperfine;
+				$useHyperfine = true;
+			} else {
+				$hyperfineOpts = [];
+			}
 
 			if ($this->getAOCBenchConfig()['version'] != "1") {
 				return [1, ['TIME' => ['AoCBench Error: Unknown config file version (Got: "' . $this->getAOCBenchConfig()['version'] . '" - Wanted: "1").']]];
@@ -752,7 +766,7 @@
 				$runScriptFilename = './.aocbench_run/aocbench-' . $day . '-' . $scriptType . '.sh';
 			}
 
-			file_put_contents($runScriptFilename, $this->getRunScript($day, $scriptType));
+			file_put_contents($runScriptFilename, $this->getRunScript($day, $scriptType, $hyperfineOpts));
 			chmod($runScriptFilename, 0777);
 
 			$cmd = 'docker run --rm ';
@@ -791,13 +805,25 @@
 			$cmd .= ' ' . escapeshellarg($imageName);
 			$cmd .= ' 2>&1';
 
+			if ($useHyperfine) {
+				$estimatedTime = ceil($hyperfineOpts['estimated']) ?? $execTimeout;
+				$runCount = $hyperfineOpts['max'] ?? ($hyperfineOpts['count'] ?? 20);
+
+				$thisExecTimeout = ($estimatedTime * $runCount) + 60;
+				if ($runDebugMode && !empty($hyperfineOpts)) {
+					echo "\n=[DEBUG hyperfineopts]=========\n", json_encode($hyperfineOpts, JSON_PRETTY_PRINT), "\n=========[DEBUG]=\n";
+				}
+			} else {
+				$thisExecTimeout = $execTimeout;
+			}
+
 			if ($runDebugMode) {
-				echo "\n=[DEBUG {$scriptType}]=========\n", $cmd, "\n=========[DEBUG]=\n";
+				echo "\n=[DEBUG {$scriptType} {$thisExecTimeout}]=========\n", $cmd, "\n=========[DEBUG]=\n";
 			}
 
 			$output = [];
 			$ret = -1;
-			dockerTimedExec($containerName, $cmd, $output, $ret, $execTimeout);
+			dockerTimedExec($containerName, $cmd, $output, $ret, $thisExecTimeout);
 			if (!$runDebugMode) {
 				@unlink($runScriptFilename);
 			}
