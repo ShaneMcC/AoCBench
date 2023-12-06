@@ -193,10 +193,10 @@
 					echo ' ', $i, 'H';
 
 					$hyperfineOpts = [];
-					if ($reallyLong) {
+					if ($lastRunTime > $reallyLongTimeout) {
 						$hyperfineOpts['max'] = $reallyLongRepeatCount;
 						$hyperfineOpts['warmup'] = 0;
-					} else if ($long) {
+					} else if ($lastRunTime > $longTimeout) {
 						$hyperfineOpts['max'] = $longRepeatCount;
 						$hyperfineOpts['warmup'] = 0;
 					} else {
