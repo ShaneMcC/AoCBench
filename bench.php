@@ -263,6 +263,8 @@
 				$lastRunTime = ($end - $start);
 				usleep($sleepTime); // Sleep a bit so that we're not constantly running.
 
+				if ($i == 0) { $thisDay['firstRun'] = $result; }
+
 				// Output to show the day ran.
 				if ($ret != 0) {
 					echo 'F';
@@ -320,6 +322,7 @@
 				} else {
 					$thisDay['checkedOutput'] = $checkOutput;
 					$thisDay['long'] = $long;
+					$thisDay['reallyLong'] = $reallyLong;
 				}
 
 				$thisDay['version'] = $participant->getDayVersion($day);
