@@ -783,7 +783,7 @@
 			file_put_contents($runScriptFilename, $this->getRunScript($day, $scriptType, $hyperfineOpts));
 			chmod($runScriptFilename, 0777);
 
-			$cmd = 'docker run --rm ';
+			$cmd = 'docker run --init --rm ';
 			if (!($this->getAOCBenchConfig()['notty'] ?? false)) {
 				$cmd .= ' -it';
 			}

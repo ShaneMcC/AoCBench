@@ -141,7 +141,6 @@
 	function dockerTimedExec($containerName, $command, &$output = array(), &$return_var = 0, $timeout = 0) {
 		if ($containerName == null) { $before = getLastContainerID(); }
 
-		$options = '';
 		appexec($command.' 2>&1', $proc, false);
 
 		if ($containerName == null) {
@@ -162,6 +161,7 @@
 				$e = null;
 				$num = @stream_select($r, $w, $e, 0, 200000);
 				if ($num !== false && $num > 0) {
+					stream_set_blocking($proc['pipes'][1], 0);
 					$line = fgets($proc['pipes'][1]);
 					$commandout .= rtrim($line, "\r");
 					if (strlen($line) == 0) { break; }
