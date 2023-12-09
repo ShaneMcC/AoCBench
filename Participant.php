@@ -205,7 +205,7 @@
 		 * @return String version for the given input.
 		 */
 		public function getInputVersion($day) {
-			return $this->getGitVersion($this->getInputFilename($day));
+			return $this->getGitVersion([$this->getInputFilename($day), $this->getInputAnswerFilename($day)]);
 		}
 
 		/**
