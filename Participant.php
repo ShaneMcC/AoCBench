@@ -325,12 +325,7 @@
 				chdir($dir);
 				@chmod($dir, 0777); // YOLO.
 				exec('git fetch 2>&1', $out, $ret);
-				$branch = $this->getBranch();
-				if (empty($branch)) {
-					exec('git reset --hard origin 2>&1', $out, $ret);
-				} else {
-					exec('git reset --hard origin/' . $branch . ' 2>&1', $out, $ret);
-				}
+				exec('git reset --hard @{upstream} 2>&1', $out, $ret);
 				if ($ret != 0) { return false; }
 			} else {
 				echo 'Cloning Repo.', "\n";
