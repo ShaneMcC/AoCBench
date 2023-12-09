@@ -324,6 +324,7 @@
 				echo 'Updating Repo.', "\n";
 				chdir($dir);
 				@chmod($dir, 0777); // YOLO.
+				exec('git fetch 2>&1', $out, $ret);
 				$branch = $this->getBranch();
 				if (empty($branch)) {
 					exec('git reset --hard origin 2>&1', $out, $ret);
@@ -331,7 +332,6 @@
 					exec('git reset --hard origin/' . $branch . ' 2>&1', $out, $ret);
 				}
 				if ($ret != 0) { return false; }
-				exec('git pull 2>&1', $out, $ret);
 			} else {
 				echo 'Cloning Repo.', "\n";
 				@mkdir($dir, 0755, true);
