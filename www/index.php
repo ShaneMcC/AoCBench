@@ -31,7 +31,7 @@
 		}
 
 		$averagingLinks = [];
-		foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'SPECIAL' => 'MeanBest', 'MAX' => 'Maximum'] as $m => $title) {
+		foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'MAX' => 'Maximum'] as $m => $title) {
 			$link = '<a href="?method=' . $m . $langLink . $timeLink . '">' . $title . '</a>';
 			if (strtoupper($m) == strtoupper($method)) { $link = '<strong>' . $link . '</strong>'; }
 
