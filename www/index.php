@@ -5,31 +5,34 @@
 	$fluid = count($data['results']) > 4;
 	require_once(__DIR__ . '/header.php');
 
-
 	$method = $_REQUEST['method'] ?? ($_SESSION['method'] ?? 'MEDIAN');
 	$timeFormat = $_REQUEST['times'] ?? ($_SESSION['times'] ?? 'DEFAULT');
 	$lang = $_REQUEST['lang'] ?? ($_SESSION['lang'] ?? '*');
 	if (!is_array($lang)) { $lang = [$lang]; }
 
+	$_SESSION['method'] = $method;
+	$_SESSION['times'] = $timeFormat;
+	$_SESSION['lang'] = $lang;
+
 	if ($hasResults) {
 		echo '<h2>Results</h2>', "\n";
 
 		$langLink = '';
-		if ($lang !== True) {
+		/*if ($lang !== ['*']]) {
 			foreach ($lang as $l) {
 				$langLink .= '&amp;lang[]=' . urlencode($l);
 			}
-		}
+		}*/
 
 		$methodLink = '';
-		if ($method !== 'MEDIAN') {
+		/*if ($method !== 'MEDIAN') {
 			$methodLink = '&amp;method=' . urlencode($method);
-		}
+		}*/
 
 		$timeLink = '';
-		if ($timeFormat !== 'DEFAULT') {
+		/*if ($timeFormat !== 'DEFAULT') {
 			$timeLink = '&amp;times=' . urlencode($timeFormat);
-		}
+		}*/
 
 		$averagingLinks = [];
 		foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'MAX' => 'Maximum'] as $m => $title) {
@@ -54,7 +57,7 @@
 		echo '<strong>Times:</strong> ', implode(' - ', $timeLinks);
 		if ($lang != ['*']) {
 			echo '<br>';
-			echo '<strong>Language Filter:</strong> <a href="?' . $timeLink . $methodLink . '">Reset Language Filter</a>';
+			echo '<strong>Language Filter:</strong> <a href="?lang=*">Reset Language Filter</a>';
 		}
 		echo '</small>';
 		echo '</p>';

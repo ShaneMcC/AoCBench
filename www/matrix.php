@@ -6,6 +6,18 @@
 	require_once(__DIR__ . '/header.php');
 
 	$lang = isset($_REQUEST['lang']) ? (is_array($_REQUEST['lang']) ? $_REQUEST['lang'] : [$_REQUEST['lang']]) : True;
+	$lang = $_REQUEST['lang'] ?? ($_SESSION['lang'] ?? '*');
+	if (!is_array($lang)) { $lang = [$lang]; }
+
+	$_SESSION['lang'] = $lang;
+
+	if ($lang != ['*']) {
+		echo '<p class="text-muted text-right">';
+		echo '<small>';
+		echo '<strong>Language Filter:</strong> <a href="?lang=*">Reset Language Filter</a>';
+		echo '</small>';
+		echo '</p>';
+	}
 
 	if ($hasMatrix) {
 		for ($day = 1; $day <= 25; $day++) {
