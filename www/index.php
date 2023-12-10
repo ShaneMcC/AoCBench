@@ -267,7 +267,7 @@
 				}
 			}
 
-			echo '<td class="participant ', implode(' ', $classes), '">', formatTime($time), '</td>';
+			echo '<td class="participant ', implode(' ', $classes), '">', formatTime($time, $timeFormat), '</td>';
 		}
 		echo '</tr>';
 
