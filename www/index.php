@@ -6,9 +6,10 @@
 	require_once(__DIR__ . '/header.php');
 
 
-	$method = isset($_REQUEST['method']) ? $_REQUEST['method'] : 'MEDIAN';
-	$timeFormat = isset($_REQUEST['times']) ? $_REQUEST['times'] : 'DEFAULT';
-	$lang = isset($_REQUEST['lang']) ? (is_array($_REQUEST['lang']) ? $_REQUEST['lang'] : [$_REQUEST['lang']]) : True;
+	$method = $_REQUEST['method'] ?? ($_SESSION['method'] ?? 'MEDIAN');
+	$timeFormat = $_REQUEST['times'] ?? ($_SESSION['times'] ?? 'DEFAULT');
+	$lang = $_REQUEST['lang'] ?? ($_SESSION['lang'] ?? '*');
+	if (!is_array($lang)) { $lang = [$lang]; }
 
 	if ($hasResults) {
 		echo '<h2>Results</h2>', "\n";
@@ -49,8 +50,12 @@
 		echo '<p class="text-muted text-right">';
 		echo '<small>';
 		echo '<strong>Averaging:</strong> ', implode(' - ', $averagingLinks);
-		echo ' &middot; ';
+		echo '<br>';
 		echo '<strong>Times:</strong> ', implode(' - ', $timeLinks);
+		if ($lang != ['*']) {
+			echo '<br>';
+			echo '<strong>Language Filter:</strong> <a href="?' . $timeLink . $methodLink . '">Reset Language Filter</a>';
+		}
 		echo '</small>';
 		echo '</p>';
 

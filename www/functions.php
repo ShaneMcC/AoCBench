@@ -1,6 +1,8 @@
 <?php
 	require_once(__DIR__ . '/../functions.php');
 
+	session_start();
+
 	$hasResults = false;
 	if (file_exists($resultsFile)) {
 		$data = json_decode(file_get_contents($resultsFile), true);
