@@ -36,7 +36,7 @@
 	function getParticipantTime($times, $method) {
 		$parsedTimes = getSortedTimes($times, false);
 
-		switch ($method) {
+		switch (strtoupper($method)) {
 			case 'SPECIAL':
 			case 'MEANBEST':
 				$parsedTimes = array_chunk($parsedTimes, count($parsedTimes) - 5)[0];
