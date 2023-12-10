@@ -99,7 +99,7 @@
 					$language = '<br><small>';
 					$langList = is_array($pdata['language']) ? $pdata['language'] : [$pdata['language']];
 					foreach ($langList as $l) {
-						$language .= '<a href="?method=' . urlencode($method) . '&lang[]=' . urlencode($l) . '">' . $l . '</a> / ';
+						$language .= '<a href="?&lang[]=' . urlencode($l) . '">' . $l . '</a> / ';
 					}
 					$language = rtrim($language, ' /');
 					$language .= '</small>';
