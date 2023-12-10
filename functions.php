@@ -80,27 +80,46 @@
 		return NULL;
 	}
 
-	function formatTime($time) {
+	function formatTime($time, $format = 'DEFAULT') {
 		if ($time === FALSE) { return ''; }
 
-		$newms = preg_replace('/^[0-9]+\./', '', sprintf('%s', $time));
-		if ($newms == $time) { $newms = ''; }
+		switch (strtoupper($format)) {
+			case 'SECONDS':
+				return sprintf('%ss', number_format($time/1000, 3));
 
-		$m = $s = $ms = 0;
+			case 'MILLISECONDS':
+				return sprintf('%sms', number_format($time, 3));
 
-		if ($time > 60 * 1000) {
-			$m = floor($time / (60 * 1000));
-			$time -= ((int)$m) * 60 * 1000;
+			case 'MICROSECONDS':
+				return sprintf('%sμs', number_format($time*1000, 3));
+
+			case 'NANOSECONDS':
+				return sprintf('%sns', number_format($time*1000*1000, 3));
+
+			case 'PICOSECONDS':
+			case 'FULL':
+				return sprintf('%sps', number_format($time*1000*1000*1000, 0));
+
+			case 'DEFAULT':
+			default:
+				$newms = preg_replace('/^[0-9]+\./', '', sprintf('%s', $time));
+				if ($newms == $time) { $newms = ''; }
+
+				$m = $s = $ms = 0;
+
+				if ($time > 60 * 1000) {
+					$m = floor($time / (60 * 1000));
+					$time -= ((int)$m) * 60 * 1000;
+				}
+
+				if ($time > 1000) {
+					$s = floor($time / (1000));
+					$time -= $s * 1000;
+				}
+
+				$ms = $time;
+				return sprintf('%dm%d.%03d%ss', $m, $s, $ms, $newms);
 		}
-
-		if ($time > 1000) {
-			$s = floor($time / (1000));
-			$time -= $s * 1000;
-		}
-
-		$ms = $time;
-
-		return sprintf('%dm%d.%03d%ss', $m, $s, $ms, $newms);
 	}
 
 	function getSortedTimes($times, $format = true) {

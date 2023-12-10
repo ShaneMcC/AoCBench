@@ -7,6 +7,7 @@
 
 
 	$method = isset($_REQUEST['method']) ? $_REQUEST['method'] : 'MEDIAN';
+	$timeFormat = isset($_REQUEST['times']) ? $_REQUEST['times'] : 'DEFAULT';
 	$lang = isset($_REQUEST['lang']) ? (is_array($_REQUEST['lang']) ? $_REQUEST['lang'] : [$_REQUEST['lang']]) : True;
 
 	if ($hasResults) {
@@ -15,18 +16,42 @@
 		$langLink = '';
 		if ($lang !== True) {
 			foreach ($lang as $l) {
-				$langLink .= '&lang[]=' . urlencode($l);
+				$langLink .= '&amp;lang[]=' . urlencode($l);
 			}
 		}
 
-		foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'SPECIAL' => 'MeanBest', 'MAX' => 'Maximum'] as $m => $title) {
-			$link = '<a href="?method=' . $m . $langLink . '">' . $title . '</a>';
-			if ($m == $method) { $link = '<strong>' . $link . '</strong>'; }
-
-			$links[] = $link;
+		$methodLink = '';
+		if ($method !== 'MEDIAN') {
+			$methodLink = '&amp;method=' . urlencode($method);
 		}
+
+		$timeLink = '';
+		if ($timeFormat !== 'DEFAULT') {
+			$timeLink = '&amp;times=' . urlencode($timeFormat);
+		}
+
+		$averagingLinks = [];
+		foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'SPECIAL' => 'MeanBest', 'MAX' => 'Maximum'] as $m => $title) {
+			$link = '<a href="?method=' . $m . $langLink . $timeLink . '">' . $title . '</a>';
+			if (strtoupper($m) == strtoupper($method)) { $link = '<strong>' . $link . '</strong>'; }
+
+			$averagingLinks[] = $link;
+		}
+
+		$timeLinks = [];
+		foreach (['DEFAULT' => 'Default', 'SECONDS' => 's', 'MILLISECONDS' => 'ms', 'MICROSECONDS' => 'μs', 'NANOSECONDS' => 'ns', 'PICOSECONDS' => 'ps'] as $m => $title) {
+			$link = '<a href="?times=' . $m . $langLink . $methodLink . '">' . $title . '</a>';
+			if (strtoupper($m) == strtoupper($timeFormat)) { $link = '<strong>' . $link . '</strong>'; }
+
+			$timeLinks[] = $link;
+		}
+
 		echo '<p class="text-muted text-right">';
-		echo '<small>', implode(' - ', $links), '</small>';
+		echo '<small>';
+		echo '<strong>Averaging:</strong> ', implode(' - ', $averagingLinks);
+		echo ' &middot; ';
+		echo '<strong>Times:</strong> ', implode(' - ', $timeLinks);
+		echo '</small>';
 		echo '</p>';
 
 		echo '<table class="table table-striped">';
@@ -130,7 +155,7 @@
 					$min = isset($pdata['days'][$day]['times']) ? getParticipantTime($pdata['days'][$day]['times'], 'MIN') : '';
 					$max = isset($pdata['days'][$day]['times']) ? getParticipantTime($pdata['days'][$day]['times'], 'MAX') : '';
 
-					$tooltip = 'Min: ' . formatTime($min) . '<br>' . 'Max: ' . formatTime($max);
+					$tooltip = 'Min: ' . formatTime($min, $timeFormat) . '<br>' . 'Max: ' . formatTime($max, $timeFormat);
 
 					$classes = ['participant', 'time'];
 					if ($podium) {
@@ -153,7 +178,7 @@
 					if (!$podium && $time == $podiumTime['first']) { $classes[] = 'table-best'; }
 
 					echo '<td class="', implode(' ', $classes), '" data-ms="', $time ,'" data-toggle="tooltip" data-placement="bottom" data-html="true" title="', htmlspecialchars($tooltip), '">';
-					echo formatTime($time);
+					echo formatTime($time, $timeFormat);
 					echo '</td>';
 				} else {
 					echo '<td class="participant">&nbsp;</td>';
