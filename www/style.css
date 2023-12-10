@@ -67,3 +67,8 @@ a.daylink {
 pre {
   line-height: 1.1em;
 }
+
+.sticky {
+  position: sticky;
+  top: 55px;
+}

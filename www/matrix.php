@@ -11,6 +11,27 @@
 
 	$_SESSION['lang'] = $lang;
 
+	echo '<p class="text-muted text-right sticky">';
+	echo '<small><strong>Jump to day:</strong> ';
+	if ($hasMatrix) {
+		for ($day = 1; $day <= 25; $day++) {
+			foreach ($matrix['results'] as $data) {
+				if (isset($data['days'][$day])) {
+					$dayLinks []= ' <a href="#day' . $day . '">' . $day . '</a>';
+					break;
+				}
+			}
+		}
+	}
+
+	if (empty($dayLinks)) {
+		echo 'None available';
+	} else {
+		echo implode(' - ', $dayLinks);
+	}
+	echo '</small>';
+	echo '</p>';
+
 	if ($lang != ['*']) {
 		echo '<p class="text-muted text-right">';
 		echo '<small>';
@@ -81,7 +102,7 @@
 
 			if (!$hasDay) { continue; }
 
-			echo '<h2>Day ', $day, '</h2>', "\n";
+			echo '<h2 id="day', $day, '">Day ', $day, '</h2>', "\n";
 			if (isset($leaderboardYear) && !empty($leaderboardYear)) {
 				echo '<a href="https://adventofcode.com/', (isset($leaderboardYear) ? $leaderboardYear : date('Y')), '/day/', $day, '">Problem</a><br><br>';
 			}
