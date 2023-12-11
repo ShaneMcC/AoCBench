@@ -15,24 +15,12 @@
 	$_SESSION['lang'] = $lang;
 
 	if ($hasResults) {
-		echo '<h2>Results</h2>', "\n";
+		echo '<h1>Results</h1>', "\n";
 
+		// Legacy, unused.
 		$langLink = '';
-		/*if ($lang !== ['*']]) {
-			foreach ($lang as $l) {
-				$langLink .= '&amp;lang[]=' . urlencode($l);
-			}
-		}*/
-
 		$methodLink = '';
-		/*if ($method !== 'MEDIAN') {
-			$methodLink = '&amp;method=' . urlencode($method);
-		}*/
-
 		$timeLink = '';
-		/*if ($timeFormat !== 'DEFAULT') {
-			$timeLink = '&amp;times=' . urlencode($timeFormat);
-		}*/
 
 		$averagingLinks = [];
 		foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'MAX' => 'Maximum'] as $m => $title) {
@@ -50,7 +38,7 @@
 			$timeLinks[] = $link;
 		}
 
-		echo '<p class="text-muted text-right">';
+		echo '<div class="text-muted text-right sticky"><div style="display: inline-block; background: white; border: 1px solid black; padding: 5px">';
 		echo '<small>';
 		echo '<strong>Averaging:</strong> ', implode(' - ', $averagingLinks);
 		echo '<br>';
@@ -60,8 +48,9 @@
 			echo '<strong>Language Filter:</strong> <a href="?lang=*">Reset Language Filter</a>';
 		}
 		echo '</small>';
-		echo '</p>';
+		echo '</div></div>';
 
+		echo '<br><br>';
 		echo '<table class="table table-striped">';
 
 		// Participants

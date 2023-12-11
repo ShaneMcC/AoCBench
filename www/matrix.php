@@ -11,9 +11,12 @@
 
 	$_SESSION['lang'] = $lang;
 
-	echo '<p class="text-muted text-right sticky">';
-	echo '<small><strong>Jump to day:</strong> ';
 	if ($hasMatrix) {
+		echo '<h1>Output Matrix</h1>', "\n";
+
+		echo '<div class="text-muted text-right sticky"><div style="display: inline-block; background: white; border: 1px solid black; padding: 5px">';
+		echo '<small><strong>Jump to day:</strong> ';
+		$dayLinks = [];
 		if (isset($_REQUEST['day'])) {
 			$dayLinks[] = ' <a href="?">All</a>';
 		}
@@ -33,25 +36,19 @@
 				}
 			}
 		}
-	}
 
-	if (empty($dayLinks)) {
-		echo 'None available';
-	} else {
-		echo implode(' - ', $dayLinks);
-	}
-	echo '</small>';
-	echo '</p>';
-
-	if ($lang != ['*']) {
-		echo '<p class="text-muted text-right">';
-		echo '<small>';
-		echo '<strong>Language Filter:</strong> <a href="?lang=*">Reset Language Filter</a>';
+		if (empty($dayLinks)) {
+			echo 'None available';
+		} else {
+			echo implode(' - ', $dayLinks);
+		}
+		if ($lang != ['*']) {
+			echo '<br>';
+			echo '<strong>Language Filter:</strong> <a href="?lang=*">Reset Language Filter</a>';
+		}
 		echo '</small>';
-		echo '</p>';
-	}
+		echo '</div></div>';
 
-	if ($hasMatrix) {
 		for ($day = 1; $day <= 25; $day++) {
 			// Build day matrix.
 			$dayMatrix = [];

@@ -23,8 +23,11 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
           <ul class="navbar-nav mr-auto">
-            <li class="nav-item <?=($pageid == 'index' ? 'active' : '');?>">
+          <li class="nav-item <?=($pageid == 'index' ? 'active' : '');?>">
               <a class="nav-link " href=".">Results</a>
+            </li>
+            <li class="nav-item <?=($pageid == 'ranking' ? 'active' : '');?>">
+              <a class="nav-link " href="ranking.php">Rankings</a>
             </li>
             <li class="nav-item <?=($pageid == 'matrix' ? 'active' : '');?>">
               <a class="nav-link" href="matrix.php">Output Matrix</a>

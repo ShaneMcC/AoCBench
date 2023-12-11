@@ -5,7 +5,7 @@
 	require_once(__DIR__ . '/header.php');
 
 	if ($hasHealthCheck) {
-		echo '<h2>Health Check</h2>', "\n";
+		echo '<h1>Health Check</h1>', "\n";
 
         echo '<ul>';
         foreach ($data['healthcheck'] as $person => $pdata) {

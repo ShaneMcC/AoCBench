@@ -40,7 +40,7 @@
 		}
 	}
 
-	function getDayBestTimes($day, $method) {
+	function getDayParticipantTimes($day, $method, $format = null) {
 		global $data, $displayParticipants;
 
 		$times = [];
@@ -48,12 +48,41 @@
 			if (!empty($displayParticipants) && !in_array($participant, $displayParticipants)) { continue; }
 
 			if (isset($pdata['days'][$day]['times'])) {
-				$times[] = getParticipantTime($pdata['days'][$day]['times'], $method);
+				$times[$participant] = ['timeraw' => getParticipantTime($pdata['days'][$day]['times'], $method)];
+
+				if ($format == null) {
+					$times[$participant]['time'] = $times[$participant]['timeraw'];
+				} else {
+					$times[$participant]['time'] = formatTime($times[$participant]['timeraw'], $format);
+				}
+
+				$times[$participant]['at'] = $pdata['days'][$day]['time'] ?? 0;
 			}
 		}
 
-		sort($times);
+		uksort($times, function($a, $b) use ($times) {
+			$r = $times[$a]['timeraw'] <=> $times[$b]['timeraw'];
+			if ($r == 0) { $r = $times[$a]['at'] <=> $times[$b]['at']; }
+			if ($r == 0) { $r = $a <=> $b; }
+			return $r;
+		});
+
+		$lastTime = null;
+		$displayRank = $lastRank = 0;
+		foreach ($times as &$data) {
+			if ($lastTime !== $data['time']) { $lastRank++; }
+			$displayRank++;
+
+			$data['rank'] = $lastRank;
+			$data['displayRank'] = $displayRank;
+			$lastTime = $data['time'];
+		}
+
 		return $times;
+	}
+
+	function getDayBestTimes($day, $method) {
+		return array_column(getDayParticipantTimes($day, $method), 'time');
 	}
 
 	function getParticipantTime($times, $method) {
