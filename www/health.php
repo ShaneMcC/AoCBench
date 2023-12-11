@@ -12,7 +12,7 @@
 
             echo '<pre>';
             echo json_encode($health, JSON_PRETTY_PRINT);
-            echo '<pre>';
+            echo '</pre>';
         }
 
 		echo '<p class="text-muted text-right"><small>';
