@@ -28,6 +28,20 @@
 		return $data;
 	}
 
+	function getLastRun($data) {
+		$latestTime = 0;
+		$lastRun = '';
+		foreach ($data['results'] as $participant => $pdata) {
+			foreach ($pdata['days'] as $day => $ddata) {
+				if ($ddata['time'] > $latestTime) {
+					$latestTime = $ddata['time'];
+					$lastRun = $participant. '/'.$day;
+				}
+			}
+		}
+		return [$lastRun, $latestTime];
+	}
+
 	// Save Data.
 	function saveData($file, $data, $setTime = false) {
 		global $dryRun;

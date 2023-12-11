@@ -267,6 +267,7 @@
 
 			// Update data
 			$thisDay['version'] = $participant->getDayVersion($day);
+			$thisDay['time'] = time();
 			$data['results'][$person]['days'][$day] = $thisDay;
 
 			// Save the data.
