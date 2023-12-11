@@ -101,6 +101,8 @@
 
 		if (!isset($data['healthcheck'][$person])) { $data['healthcheck'][$person] = []; }
 		$data['healthcheck'][$person]['name'] = $participant->getName();
+		$data['healthcheck'][$person]['repo'] = $participant->getRepo();
+		$data['healthcheck'][$person]['branch'] = $participant->getBranch();
 		$data['healthcheck'][$person]['dirname'] = $person;
 
 		$dir = $participantsDir . '/' . $person;
@@ -146,9 +148,11 @@
 		} else {
 			$data['healthcheck'][$person]['participanttype'] = 1;
 			$data['healthcheck'][$person]['config'] = [];
-			$data['healthcheck'][$person]['config']['repo'] = $data['results'][$person]['repo'];
-			$data['healthcheck'][$person]['config']['subheading'] = $data['results'][$person]['subheading'];
-			$data['healthcheck'][$person]['config']['language'] = $data['results'][$person]['language'];
+			$data['healthcheck'][$person]['config']['subheading'] = $participant->getSubheading();
+			$data['healthcheck'][$person]['config']['language'] = $participant->getLanguage();
+			$data['healthcheck'][$person]['config']['daypath'] = $participant->getDayFilename();
+			$data['healthcheck'][$person]['config']['inputfile'] = $participant->getInputFilename(1);
+			$data['healthcheck'][$person]['config']['answerfile'] = $participant->getInputAnswerFilename(1);
 		}
 
 		// Run day.
