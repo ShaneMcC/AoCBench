@@ -4,10 +4,14 @@
 	session_start();
 
 	$hasResults = false;
+	$hasHealthCheck = false;
 	if (file_exists($resultsFile)) {
 		$data = json_decode(file_get_contents($resultsFile), true);
 		if (isset($data['results'])) {
 			$hasResults = true;
+		}
+		if (isset($data['healthcheck'])) {
+			$hasHealthCheck = true;
 		}
 	}
 
