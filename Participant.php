@@ -552,6 +552,7 @@
 		private function getRunScript($day, $scriptType, $opts) {
 			$prerun = $this->getValueWithReplacements('prerun', $day);
 			$runOnce = $this->getValueWithReplacements('runonce', $day);
+			$hyperfineShell = $this->getAOCBenchConfig()['hyperfineshell'] ?? True;
 			$cmd = $this->getValueWithReplacements('cmd', $day);
 			$cmdWrapped = escapeshellarg($cmd);
 			$workdir = $this->getValueWithReplacements('workdir', $day) ?? $this->getAOCBenchConfig()['code'];
@@ -576,7 +577,7 @@
 					$warmup = $opts['warmup'] ?? 1;
 					$min = $opts['min'] ?? ($opts['count'] ?? 5);
 					$max = $opts['max'] ?? ($opts['count'] ?? 20);
-					$shell = $opts['shell'] ?? 'default';
+					$shell = $opts['shell'] ?? ($hyperfineShell ? 'Default' : 'None');
 
 					return <<<RUNSCRIPT
 						#!/bin/bash
