@@ -63,11 +63,7 @@
 
   <main role="main">
     <div class="container-fluid">
-      <?php if ($lastScheduledRunTime > $lastBenchStartTime) { ?>
-        <div class="alert alert-warning" role="alert">
-          There are pending bench runs for this instance since <?= date('r', $lastScheduledRunTime); ?>
-        </div>
-      <?php } else if ($lastBenchStartTime > $lastBenchEndTime) { ?>
+      <?php if ($lastBenchStartTime > $lastBenchEndTime) { ?>
         <div class="alert alert-info" role="alert">
           Bench for this instance is currently running since <?= date('r', $lastBenchStartTime); ?>
           <?php
@@ -78,12 +74,13 @@
           ?>
         </div>
       <?php } ?>
-
-      <?php if ($lastScheduledRunTime > $lastMatrixStartTime) { ?>
+      <?php if ($lastScheduledRunTime > $lastBenchStartTime) { ?>
         <div class="alert alert-warning" role="alert">
-          There are pending matrix runs for this instance since <?= date('r', $lastScheduledRunTime); ?>
+          There are pending bench runs for this instance since <?= date('r', $lastScheduledRunTime); ?>
         </div>
-      <?php } else if ($lastMatrixStartTime > $lastMatrixEndTime) { ?>
+      <?php } ?>
+
+      <?php if ($lastMatrixStartTime > $lastMatrixEndTime) { ?>
         <div class="alert alert-info" role="alert">
           Matrix for this instance is currently running since <?= date('r', $lastMatrixStartTime); ?>
           <?php
@@ -92,6 +89,11 @@
             echo '<br><small>(Last update: <strong>' . $last . '</strong> at ' . date('r', $lastTime) . ')</small>';
           }
           ?>
+        </div>
+      <?php } ?>
+      <?php if ($lastScheduledRunTime > $lastMatrixStartTime) { ?>
+        <div class="alert alert-warning" role="alert">
+          There are pending matrix runs for this instance since <?= date('r', $lastScheduledRunTime); ?>
         </div>
       <?php } ?>
     </div>
