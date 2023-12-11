@@ -14,4 +14,10 @@
 	$msg = new AMQPMessage(json_encode(['event' => 'run-instance', 'instance' => $instanceid]));
 	$channel->basic_publish($msg, 'events', 'event.run-instance');
 
+	if (isset($instanceid) && !empty($instanceid) && file_exists($schedulerStateFile)) {
+		$schedulerState = json_decode(file_get_contents($schedulerStateFile), true);
+		$schedulerState[$instanceid]['time'] = time();
+		file_put_contents($schedulerStateFile, json_encode($schedulerState));
+	}
+
 	echo 'OK', "\n";

@@ -3,11 +3,11 @@
 
 	if (!$enableScheduledUpdates) { die('Scheduled updates not enabled for this instance.'."\n"); }
 
-	echo date('r'), ' - Started', "\n";
-
 	use PhpAmqpLib\Connection\AMQPStreamConnection;
 	use PhpAmqpLib\Message\AMQPMessage;
 	use PhpAmqpLib\Exception\AMQPTimeoutException;
+
+	echo date('r'), ' - Started', "\n";
 
 	$connection = new AMQPStreamConnection($rabbitmq['server'], $rabbitmq['port'], $rabbitmq['username'], $rabbitmq['password'], $rabbitmq['vhost']);
 	$channel = $connection->channel();
@@ -17,13 +17,15 @@
 	$channel->queue_bind($myQueue, 'events', '#');
 	$channel->basic_consume($myQueue, '', false, true, false, false, function ($msg) {
 		$m = json_decode($msg->body, true);
-		echo $msg->body, "\n";
+		echo date('r'), ' - Got run request for instanceid: ', $m['instance'], "\n";
 		handleScheduledUpdate($m['instance']);
 	});
 
 	while ($channel->is_consuming() && $channel->is_open()) {
 		try {
-			$channel->wait(null, false, 60);
+			$connection->getIO()->check_heartbeat();
+			$connection->getIO()->read(0);
+			$channel->wait(null, false, 30);
 		} catch (AMQPTimeoutException $e) { }
 	}
 
