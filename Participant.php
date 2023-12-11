@@ -202,10 +202,22 @@
 		 * Get the Version for the input file for this day.
 		 *
 		 * @param int $day Day number.
+		 * @param bool $includeAnswers [Default: true] Include the answers file when deciding the version?
 		 * @return String version for the given input.
 		 */
-		public function getInputVersion($day) {
-			return $this->getGitVersion([$this->getInputFilename($day), $this->getInputAnswerFilename($day)]);
+		public function getInputVersion($day, $includeAnswers = true) {
+			return $includeAnswers ? $this->getGitVersion([$this->getInputFilename($day), $this->getInputAnswerFilename($day)]) : $this->getGitVersion($this->getInputFilename($day));
+		}
+
+		/**
+		 * Get the Version for the input answers file for this day.
+		 *
+		 * @param int $day Day number.
+		 * @param bool $includeInput [Default: true] Include the input file when deciding the version?
+		 * @return String version for the given input.
+		 */
+		public function getInputAnswerVersion($day, $includeInput = true) {
+			return $includeInput ? $this->getGitVersion([$this->getInputFilename($day), $this->getInputAnswerFilename($day)]) : $this->getGitVersion($this->getInputAnswerFilename($day));
 		}
 
 		/**

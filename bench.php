@@ -15,6 +15,9 @@
 	$hardware = implode("\n", $hardware);
 	$data['hardware'] = $hardware;
 
+	$healthCheckData = $data['healthcheck'] ?? [];
+	$data['healthcheck'] = &$healthCheckData;
+
 	$hasRun = false;
 
 	// Get CLI Options.
@@ -97,6 +100,10 @@
 
 		echo "\n", $participant->getName() , ': ', "\n";
 
+		$healthCheckData[$person] = [];
+		$healthCheckData[$person]['name'] = $participant->getName();
+		$healthCheckData[$person]['dirname'] = $person;
+
 		$dir = $participantsDir . '/' . $person;
 		if (!$noUpdate) {
 			if (!$participant->updateRepo($dir)) {
@@ -107,14 +114,19 @@
 		chdir($dir);
 
 		$valid = $participant->isValidParticipant();
+		$healthCheckData[$person]['valid'] = ($valid === true);
 		if ($valid !== true) {
+			$healthCheckData[$person]['valid_info'] = $valid;
 			echo 'Repo not valid: ', $valid, "\n";
+			continue;
 		}
 
 		// Prepare.
 		echo 'Preparing.', "\n";
 		$prepResult = $participant->prepare();
+		$healthCheckData[$person]['prepared'] = ($prepResult === true);
 		if ($prepResult !== true) {
+			$healthCheckData[$person]['prepare_info'] = implode("\n", $prepResult);
 			echo "\n=[Failed to prepare]=========\n", implode("\n", $prepResult), "\n==========\n";
 			continue;
 		}
@@ -128,19 +140,42 @@
 		$data['results'][$person]['subheading'] = $participant->getSubheading();
 		$data['results'][$person]['language'] = $participant->getLanguage();
 
+		if ($participant instanceof V2Participant) {
+			$healthCheckData[$person]['participanttype'] = 2;
+			$healthCheckData[$person]['config'] = $participant->getAOCBenchConfig();
+		} else {
+			$healthCheckData[$person]['participanttype'] = 1;
+			$healthCheckData[$person]['config'] = [];
+			$healthCheckData[$person]['config']['repo'] = $data['results'][$person]['repo'];
+			$healthCheckData[$person]['config']['subheading'] = $data['results'][$person]['subheading'];
+			$healthCheckData[$person]['config']['language'] = $data['results'][$person]['language'];
+		}
+
 		// Run day.
+		$healthCheckData[$person]['days'] = [];
 		for ($day = 1; $day <= 25; $day++) {
+			$healthCheckData[$person]['days'][$day] = [];
+			$healthCheckData[$person]['days'][$day]['version'] = $participant->getDayVersion($day);
+			$healthCheckData[$person]['days'][$day]['exists'] = $participant->hasDay($day);
+			$healthCheckData[$person]['days'][$day]['wip'] = $participant->isWIP($day);
+			$healthCheckData[$person]['days'][$day]['ignored'] = in_array($day, $participant->getIgnored());
+
 			if (!$participant->hasDay($day) || $participant->isWIP($day) || in_array($day, $participant->getIgnored())) {
 				// If this day no longer exists, remove it.
 				if (isset($data['results'][$person]['days'][$day])) {
 					echo 'Removing missing/wip/ignored day ', $day, '.', "\n";
+					$healthCheckData[$person]['days'][$day]['log'] = 'Removed';
 				}
 				unset($data['results'][$person]['days'][$day]);
 				continue;
 			}
 			if (!preg_match('#^' . $wantedDay. '$#', $day)) { continue; }
 
-			$thisDay = isset($data['results'][$person]['days'][$day]) ? $data['results'][$person]['days'][$day] : ['times' => []];
+			$healthCheckData[$person]['days'][$day]['input'] = ['version' => $participant->getInputVersion($day, false)];
+			$answers = $participant->getInputAnswer();
+			$healthCheckData[$person]['days'][$day]['answers'] = ['version' => $participant->getInputAnswerVersion($day, false), 'part1' => (isset($answers[0]) && !empty($answers[0]), 'part2' => (isset($answers[1]) && !empty($answers[1])];
+
+			$thisDay = $data['results'][$person]['days'][$day] ?? ['times' => []];
 			echo 'Day ', $day, ':';
 
 			if ($removeMatching) {
@@ -172,6 +207,8 @@
 
 			if ($skip) { echo ' Up to date.', "\n"; continue; }
 
+			$healthCheckData[$person]['days'][$day]['log'] = '';
+
 			if ($input !== FALSE && $input !== NULL && $input !== '') {
 				$participant->setInput($day, $input);
 			}
@@ -189,6 +226,7 @@
 
 			if ($participant instanceof V2Participant) {
 				$thisDay['image'] = $participant->getImageInfo();
+				$healthCheckData[$person]['image'] = $participant->getImageInfo();
 			}
 
 			$lastRunTime = 0;
@@ -196,14 +234,17 @@
 			for ($i = 0; $i <= ($reallyLong ? $reallyLongRepeatCount : ($long ? $longRepeatCount : $repeatCount)); $i++) {
 				if ($i == 1 && $allowHyperfine) {
 					echo ' ', $i, 'H';
+					$healthCheckData[$person]['days'][$day]['log'] .= ' ' . $i . 'H';
 
 					$hyperfineOpts = [];
 					if ($lastRunTime > $reallyLongTimeout) {
 						echo 'LL';
+						$healthCheckData[$person]['days'][$day]['log'] .= 'LL';
 						$hyperfineOpts['max'] = $reallyLongRepeatCount;
 						$hyperfineOpts['warmup'] = 0;
 					} else if ($lastRunTime > $longTimeout) {
 						echo 'L';
+						$healthCheckData[$person]['days'][$day]['log'] .= 'L';
 						$hyperfineOpts['max'] = $longRepeatCount;
 						$hyperfineOpts['warmup'] = 0;
 					} else {
@@ -231,20 +272,28 @@
 						unset($thisDay['hyperfine']['command']);
 						$saveResult = true;
 						$hasRun = true;
+						$healthCheckData[$person]['days'][$day]['runtype'] = 'hyperfine';
 						break;
 					} else {
 						// Make us try again without hyperfine and behave normally.
 						$allowHyperfine = true;
 						echo 'F';
+						$healthCheckData[$person]['days'][$day]['log'] .= 'F';
 					}
 				}
 
 				if ($i == 0) {
 					list($ret, $result) = $participant->runOnce($day);
 					echo ' R';
+					$healthCheckData[$person]['days'][$day]['log'] .= ' R';
 					$thisDay['runOnce'] = $result;
 
+					$healthCheckData[$person]['runonce'] = ($ret === 0);
+
 					if ($ret != 0) {
+						echo 'F';
+						$healthCheckData[$person]['days'][$day]['log'] .= 'F';
+						$healthCheckData[$person]['runonce_info'] = implode("\n", $out);
 						echo "\n";
 						echo 'RunOnce exited with error.', "\n";
 						echo 'Output:', "\n";
@@ -258,6 +307,7 @@
 
 				$start = time();
 				echo ' ', $i;
+				$healthCheckData[$person]['days'][$day]['log'] .= ' ' . $i;
 				list($ret, $result) = $participant->run($day);
 				$end = time();
 				$lastRunTime = ($end - $start);
@@ -267,6 +317,8 @@
 
 				// Output to show the day ran.
 				if ($ret != 0) {
+					$healthCheckData[$person]['days'][$day]['runtype'] = 'fail';
+					$healthCheckData[$person]['days'][$day]['log'] .= 'F';
 					echo 'F';
 					echo "\n";
 					echo 'Exited with error.', "\n";
@@ -275,10 +327,13 @@
 					$failedRun = true;
 					break;
 				} else {
+					$healthCheckData[$person]['days'][$day]['runtype'] = 'time';
 					if ($checkOutput) {
 						$rightAnswer = preg_match('#' . preg_quote($answer1, '#') . '.+' . preg_quote($answer2, '#') . '#i', implode(' ', $result));
 						if (!$rightAnswer) {
-							echo 'F';
+							$healthCheckData[$person]['days'][$day]['runtype'] = 'incorrect';
+							$healthCheckData[$person]['days'][$day]['log'] .= 'I';
+							echo 'I';
 							echo "\n";
 							echo 'Wanted Answers:', "\n";
 							echo '                 Part 1:', $answer1, "\n";
@@ -298,10 +353,18 @@
 				// If this was a long-running day that wasn't the first run,
 				// run future days less often. (First run is allowed to allow
 				// for compile-time)
-				if ($lastRunTime > $longTimeout) { echo 'L'; $long = ($i > 0); }
+				if ($lastRunTime > $longTimeout) {
+					echo 'L';
+					$healthCheckData[$person]['days'][$day]['log'] .= 'L';
+					$long = ($i > 0);
+				}
 
 				// Same for really-long.
-				if ($lastRunTime > $reallyLongTimeout) { echo 'L'; $reallyLong = ($i > 0); }
+				if ($lastRunTime > $reallyLongTimeout) {
+					echo 'L';
+					$healthCheckData[$person]['days'][$day]['log'] .= 'L';
+					$reallyLong = ($i > 0);
+				}
 
 				if ($i > 0) {
 					// Get the `real` time output.
@@ -310,6 +373,14 @@
 					$thisDay['times'][] = $time;
 					$saveResult = true;
 					$hasRun = true;
+				}
+
+				if ($reallyLong) {
+					$healthCheckData[$person]['days'][$day]['length'] = 'long';
+				} else if ($long) {
+					$healthCheckData[$person]['days'][$day]['length'] = 'reallylong';
+				} else {
+					$healthCheckData[$person]['days'][$day]['length'] = 'normal';
 				}
 			}
 			echo "\n";
