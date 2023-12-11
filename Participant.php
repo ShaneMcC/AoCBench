@@ -577,7 +577,7 @@
 					$warmup = $opts['warmup'] ?? 1;
 					$min = $opts['min'] ?? ($opts['count'] ?? 5);
 					$max = $opts['max'] ?? ($opts['count'] ?? 20);
-					$shell = $opts['shell'] ?? ($hyperfineShell ? 'Default' : 'None');
+					$shell = $opts['shell'] ?? ($hyperfineShell ? 'default' : 'none');
 
 					return <<<RUNSCRIPT
 						#!/bin/bash
