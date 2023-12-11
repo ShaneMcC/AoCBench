@@ -169,6 +169,12 @@
 				if (isset($data['results'][$person]['days'][$day])) {
 					echo 'Removing missing/wip/ignored day ', $day, '.', "\n";
 					$data['healthcheck'][$person]['days'][$day]['log'] = 'Removed';
+					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
+
+					unset($data['healthcheck'][$person]['days'][$day]['input']);
+					unset($data['healthcheck'][$person]['days'][$day]['answers']);
+					unset($data['healthcheck'][$person]['days'][$day]['runtype']);
+					unset($data['healthcheck'][$person]['days'][$day]['length']);
 				}
 				unset($data['results'][$person]['days'][$day]);
 				continue;
@@ -214,6 +220,7 @@
 			if ($skip) { echo ' Up to date.', "\n"; continue; }
 
 			$data['healthcheck'][$person]['days'][$day]['log'] = '';
+			$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 
 			if ($input !== FALSE && $input !== NULL && $input !== '') {
 				$participant->setInput($day, $input);
