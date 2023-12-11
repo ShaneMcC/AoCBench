@@ -233,7 +233,7 @@
 					$thisDay['outputs'][$inputPerson]['correct'] = $rightAnswer;
 				}
 
-				echo 'Done!', "\n";
+				echo 'Done - ', ($rightAnswer ? 'correct' : 'wrong'), '!', "\n";
 			}
 
 			// Clear out any inputs that no longer exist
