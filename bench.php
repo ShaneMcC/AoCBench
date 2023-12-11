@@ -283,7 +283,10 @@
 						$thisDay['hyperfine']['version'] = $result['HYPERFINEVERSION'][0];
 						$thisDay['times'] = [];
 						foreach ($thisDay['hyperfine']['times'] as $time) {
-							$thisDay['times'][] = '0m' . $time . 's';
+							$timeStr = strval($time);
+							if ($timeStr != "0" && preg_match('/^[0-9]+.[0-9]+$/', $timeStr)) {
+								$thisDay['times'][] = '0m' . $time . 's';
+							}
 						}
 
 						unset($thisDay['hyperfine']['times']);
