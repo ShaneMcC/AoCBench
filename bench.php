@@ -318,7 +318,7 @@
 						echo 'F';
 						$data['healthcheck'][$person]['days'][$day]['log'] .= 'F';
 						$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
-						$data['healthcheck'][$person]['runonce_info'] = implode("\n", $out);
+						$data['healthcheck'][$person]['runonce_info'] = implode("\n", $result);
 						echo "\n";
 						echo 'RunOnce exited with error.', "\n";
 						echo 'Output:', "\n";
