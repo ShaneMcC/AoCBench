@@ -191,7 +191,7 @@
 			                                                      'part1' => (isset($answers[0]) && !empty($answers[0])),
 																  'part2' => (isset($answers[1]) && !empty($answers[1]))];
 
-			$thisDay = $data['results'][$person]['days'][$day] ?? ['times' => []];
+			$thisDay = $data['results'][$person]['days'][$day] ?? ['times' => [], 'time' => time()];
 			echo 'Day ', $day, ':';
 
 			if ($removeMatching) {
@@ -423,6 +423,7 @@
 					$thisDay['reallyLong'] = $reallyLong;
 				}
 
+				$thisDay['time'] = time();
 				$thisDay['version'] = $participant->getDayVersion($day);
 				$data['results'][$person]['days'][$day] = $thisDay;
 			}
