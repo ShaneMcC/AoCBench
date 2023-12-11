@@ -552,7 +552,7 @@
 		private function getRunScript($day, $scriptType, $opts) {
 			$prerun = $this->getValueWithReplacements('prerun', $day);
 			$runOnce = $this->getValueWithReplacements('runonce', $day);
-			$hyperfineShell = $this->getAOCBenchConfig()['hyperfineshell'] ?? True;
+			$hyperfineShell = $this->getAOCBenchConfig()['hyperfineshell'] ?? False;
 			$cmd = $this->getValueWithReplacements('cmd', $day);
 			$cmdWrapped = escapeshellarg($cmd);
 			$workdir = $this->getValueWithReplacements('workdir', $day) ?? $this->getAOCBenchConfig()['code'];
