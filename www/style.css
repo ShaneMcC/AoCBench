@@ -72,3 +72,9 @@ pre {
   position: sticky;
   top: 55px;
 }
+
+code.codeview pre {
+  border-left: 2px solid grey;
+  margin-left: 20px;
+  padding-left: 10px;
+}
