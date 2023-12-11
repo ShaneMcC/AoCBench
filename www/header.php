@@ -73,11 +73,11 @@
         </div>
       <?php } ?>
 
-      <?php if ($lastScheduledRunTime > $lastMatrixStartTime) { ?>
+      <?php if ($lastBenchStartTime > $lastBenchEndTime) { ?>
         <div class="alert alert-warning" role="alert">
           There are pending matrix runs for this instance since <?= date('r', $lastScheduledRunTime); ?>
         </div>
-      <?php } else if ($lastScheduledRunTime > $lastMatrixEndTime) { ?>
+      <?php } else if ($lastMatrixStartTime > $lastMatrixEndTime) { ?>
         <div class="alert alert-info" role="alert">
           Matrix for this instance is currently running since <?= date('r', $lastMatrixStartTime); ?>
         </div>
