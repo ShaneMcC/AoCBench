@@ -497,6 +497,7 @@
 				}
 
 				$this->imageInfo['dockerfile'] = $dockerFile;
+				$this->imageInfo['imageName'] = $imageName;
 			}
 
 			// Create temporary storage directory.
