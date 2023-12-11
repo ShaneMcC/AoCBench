@@ -35,8 +35,8 @@
 		$matrix = json_decode(file_get_contents($outputResultsFile), true);
 		if (isset($matrix['results'])) {
 			$hasMatrix = true;
-			$lastMatrixEndTime = $data['finishtime'] ?? $data['time'];
-			$lastMatrixStartTime = $data['starttime'] ?? $data['time'];
+			$lastMatrixEndTime = $matrix['finishtime'] ?? $matrix['time'];
+			$lastMatrixStartTime = $matrix['starttime'] ?? $matrix['time'];
 		}
 	}
 
