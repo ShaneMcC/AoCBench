@@ -101,6 +101,7 @@
 			echo '<th>' . ucfirst(strtolower($method)) . ' Time</th>';
 			echo '<th>Difference from first</th>';
 			echo '<th>Difference from previous</th>';
+			echo '<th>Graph</th>';
 			echo '</tr>';
 			foreach ($times as $participant => $timeData) {
 				if (!isset($data['results'][$participant])) { continue; }
@@ -141,6 +142,7 @@
 				echo '<td>', formatTime($time, $timeFormat), '</td>';
 				echo '<td>', $diffFirst > 0 ? '+' . formatTime($diffFirst, $timeFormat) : '-', '</td>';
 				echo '<td>', $diffPrev > 0 ? '+' . formatTime($diffPrev, $timeFormat) : '-', '</td>';
+				echo '<td data-graph data-participant="' . $participant . '" data-day="' . $day . '"></td>';
 				echo '</tr>';
 
 				$lastRank = $timeData['rank'];
@@ -158,6 +160,7 @@
         echo '</small></p>';
 
         echo '<script src="./index.js"></script>';
+		echo '<script type="module" src="./graphs.js"></script>';
 	} else {
 		echo 'No results yet.';
 	}
