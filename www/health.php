@@ -9,11 +9,16 @@
 
         echo '<ul>';
         foreach ($data['healthcheck'] as $person => $pdata) {
-            echo '<li><a href="#', $person, '">', $pdata['name'], '</a></li>';
+            echo '<li><a href="?person=', $person, '">', $pdata['name'], '</a></li>';
         }
+        echo '<li><a href="?person=*">All Participants</a></li>';
         echo '</ul>';
 
         foreach ($data['healthcheck'] as $person => $pdata) {
+            if ($_REQUEST['person'] != '*' && $_REQUEST['person'] != $person) {
+                continue;
+            }
+
             echo '<h3 id="', $person, '">', $pdata['name'], '</h3>';
 
 			echo '<strong>Valid:</strong> ', ($pdata['valid'] ? 'true' : 'false'), '<br>';
@@ -193,15 +198,22 @@
                 }
                 $dayRows = ob_get_clean();
 
-                echo '<tbody id="' . $person . '-day'.$day.'">';
-                echo '<tr>';
-                echo '<th rowspan=' . $rowspan. ' style="width: 200px" class="', $dayClass, '">';
-                echo '<a class="daylink" href="./matrix.php?day=', $day, '">Day ', $day, '</a><br>';
-                echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-day'.$day.' tr.dayinfo" class="btn btn-sm btn-secondary">show/hide</button>';
-                echo '</th>';
-                echo '</tr>';
-                echo $dayRows;
-                echo '</tbody>';
+                $showRow = true;
+                if (isset($_REQUEST['onlybad'])) {
+                    $showRow = ($dayClass != 'table-success');
+                }
+
+                if ($showRow) {
+                    echo '<tbody id="' . $person . '-day'.$day.'">';
+                    echo '<tr>';
+                    echo '<th rowspan=' . $rowspan. ' style="width: 200px" class="', $dayClass, '">';
+                    echo '<a class="daylink" href="./matrix.php?day=', $day, '">Day ', $day, '</a><br>';
+                    echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-day'.$day.' tr.dayinfo" class="btn btn-sm btn-secondary">show/hide</button>';
+                    echo '</th>';
+                    echo '</tr>';
+                    echo $dayRows;
+                    echo '</tbody>';
+                }
             }
             echo '</table>';
         }
