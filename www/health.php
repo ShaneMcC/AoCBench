@@ -12,6 +12,7 @@
             echo '<li><a href="?person=', $person, '">', $pdata['name'], '</a></li>';
         }
         echo '<li><a href="?person=*">All Participants</a></li>';
+        echo '<li><a href="?person=*&onlybad">All Participants, Bad Only</a></li>';
         echo '</ul>';
 
         foreach ($data['healthcheck'] as $person => $pdata) {
