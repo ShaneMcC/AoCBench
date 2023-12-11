@@ -312,13 +312,13 @@
 					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 					$thisDay['runOnce'] = $result;
 
-					$data['healthcheck'][$person]['runonce'] = ($ret === 0);
+					$data['healthcheck'][$person]['days'][$day]['runonce'] = ($ret === 0);
 
 					if ($ret != 0) {
 						echo 'F';
 						$data['healthcheck'][$person]['days'][$day]['log'] .= 'F';
 						$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
-						$data['healthcheck'][$person]['runonce_info'] = implode("\n", $result);
+						$data['healthcheck'][$person]['days'][$day]['runonce_info'] = implode("\n", $result);
 						echo "\n";
 						echo 'RunOnce exited with error.', "\n";
 						echo 'Output:', "\n";
