@@ -236,3 +236,10 @@
 			return ($lines > 0) ? $commandout[$lines - 1] : '';
 		}
 	}
+
+	function cacheBuster() {
+		return max([filemtime(__DIR__ . '/styles.css'),
+		            filemtime(__DIR__ . '/index.js'),
+					filemtime(__DIR__ . '/graphs.js')
+	               ]);
+	}

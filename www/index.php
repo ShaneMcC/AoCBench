@@ -254,7 +254,7 @@
 		}
 		echo '</small></p>';
 
-		echo '<script src="./index.js"></script>';
+		echo '<script src="./index.js?'.cacheBuster().'"></script>';
 	} else {
 		echo 'No results yet.';
 	}

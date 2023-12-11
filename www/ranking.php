@@ -159,8 +159,8 @@
         }
         echo '</small></p>';
 
-        echo '<script src="./index.js"></script>';
-		echo '<script type="module" src="./graphs.js"></script>';
+        echo '<script src="./index.js?'.cacheBuster().'"></script>';
+		echo '<script type="module" src="./graphs.js?'.cacheBuster().'"></script>';
 	} else {
 		echo 'No results yet.';
 	}
