@@ -57,5 +57,18 @@
 
     <main role="main">
       <div class="container-fluid">
+        <?php if ($lastScheduledRunTime > $lastBenchRunTime) { ?>
+            <div class="alert alert-warning" role="alert">
+              There are pending bench runs for this instance since <?=date('r', $lastScheduledRunTime); ?>
+            </div>
+          <?php } ?>
+
+          <?php if ($lastScheduledRunTime > $lastMatrixRunTime) { ?>
+            <div class="alert alert-warning" role="alert">
+              There are pending matrix runs for this instance since <?=date('r', $lastScheduledRunTime); ?>
+            </div>
+          <?php } ?>
+      </div>
+      <div class="container-fluid">
         <div class="row">
             <div class="container<?=(isset($fluid) && $fluid ? '-fluid' : '');?>">

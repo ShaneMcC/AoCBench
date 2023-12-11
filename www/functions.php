@@ -3,12 +3,26 @@
 
 	session_start();
 
+	// Default to 0, to disable showing banner.
+	$lastScheduledRunTime = 0;
+
+	if (file_exists(__DIR__ . '/../.doRun')) {
+		$lastScheduledRunTime = filemtime(__DIR__ . '/../.doRun');
+	}
+
+	if (isset($instanceid) && !empty($instanceid) && file_exists($schedulerStateFile)) {
+		$schedulerState = json_decode(file_get_contents($schedulerStateFile), true);
+
+		$lastScheduledRunTime = $schedulerState[$instanceid]['time'] ?? 0;
+	}
+
 	$hasResults = false;
 	$hasHealthCheck = false;
 	if (file_exists($resultsFile)) {
 		$data = json_decode(file_get_contents($resultsFile), true);
 		if (isset($data['results'])) {
 			$hasResults = true;
+			$lastBenchRunTime = $data['finishtime'] ?? $data['time'];
 		}
 		if (isset($data['healthcheck'])) {
 			$hasHealthCheck = true;
@@ -20,6 +34,7 @@
 		$matrix = json_decode(file_get_contents($outputResultsFile), true);
 		if (isset($matrix['results'])) {
 			$hasMatrix = true;
+			$lastMatrixRunTime = $data['finishtime'] ?? $data['time'];
 		}
 	}
 

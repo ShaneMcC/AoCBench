@@ -8,6 +8,7 @@
 	echo 'inputMatrix starting at: ', date('r', $startTime), "\n";
 
 	$data = loadData($outputResultsFile);
+	$data['starttime'] = time();
 
 	$hasRun = false;
 
@@ -45,6 +46,19 @@
 		echo 'participants/days/inputs.', "\n";
 		die();
 	}
+
+	// Ensure we save if we exit:
+	$shutdownFunc = function() {
+		global $outputResultsFile, $data, $hasRun;
+		saveData($outputResultsFile, $data, $hasRun);
+		die();
+	};
+
+	register_shutdown_function($shutdownFunc);
+	pcntl_signal(SIGINT, $shutdownFunc);
+	pcntl_signal(SIGTERM, $shutdownFunc);
+	pcntl_async_signals(true);
+
 
 	// Get all inputs.
 	$inputs = [];
@@ -256,9 +270,14 @@
 
 		echo 'Cleanup.', "\n";
 		$participant->cleanup();
+
+		// Save the data.
+		saveData($outputResultsFile, $data, $hasRun);
 	}
 
-
+	// Save the data.
+	$data['finishtime'] = time();
+	saveData($outputResultsFile, $data, $hasRun);
 
 	$endTime = time();
 	echo "\n";

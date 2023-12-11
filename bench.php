@@ -8,6 +8,7 @@
 	echo 'Bench starting at: ', date('r', $startTime), "\n";
 
 	$data = loadData($resultsFile);
+	$data['starttime'] = time();
 
 	// Set our hardware.
 	$hardware = [];
@@ -438,6 +439,7 @@
 	}
 
 	// Save the data.
+	$data['finishtime'] = time();
 	saveData($resultsFile, $data, $hasRun);
 	$endTime = time();
 	echo "\n";

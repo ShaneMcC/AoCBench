@@ -5,6 +5,7 @@
 	$outputResultsFile = __DIR__ . '/outputresults.json';
 	$participantsDir = __DIR__ . '/participants/';
 	$logFile = __DIR__ . '/run.log';
+	$schedulerStateFile = __DIR__ . '/aocbench-scheduler.json';
 
 	$leaderboardID = '';
 	$leaderboardYear = '';
