@@ -25,6 +25,7 @@
 		}
 	}
 
+	$settingsBox = [];
 	$settingsBox['Days'] = implode(' - ', $dayLinks);
 	if ($lang != ['*']) {
 		$settingsBox['Language Filter'] = '<a href="?lang=*">Reset Language Filter</a>';
@@ -33,12 +34,6 @@
 	$pageTitle = 'Output Matrix';
 
 	require_once(__DIR__ . '/header.php');
-
-	$lang = isset($_REQUEST['lang']) ? (is_array($_REQUEST['lang']) ? $_REQUEST['lang'] : [$_REQUEST['lang']]) : True;
-	$lang = $_REQUEST['lang'] ?? ($_SESSION['lang'] ?? '*');
-	if (!is_array($lang)) { $lang = [$lang]; }
-
-	$_SESSION['lang'] = $lang;
 
 	if ($hasMatrix) {
 		for ($day = 1; $day <= 25; $day++) {

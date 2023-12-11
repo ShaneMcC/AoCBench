@@ -4,17 +4,6 @@
 	$pageid = 'index';
 	$fluid = count($data['results']) > 4;
 
-	$settingsBox = [];
-
-	$method = $_REQUEST['method'] ?? ($_SESSION['method'] ?? 'MEDIAN');
-	$timeFormat = $_REQUEST['times'] ?? ($_SESSION['times'] ?? 'DEFAULT');
-	$lang = $_REQUEST['lang'] ?? ($_SESSION['lang'] ?? '*');
-	if (!is_array($lang)) { $lang = [$lang]; }
-
-	$_SESSION['method'] = $method;
-	$_SESSION['times'] = $timeFormat;
-	$_SESSION['lang'] = $lang;
-
 	$averagingLinks = [];
 	foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'MAX' => 'Maximum'] as $m => $title) {
 		$link = '<a href="?method=' . $m . '">' . $title . '</a>';
@@ -31,6 +20,7 @@
 		$timeLinks[] = $link;
 	}
 
+	$settingsBox = [];
 	$settingsBox['Averaging'] = implode(' - ', $averagingLinks);
 	$settingsBox['Times'] = implode(' - ', $timeLinks);
 	if ($lang != ['*']) {

@@ -3,6 +3,15 @@
 
 	session_start();
 
+	$method = $_REQUEST['method'] ?? ($_SESSION['method'] ?? 'MEDIAN');
+	$timeFormat = $_REQUEST['times'] ?? ($_SESSION['times'] ?? 'DEFAULT');
+	$lang = $_REQUEST['lang'] ?? ($_SESSION['lang'] ?? '*');
+	if (!is_array($lang)) { $lang = [$lang]; }
+
+	$_SESSION['method'] = $method;
+	$_SESSION['times'] = $timeFormat;
+	$_SESSION['lang'] = $lang;
+
 	// Default to 0, to disable showing banner.
 	$lastScheduledRunTime = 0;
 

@@ -4,17 +4,6 @@
 	$pageid = 'ranking';
 	$fluid = count($data['results']) > 4;
 
-	$settingsBox = [];
-
-	$method = $_REQUEST['method'] ?? ($_SESSION['method'] ?? 'MEDIAN');
-	$timeFormat = $_REQUEST['times'] ?? ($_SESSION['times'] ?? 'DEFAULT');
-	$lang = $_REQUEST['lang'] ?? ($_SESSION['lang'] ?? '*');
-	if (!is_array($lang)) { $lang = [$lang]; }
-
-	$_SESSION['method'] = $method;
-	$_SESSION['times'] = $timeFormat;
-	$_SESSION['lang'] = $lang;
-
 	$dayLinks = [];
 	if (isset($_REQUEST['day'])) {
 		$dayLinks[] = ' <a href="?">All</a>';
@@ -52,6 +41,7 @@
 		$timeLinks[] = $link;
 	}
 
+	$settingsBox = [];
 	$settingsBox['Averaging'] = implode(' - ', $averagingLinks);
 	$settingsBox['Times'] = implode(' - ', $timeLinks);
 	$settingsBox['Days'] = implode(' - ', $dayLinks);
