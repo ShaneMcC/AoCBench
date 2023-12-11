@@ -23,7 +23,7 @@
             echo '[<a href="#" data-toggle="collapse" data-target="#' . $person . '-code">show/hide</a>]';
             echo '<code id="' . $person . '-code" class="collapse codeview"><pre>';
             echo spyc_dump($pdata['config']);
-            echo '</pre></code>';
+            echo '</pre></code><br>';
 
 			if (isset($pdata['repo']) && !empty($pdata['repo'])) {
 				echo '<strong>Repo:</strong> <a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="github.ico" alt="github">' . $pdata['repo'] . '</a>';
