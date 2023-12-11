@@ -22,12 +22,19 @@
 
             echo '<h3 id="', $person, '">', $pdata['name'], '</h3>';
 
-			echo '<strong>Valid:</strong> ', ($pdata['valid'] ? 'true' : 'false'), '<br>';
-            echo '<strong>Prepared:</strong> ', ($pdata['prepared'] ? 'true' : 'false'), '<br>';
+			echo '<strong>Valid:</strong> ', ($pdata['valid'] ? 'true' : 'false - ' . $data['valid_info']), '<br>';
+            echo '<strong>Prepared:</strong> ', ($pdata['prepared'] ? 'true' : 'false');
+            if (!$pdata['prepared']) {
+                echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-prepare" class="btn btn-sm btn-secondary">show/hide</button>';
+                echo '<code id="' . $person . '-prepare" class="collapse codeview"><pre>';
+                echo htmlspecialchars($data['prepare_info']);
+                echo '</pre></code><br>';
+            }
+            echo '<br>';
             echo '<strong>Participant Type:</strong> ', ($pdata['participanttype'] == 2 ? 'yaml' : 'legacy'), '<br>';
             echo '<strong>Config:</strong> ';
-            echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-code" class="btn btn-sm btn-secondary">show/hide</button>';
-            echo '<code id="' . $person . '-code" class="collapse codeview"><pre>';
+            echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-config" class="btn btn-sm btn-secondary">show/hide</button>';
+            echo '<code id="' . $person . '-config" class="collapse codeview"><pre>';
             echo spyc_dump($pdata['config']);
             echo '</pre></code><br>';
 
@@ -135,6 +142,25 @@
                     echo '</tr>';
                     if (!$ddata['answers']['part2']) { $dayClass = 'table-danger'; }
                     $rowspan++;
+
+                    if (isset($ddata['runonce'])) {
+                        echo '<tr class="collapse dayinfo ', ($ddata['runonce'] ? 'table-success' : 'table-danger'), '">';
+                        echo '<th>Run Once</th>';
+                        echo '<td>';
+                        echo ($ddata['runonce'] ? 'true' : 'false');
+
+                        if (isset($data['runonce_info'])) {
+                            echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-' . $day . '-runonce" class="btn btn-sm btn-secondary">show/hide</button>';
+                            echo '<code id="' . $person . '-' . $day . '-runonce" class="collapse codeview"><pre>';
+                            echo htmlspecialchars($data['runonce_info']);
+                            echo '</pre></code><br>';
+                        }
+
+                        echo '</td>';
+                        echo '</tr>';
+                        if (!$ddata['runonce']) { $dayClass = 'table-danger'; }
+                        $rowspan++;
+                    }
 
                     if (empty($ddata['runtype'])) { $runClass = 'table-success'; } // For now.
                     else if ($ddata['runtype'] == 'hyperfine') { $runClass = 'table-success'; }
