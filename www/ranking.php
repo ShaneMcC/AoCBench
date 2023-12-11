@@ -3,7 +3,8 @@
 
 	$pageid = 'ranking';
 	$fluid = count($data['results']) > 4;
-	require_once(__DIR__ . '/header.php');
+
+	$settingsBox = [];
 
 	$method = $_REQUEST['method'] ?? ($_SESSION['method'] ?? 'MEDIAN');
 	$timeFormat = $_REQUEST['times'] ?? ($_SESSION['times'] ?? 'DEFAULT');
@@ -14,60 +15,55 @@
 	$_SESSION['times'] = $timeFormat;
 	$_SESSION['lang'] = $lang;
 
-	if ($hasResults) {
-		echo '<h1>Rankings</h1>', "\n";
-
-		$dayLinks = [];
-		if (isset($_REQUEST['day'])) {
-			$dayLinks[] = ' <a href="?">All</a>';
-		}
-		for ($day = 1; $day <= 25; $day++) {
-			$times = getDayParticipantTimes($day, $method, $timeFormat);
-			if (!empty($times)) {
-				if (isset($_REQUEST['day'])) {
-					if ($day == $_REQUEST['day']) {
-						$dayLinks[] = ' <strong>' . $day . '</strong>';
-					} else {
-						$dayLinks[] = ' <a href="?day=' . $day . '">' . $day . '</a>';
-					}
+	$dayLinks = [];
+	if (isset($_REQUEST['day'])) {
+		$dayLinks[] = ' <a href="?">All</a>';
+	}
+	for ($day = 1; $day <= 25; $day++) {
+		$times = getDayParticipantTimes($day, $method, $timeFormat);
+		if (!empty($times)) {
+			if (isset($_REQUEST['day'])) {
+				if ($day == $_REQUEST['day']) {
+					$dayLinks[] = ' <strong>' . $day . '</strong>';
 				} else {
-					$dayLinks[] = ' <a href="#day' . $day . '">' . $day . '</a>';
+					$dayLinks[] = ' <a href="?day=' . $day . '">' . $day . '</a>';
 				}
+			} else {
+				$dayLinks[] = ' <a href="#day' . $day . '">' . $day . '</a>';
 			}
 		}
+	}
 
-        $dayLink = isset($_REQUEST['day']) ? '&day=' . $_REQUEST['day'] : '';
+	$dayLink = isset($_REQUEST['day']) ? '&day=' . $_REQUEST['day'] : '';
 
-		$averagingLinks = [];
-		foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'MAX' => 'Maximum'] as $m => $title) {
-			$link = '<a href="?method=' . $m . $dayLink . '">' . $title . '</a>';
-			if (strtoupper($m) == strtoupper($method)) { $link = '<strong>' . $link . '</strong>'; }
+	$averagingLinks = [];
+	foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'MAX' => 'Maximum'] as $m => $title) {
+		$link = '<a href="?method=' . $m . $dayLink . '">' . $title . '</a>';
+		if (strtoupper($m) == strtoupper($method)) { $link = '<strong>' . $link . '</strong>'; }
 
-			$averagingLinks[] = $link;
-		}
+		$averagingLinks[] = $link;
+	}
 
-		$timeLinks = [];
-		foreach (['DEFAULT' => 'Default', 'SECONDS' => 's', 'MILLISECONDS' => 'ms', 'MICROSECONDS' => 'μs', 'NANOSECONDS' => 'ns', 'PICOSECONDS' => 'ps'] as $m => $title) {
-			$link = '<a href="?times=' . $m . $dayLink . '">' . $title . '</a>';
-			if (strtoupper($m) == strtoupper($timeFormat)) { $link = '<strong>' . $link . '</strong>'; }
+	$timeLinks = [];
+	foreach (['DEFAULT' => 'Default', 'SECONDS' => 's', 'MILLISECONDS' => 'ms', 'MICROSECONDS' => 'μs', 'NANOSECONDS' => 'ns', 'PICOSECONDS' => 'ps'] as $m => $title) {
+		$link = '<a href="?times=' . $m . $dayLink . '">' . $title . '</a>';
+		if (strtoupper($m) == strtoupper($timeFormat)) { $link = '<strong>' . $link . '</strong>'; }
 
-			$timeLinks[] = $link;
-		}
+		$timeLinks[] = $link;
+	}
 
-		echo '<div class="text-muted text-right sticky"><div style="display: inline-block; background: white; border: 1px solid black; padding: 5px">';
-		echo '<small>';
-		echo '<strong>Averaging:</strong> ', implode(' - ', $averagingLinks);
-		echo '<br>';
-		echo '<strong>Times:</strong> ', implode(' - ', $timeLinks);
-		if ($lang != ['*']) {
-			echo '<br>';
-			echo '<strong>Language Filter:</strong> <a href="?lang=*">Reset Language Filter</a>';
-		}
-		echo '<br>';
-		echo '<strong>Days:</strong> ', implode(' - ', $dayLinks);
-		echo '</small>';
-		echo '</div></div>';
+	$settingsBox['Averaging'] = implode(' - ', $averagingLinks);
+	$settingsBox['Times'] = implode(' - ', $timeLinks);
+	$settingsBox['Days'] = implode(' - ', $dayLinks);
+	if ($lang != ['*']) {
+		$settingsBox['Language Filter'] = '<a href="?lang=*">Reset Language Filter</a>';
+	}
 
+	$pageTitle = 'Rankings';
+
+	require_once(__DIR__ . '/header.php');
+
+	if ($hasResults) {
 		// Participants
 		$p = 1;
 		if (empty($displayParticipants)) {

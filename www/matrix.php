@@ -3,6 +3,35 @@
 
 	$pageid = 'matrix';
 	$fluid = count($data['results']) > 4;
+
+	$dayLinks = [];
+	if (isset($_REQUEST['day'])) {
+		$dayLinks[] = ' <a href="?">All</a>';
+	}
+	for ($day = 1; $day <= 25; $day++) {
+		foreach ($matrix['results'] as $data) {
+			if (isset($data['days'][$day])) {
+				if (isset($_REQUEST['day'])) {
+					if ($day == $_REQUEST['day']) {
+						$dayLinks[] = ' <strong>' . $day . '</strong>';
+					} else {
+						$dayLinks[] = ' <a href="?day=' . $day . '">' . $day . '</a>';
+					}
+				} else {
+					$dayLinks[] = ' <a href="#day' . $day . '">' . $day . '</a>';
+				}
+				break;
+			}
+		}
+	}
+
+	$settingsBox['Days'] = implode(' - ', $dayLinks);
+	if ($lang != ['*']) {
+		$settingsBox['Language Filter'] = '<a href="?lang=*">Reset Language Filter</a>';
+	}
+
+	$pageTitle = 'Output Matrix';
+
 	require_once(__DIR__ . '/header.php');
 
 	$lang = isset($_REQUEST['lang']) ? (is_array($_REQUEST['lang']) ? $_REQUEST['lang'] : [$_REQUEST['lang']]) : True;
@@ -12,43 +41,6 @@
 	$_SESSION['lang'] = $lang;
 
 	if ($hasMatrix) {
-		echo '<h1>Output Matrix</h1>', "\n";
-
-		echo '<div class="text-muted text-right sticky"><div style="display: inline-block; background: white; border: 1px solid black; padding: 5px">';
-		echo '<small><strong>Jump to day:</strong> ';
-		$dayLinks = [];
-		if (isset($_REQUEST['day'])) {
-			$dayLinks[] = ' <a href="?">All</a>';
-		}
-		for ($day = 1; $day <= 25; $day++) {
-			foreach ($matrix['results'] as $data) {
-				if (isset($data['days'][$day])) {
-					if (isset($_REQUEST['day'])) {
-						if ($day == $_REQUEST['day']) {
-							$dayLinks[] = ' <strong>' . $day . '</strong>';
-						} else {
-							$dayLinks[] = ' <a href="?day=' . $day . '">' . $day . '</a>';
-						}
-					} else {
-						$dayLinks[] = ' <a href="#day' . $day . '">' . $day . '</a>';
-					}
-					break;
-				}
-			}
-		}
-
-		if (empty($dayLinks)) {
-			echo 'None available';
-		} else {
-			echo implode(' - ', $dayLinks);
-		}
-		if ($lang != ['*']) {
-			echo '<br>';
-			echo '<strong>Language Filter:</strong> <a href="?lang=*">Reset Language Filter</a>';
-		}
-		echo '</small>';
-		echo '</div></div>';
-
 		for ($day = 1; $day <= 25; $day++) {
 			// Build day matrix.
 			$dayMatrix = [];

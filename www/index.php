@@ -3,7 +3,8 @@
 
 	$pageid = 'index';
 	$fluid = count($data['results']) > 4;
-	require_once(__DIR__ . '/header.php');
+
+	$settingsBox = [];
 
 	$method = $_REQUEST['method'] ?? ($_SESSION['method'] ?? 'MEDIAN');
 	$timeFormat = $_REQUEST['times'] ?? ($_SESSION['times'] ?? 'DEFAULT');
@@ -14,42 +15,33 @@
 	$_SESSION['times'] = $timeFormat;
 	$_SESSION['lang'] = $lang;
 
+	$averagingLinks = [];
+	foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'MAX' => 'Maximum'] as $m => $title) {
+		$link = '<a href="?method=' . $m . '">' . $title . '</a>';
+		if (strtoupper($m) == strtoupper($method)) { $link = '<strong>' . $link . '</strong>'; }
+
+		$averagingLinks[] = $link;
+	}
+
+	$timeLinks = [];
+	foreach (['DEFAULT' => 'Default', 'SECONDS' => 's', 'MILLISECONDS' => 'ms', 'MICROSECONDS' => 'μs', 'NANOSECONDS' => 'ns', 'PICOSECONDS' => 'ps'] as $m => $title) {
+		$link = '<a href="?times=' . $m . '">' . $title . '</a>';
+		if (strtoupper($m) == strtoupper($timeFormat)) { $link = '<strong>' . $link . '</strong>'; }
+
+		$timeLinks[] = $link;
+	}
+
+	$settingsBox['Averaging'] = implode(' - ', $averagingLinks);
+	$settingsBox['Times'] = implode(' - ', $timeLinks);
+	if ($lang != ['*']) {
+		$settingsBox['Language Filter'] = '<a href="?lang=*">Reset Language Filter</a>';
+	}
+
+	$pageTitle = 'Results';
+
+	require_once(__DIR__ . '/header.php');
+
 	if ($hasResults) {
-		echo '<h1>Results</h1>', "\n";
-
-		// Legacy, unused.
-		$langLink = '';
-		$methodLink = '';
-		$timeLink = '';
-
-		$averagingLinks = [];
-		foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'MAX' => 'Maximum'] as $m => $title) {
-			$link = '<a href="?method=' . $m . $langLink . $timeLink . '">' . $title . '</a>';
-			if (strtoupper($m) == strtoupper($method)) { $link = '<strong>' . $link . '</strong>'; }
-
-			$averagingLinks[] = $link;
-		}
-
-		$timeLinks = [];
-		foreach (['DEFAULT' => 'Default', 'SECONDS' => 's', 'MILLISECONDS' => 'ms', 'MICROSECONDS' => 'μs', 'NANOSECONDS' => 'ns', 'PICOSECONDS' => 'ps'] as $m => $title) {
-			$link = '<a href="?times=' . $m . $langLink . $methodLink . '">' . $title . '</a>';
-			if (strtoupper($m) == strtoupper($timeFormat)) { $link = '<strong>' . $link . '</strong>'; }
-
-			$timeLinks[] = $link;
-		}
-
-		echo '<div class="text-muted text-right sticky"><div style="display: inline-block; background: white; border: 1px solid black; padding: 5px">';
-		echo '<small>';
-		echo '<strong>Averaging:</strong> ', implode(' - ', $averagingLinks);
-		echo '<br>';
-		echo '<strong>Times:</strong> ', implode(' - ', $timeLinks);
-		if ($lang != ['*']) {
-			echo '<br>';
-			echo '<strong>Language Filter:</strong> <a href="?lang=*">Reset Language Filter</a>';
-		}
-		echo '</small>';
-		echo '</div></div>';
-
 		echo '<br><br>';
 		echo '<table class="table table-striped">';
 

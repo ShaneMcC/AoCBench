@@ -78,3 +78,17 @@ code.codeview pre {
   margin-left: 20px;
   padding-left: 10px;
 }
+
+
+div.settingsbox {
+  display: inline-block;
+  padding: 10px;
+  background: #343A40;
+  border: 1px solid #343A40;
+  color: rgba(255,255,255,.5);
+  /* background: white;
+  border: 1px solid black; */
+}
+div.settingsbox a {
+  color: rgba(255,255,255);
+}
