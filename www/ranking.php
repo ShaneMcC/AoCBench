@@ -146,7 +146,7 @@
 
 				$rankClass = ['1' => 'table-first', '2' => 'table-second', '3' => 'table-third'];
 
-				echo '<tr class="', ($rankClass[$timeData['rank']] ?? ''), '">';
+				echo '<tr class="', ($rankClass[$timeData['displayrank']] ?? ''), '">';
 				if ($lastRank != $timeData['rank']) {
 					echo '<th rowspan="', $ranks[$timeData['rank']], '">', $timeData['displayRank'], '</th>';
 				}
