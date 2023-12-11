@@ -41,7 +41,8 @@
 		die();
 	}
 
-	getLock();
+	if (!$noLock) {	getLock(); } else { echo 'Skipping lock file acquire', "\n"; }
+	if ($dryRun) { echo 'Dry run enabled.', "\n"; }
 
 	$startTime = time();
 	echo 'inputMatrix starting at: ', date('r', $startTime), "\n";
