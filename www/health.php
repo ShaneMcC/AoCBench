@@ -59,7 +59,12 @@
                 ob_start();
                 echo '<tr>';
                 echo '<th>Log</th>';
-                echo '<td>', $ddata['log'], '</td>';
+                echo '<td>';
+                echo $ddata['log'];
+                if (!empty($ddata['log']) && $ddata['logtime'] > 0) {
+                    echo '<br><span class="muted"><small>@ ' . date('r', $ddata['logtime']) . '</small></span>';
+                }
+                echo '</td>';
                 echo '</tr>';
                 $rowspan++;
 
