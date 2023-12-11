@@ -68,13 +68,15 @@
 		});
 
 		$lastTime = null;
-		$displayRank = $lastRank = 0;
+		$displayRank = $rankCount = 0;
 		foreach ($times as &$data) {
-			if ($lastTime !== $data['time']) { $lastRank++; }
-			$displayRank++;
+			$rankCount++;
+			if ($lastTime !== $data['time']) {
+				$displayRank = $rankCount;
+			}
 
-			$data['rank'] = $lastRank;
-			$data['displayRank'] = $displayRank;
+			$data['rank'] = $displayRank;
+
 			$lastTime = $data['time'];
 		}
 

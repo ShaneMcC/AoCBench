@@ -98,7 +98,7 @@
         for ($day = 1; $day <= 25; $day++) {
             if (isset($_REQUEST['day']) && $_REQUEST['day'] != $day) { continue; }
 
-            $times = getDayParticipantTimes($day, $method, $timeFormat);
+            $times = getDayParticipantTimes($day, $method);
 			if (empty($times)) { continue; }
 
 			$lastTime = $firstTime = array_column($times, 'timeraw')[0] ?? 0;
@@ -146,9 +146,9 @@
 
 				$rankClass = ['1' => 'table-first', '2' => 'table-second', '3' => 'table-third'];
 
-				echo '<tr class="', ($rankClass[$timeData['displayrank']] ?? ''), '">';
+				echo '<tr class="', ($rankClass[$timeData['rank']] ?? ''), '">';
 				if ($lastRank != $timeData['rank']) {
-					echo '<th rowspan="', $ranks[$timeData['rank']], '">', $timeData['displayRank'], '</th>';
+					echo '<th rowspan="', $ranks[$timeData['rank']], '">', $timeData['rank'], '</th>';
 				}
 				echo '<th>', $participant, ' ' , $link, '</th>';
 				echo '<td>', $language, '</td>';
