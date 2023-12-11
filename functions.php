@@ -29,7 +29,7 @@
 	}
 
 	function getLastRun($data) {
-		$latestTime = 0;
+		$latestTime = $data['starttime'];
 		$lastRun = '';
 		foreach ($data['results'] as $participant => $pdata) {
 			foreach ($pdata['days'] as $day => $ddata) {

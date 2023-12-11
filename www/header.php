@@ -69,7 +69,9 @@
           <?php
           if ($hasResults) {
             [$last, $lastTime] = getLastRun($data);
-            echo '<br><small>(Last update: <strong>' . $last . '</strong> at ' . date('r', $lastTime) . ')</small>';
+            if ($last != null) {
+              echo '<br><small>(Last update: <strong>' . $last . '</strong> at ' . date('r', $lastTime) . ')</small>';
+            }
           }
           ?>
         </div>
@@ -86,7 +88,9 @@
           <?php
           if ($hasMatrix) {
             [$last, $lastTime] = getLastRun($matrix);
-            echo '<br><small>(Last update: <strong>' . $last . '</strong> at ' . date('r', $lastTime) . ')</small>';
+            if ($last != null) {
+              echo '<br><small>(Last update: <strong>' . $last . '</strong> at ' . date('r', $lastTime) . ')</small>';
+            }
           }
           ?>
         </div>
