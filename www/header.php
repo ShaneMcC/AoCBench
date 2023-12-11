@@ -67,13 +67,13 @@
         <div class="alert alert-warning" role="alert">
           There are pending bench runs for this instance since <?= date('r', $lastScheduledRunTime); ?>
         </div>
-      <?php } else if ($lastScheduledRunTime > $lastBenchEndTime) { ?>
+      <?php } else if ($lastBenchStartTime > $lastBenchEndTime) { ?>
         <div class="alert alert-info" role="alert">
           Bench for this instance is currently running since <?= date('r', $lastBenchStartTime); ?>
         </div>
       <?php } ?>
 
-      <?php if ($lastBenchStartTime > $lastBenchEndTime) { ?>
+      <?php if ($lastScheduledRunTime > $lastMatrixStartTime) { ?>
         <div class="alert alert-warning" role="alert">
           There are pending matrix runs for this instance since <?= date('r', $lastScheduledRunTime); ?>
         </div>
