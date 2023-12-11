@@ -30,6 +30,9 @@
 
 	// Save Data.
 	function saveData($file, $data, $setTime = false) {
+		global $dryRun;
+		if ($dryRun) { return; }
+
 		if ($setTime || !isset($data['time'])) { $data['time'] = time(); }
 
 		// Output results to disk.

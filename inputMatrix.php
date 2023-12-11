@@ -2,18 +2,8 @@
 <?php
 	require_once(__DIR__ . '/functions.php');
 
-	getLock();
-
-	$startTime = time();
-	echo 'inputMatrix starting at: ', date('r', $startTime), "\n";
-
-	$data = loadData($outputResultsFile);
-	$data['starttime'] = time();
-
-	$hasRun = false;
-
 	// Get CLI Options.
-	$__CLIOPTS = getopt('fp:d:i:h', ['force', 'participant:', 'day:', 'input:', 'help', 'no-update', 'remove', 'debug']);
+	$__CLIOPTS = getopt('fp:d:i:h', ['force', 'participant:', 'day:', 'input:', 'help', 'no-update', 'remove', 'debug', 'no-lock', 'dryrun']);
 
 	$noUpdate = getOptionValue(NULL, 'no-update', NULL) !== NULL;
 	$wantedParticipant = getOptionValue('p', 'participant', '.*');
@@ -22,6 +12,8 @@
 	$force = getOptionValue('f', 'force', NULL) !== NULL;
 	$removeMatching = getOptionValue(NULL, 'remove', NULL) !== NULL;
 	$runDebugMode = getOptionValue(NULL, 'debug', NULL) !== NULL;
+	$noLock = getOptionValue(NULL, 'no-lock', NULL) !== NULL;
+	$dryRun = getOptionValue(NULL, 'dryrun', NULL) !== NULL;
 
 	if (getOptionValue('h', 'help', NULL) !== NULL) {
 		echo 'AoCBench input matrix generator.', "\n";
@@ -41,11 +33,23 @@
 		echo '      --no-update               Do not update repos.', "\n";
 		echo '      --remove                  Remove matching.', "\n";
 		echo '      --debug                   Enable extra debugging in various places.', "\n";
+		echo '      --no-lock                 Disable grabbing lock file lock.', "\n";
+		echo '      --dryrun                  Do not save result to disk.', "\n";
 		echo '', "\n";
 		echo 'If not specified, day, participant, input all default to ".*" to match all', "\n";
 		echo 'participants/days/inputs.', "\n";
 		die();
 	}
+
+	getLock();
+
+	$startTime = time();
+	echo 'inputMatrix starting at: ', date('r', $startTime), "\n";
+
+	$data = loadData($outputResultsFile);
+	$data['starttime'] = time();
+
+	$hasRun = false;
 
 	// Ensure we save if we exit:
 	$shutdownFunc = function() {

@@ -3,7 +3,7 @@
 	require_once(__DIR__ . '/functions.php');
 
 	// Get CLI Options.
-	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help', 'no-update', 'no-hyperfine', 'remove', 'debug']);
+	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help', 'no-update', 'no-hyperfine', 'remove', 'debug', 'no-lock', 'dryrun']);
 
 	$noUpdate = getOptionValue(NULL, 'no-update', NULL) !== NULL;
 	$wantedParticipant = getOptionValue('p', 'participant', '.*');
@@ -12,6 +12,8 @@
 	$removeMatching = getOptionValue(NULL, 'remove', NULL) !== NULL;
 	$noHyperfine = getOptionValue(NULL, 'no-hyperfine', NULL) !== NULL;
 	$runDebugMode = getOptionValue(NULL, 'debug', NULL) !== NULL;
+	$noLock = getOptionValue(NULL, 'no-lock', NULL) !== NULL;
+	$dryRun = getOptionValue(NULL, 'dryrun', NULL) !== NULL;
 
 	if (getOptionValue('h', 'help', NULL) !== NULL) {
 		echo 'AoCBench Benchmarker.', "\n";
@@ -30,13 +32,15 @@
 		echo '      --no-hyperfine            Do not use hyperfine even if available.', "\n";
 		echo '      --remove                  Remove matching.', "\n";
 		echo '      --debug                   Enable extra debugging in various places.', "\n";
+		echo '      --no-lock                 Disable grabbing lock file lock.', "\n";
+		echo '      --dryrun                  Do not save result to disk.', "\n";
 		echo '', "\n";
 		echo 'If not specified, day and participant both default to ".*" to match all', "\n";
 		echo 'participants/days.', "\n";
 		die();
 	}
 
-	getLock();
+	if (!$noLock) {	getLock(); }
 
 	$startTime = time();
 	echo 'Bench starting at: ', date('r', $startTime), "\n";
