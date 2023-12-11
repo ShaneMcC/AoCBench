@@ -19,14 +19,14 @@
 			echo '<strong>Valid:</strong> ', ($pdata['valid'] ? 'true' : 'false'), '<br>';
             echo '<strong>Prepared:</strong> ', ($pdata['prepared'] ? 'true' : 'false'), '<br>';
             echo '<strong>Participant Type:</strong> ', ($pdata['participanttype'] == 2 ? 'yaml' : 'legacy'), '<br>';
-            echo '<strong>Config:</strong>';
-            echo '[<a href="#" data-toggle="collapse" data-target="#' . $person . '-code">show/hide</a>]';
+            echo '<strong>Config:</strong> ';
+            echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-code" class="btn btn-sm btn-secondary">show/hide</button>';
             echo '<code id="' . $person . '-code" class="collapse codeview"><pre>';
             echo spyc_dump($pdata['config']);
             echo '</pre></code><br>';
 
 			if (isset($pdata['repo']) && !empty($pdata['repo'])) {
-				echo '<strong>Repo:</strong> <a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="github.ico" alt="github">' . $pdata['repo'] . '</a>';
+				echo '<strong>Repo:</strong> <a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="github.ico" alt="github"> ' . $pdata['repo'] . '</a>';
                 if (isset($pdata['branch']) && !empty($pdata['branch'])) {
                     echo ' (<strong>Branch:</strong> ' . $pdata['branch'] . ')';
                 }
@@ -153,6 +153,41 @@
                     echo '<td>', $ddata['length'], '</td>';
                     echo '</tr>';
                     $rowspan++;
+
+                    $rowClass = 'table-success';
+                    $rowData = '';
+                    if (isset($matrix['results'][$person]['days'][$day])) {
+                        foreach ($matrix['results'][$person]['days'][$day]['outputs'] as $targetPerson => $odata) {
+                            $matrixClass = '';
+                            if ($odata['return'] != '0') {
+                                $result = 'Failed to run';
+                                $matrixClass = 'text-danger';
+                                $dayClass = $rowClass = 'table-danger';
+                            } else if (isset($odata['correct']) && $odata['correct']) {
+                                $result = 'Correct';
+                                $matrixClass = 'text-success';
+                            } else if (isset($odata['correct']) && !$odata['correct']) {
+                                $result = 'Failed';
+                                $matrixClass = 'text-danger';
+                                $dayClass = $rowClass = 'table-danger';
+                            } else {
+                                $result = 'Unknown';
+                                $matrixClass = 'text-secondary';
+                            }
+
+                            $rowData .= $targetPerson . ' => <span class="' . $matrixClass . '">' . $result . '</span><br>';
+                        }
+                    } else {
+                        $rowData = 'No matrix runs found.';
+                    }
+
+                    echo '<tr class="collapse dayinfo ' . $rowClass .'">';
+                    echo '<th>Matrix Results</th>';
+                    echo '<td>';
+                    echo $rowData;
+                    echo '</td>';
+                    echo '</tr>';
+                    $rowspan++;
                 } else {
                     $dayClass = 'table-danger';
                 }
@@ -161,8 +196,8 @@
                 echo '<tbody id="' . $person . '-day'.$day.'">';
                 echo '<tr>';
                 echo '<th rowspan=' . $rowspan. ' style="width: 200px" class="', $dayClass, '">';
-                echo $day;
-                echo '[<a href="#" data-toggle="collapse" data-target="#' . $person . '-day'.$day.' tr.dayinfo">show/hide</a>]';
+                echo '<a class="daylink" href="./matrix.php?day=', $day, '">Day ', $day, '</a><br>';
+                echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-day'.$day.' tr.dayinfo" class="btn btn-sm btn-secondary">show/hide</button>';
                 echo '</th>';
                 echo '</tr>';
                 echo $dayRows;

@@ -29,6 +29,9 @@
             <li class="nav-item <?=($pageid == 'matrix' ? 'active' : '');?>">
               <a class="nav-link" href="matrix.php">Output Matrix</a>
             </li>
+            <li class="nav-item <?=($pageid == 'health' ? 'active' : '');?>">
+              <a class="nav-link" href="health.php">Health Check</a>
+            </li>
             <li class="nav-item <?=($pageid == 'hardware' ? 'active' : '');?>">
               <a class="nav-link" href="hardware.php">Hardware</a>
             </li>
