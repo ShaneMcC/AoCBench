@@ -97,14 +97,14 @@
                     echo '</tr>';
                     $rowspan++;
 
-                    echo '<tr class="collapse dayinfo">';
+                    echo '<tr class="collapse dayinfo ', (empty($ddata['input']['version']) ? 'table-danger' : ''), '">';
                     echo '<th>Input Version</th>';
                     echo '<td>', $ddata['input']['version'], '</td>';
                     echo '</tr>';
                     if (empty($ddata['input']['version'])) { $dayClass = 'table-danger'; }
                     $rowspan++;
 
-                    echo '<tr class="collapse dayinfo">';
+                    echo '<tr class="collapse dayinfo ', (empty($ddata['answers']['version']) ? 'table-danger' : ''), '">';
                     echo '<th>Answers Version</th>';
                     echo '<td>', $ddata['answers']['version'], '</td>';
                     echo '</tr>';
