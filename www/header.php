@@ -57,15 +57,23 @@
 
     <main role="main">
       <div class="container-fluid">
-        <?php if ($lastScheduledRunTime > $lastBenchRunTime) { ?>
+          <?php if ($lastScheduledRunTime > $lastBenchStartTime) { ?>
             <div class="alert alert-warning" role="alert">
               There are pending bench runs for this instance since <?=date('r', $lastScheduledRunTime); ?>
             </div>
+          <?php } else if ($lastScheduledRunTime > $lastBenchEndTime) { ?>
+            <div class="alert alert-info" role="alert">
+              Bench for this instance is currently running since <?=date('r', $lastBenchStartTime); ?>
+            </div>
           <?php } ?>
 
-          <?php if ($lastScheduledRunTime > $lastMatrixRunTime) { ?>
+          <?php if ($lastScheduledRunTime > $lastMatrixStartTime) { ?>
             <div class="alert alert-warning" role="alert">
               There are pending matrix runs for this instance since <?=date('r', $lastScheduledRunTime); ?>
+            </div>
+          <?php } else if ($lastScheduledRunTime > $lastMatrixEndTime) { ?>
+            <div class="alert alert-info" role="alert">
+              Matrix for this instance is currently running since <?=date('r', $lastMatrixStartTime); ?>
             </div>
           <?php } ?>
       </div>

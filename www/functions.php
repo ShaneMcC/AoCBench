@@ -22,7 +22,8 @@
 		$data = json_decode(file_get_contents($resultsFile), true);
 		if (isset($data['results'])) {
 			$hasResults = true;
-			$lastBenchRunTime = $data['finishtime'] ?? $data['time'];
+			$lastBenchEndTime = $data['finishtime'] ?? $data['time'];
+			$lastBenchStartTime = $data['starttime'] ?? $data['time'];
 		}
 		if (isset($data['healthcheck'])) {
 			$hasHealthCheck = true;
@@ -34,7 +35,8 @@
 		$matrix = json_decode(file_get_contents($outputResultsFile), true);
 		if (isset($matrix['results'])) {
 			$hasMatrix = true;
-			$lastMatrixRunTime = $data['finishtime'] ?? $data['time'];
+			$lastMatrixEndTime = $data['finishtime'] ?? $data['time'];
+			$lastMatrixStartTime = $data['starttime'] ?? $data['time'];
 		}
 	}
 
