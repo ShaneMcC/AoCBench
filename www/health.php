@@ -7,6 +7,12 @@
 	if ($hasHealthCheck) {
 		echo '<h2>Health Check</h2>', "\n";
 
+        echo '<ul>';
+        foreach ($data['healthcheck'] as $person => $pdata) {
+            echo '<li><a href="#', $person, '">', $pdata['name'], '</a></li>';
+        }
+        echo '</ul>';
+
         foreach ($data['healthcheck'] as $person => $pdata) {
             echo '<h3 id="', $person, '">', $pdata['name'], '</h3>';
 
