@@ -250,16 +250,19 @@
 				if ($i == 1 && $allowHyperfine) {
 					echo ' ', $i, 'H';
 					$data['healthcheck'][$person]['days'][$day]['log'] .= ' ' . $i . 'H';
+					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 
 					$hyperfineOpts = [];
 					if ($lastRunTime > $reallyLongTimeout) {
 						echo 'LL';
 						$data['healthcheck'][$person]['days'][$day]['log'] .= 'LL';
+						$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 						$hyperfineOpts['max'] = $reallyLongRepeatCount;
 						$hyperfineOpts['warmup'] = 0;
 					} else if ($lastRunTime > $longTimeout) {
 						echo 'L';
 						$data['healthcheck'][$person]['days'][$day]['log'] .= 'L';
+						$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 						$hyperfineOpts['max'] = $longRepeatCount;
 						$hyperfineOpts['warmup'] = 0;
 					} else {
@@ -294,6 +297,7 @@
 						$allowHyperfine = true;
 						echo 'F';
 						$data['healthcheck'][$person]['days'][$day]['log'] .= 'F';
+						$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 					}
 				}
 
@@ -301,6 +305,7 @@
 					list($ret, $result) = $participant->runOnce($day);
 					echo ' R';
 					$data['healthcheck'][$person]['days'][$day]['log'] .= ' R';
+					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 					$thisDay['runOnce'] = $result;
 
 					$data['healthcheck'][$person]['runonce'] = ($ret === 0);
@@ -308,6 +313,7 @@
 					if ($ret != 0) {
 						echo 'F';
 						$data['healthcheck'][$person]['days'][$day]['log'] .= 'F';
+						$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 						$data['healthcheck'][$person]['runonce_info'] = implode("\n", $out);
 						echo "\n";
 						echo 'RunOnce exited with error.', "\n";
@@ -323,6 +329,7 @@
 				$start = time();
 				echo ' ', $i;
 				$data['healthcheck'][$person]['days'][$day]['log'] .= ' ' . $i;
+				$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 				list($ret, $result) = $participant->run($day);
 				$end = time();
 				$lastRunTime = ($end - $start);
@@ -334,6 +341,7 @@
 				if ($ret != 0) {
 					$data['healthcheck'][$person]['days'][$day]['runtype'] = 'fail';
 					$data['healthcheck'][$person]['days'][$day]['log'] .= 'F';
+					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 					echo 'F';
 					echo "\n";
 					echo 'Exited with error.', "\n";
@@ -348,6 +356,7 @@
 						if (!$rightAnswer) {
 							$data['healthcheck'][$person]['days'][$day]['runtype'] = 'incorrect';
 							$data['healthcheck'][$person]['days'][$day]['log'] .= 'I';
+							$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 							echo 'I';
 							echo "\n";
 							echo 'Wanted Answers:', "\n";
@@ -371,6 +380,7 @@
 				if ($lastRunTime > $longTimeout) {
 					echo 'L';
 					$data['healthcheck'][$person]['days'][$day]['log'] .= 'L';
+					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 					$long = ($i > 0);
 				}
 
@@ -378,6 +388,7 @@
 				if ($lastRunTime > $reallyLongTimeout) {
 					echo 'L';
 					$data['healthcheck'][$person]['days'][$day]['log'] .= 'L';
+					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 					$reallyLong = ($i > 0);
 				}
 
