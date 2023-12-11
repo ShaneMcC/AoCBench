@@ -377,7 +377,7 @@
 							break;
 						}
 					}
-					if ($runDebugMode && $i = 0) {
+					if ($runDebugMode && $i == 0) {
 						echo "\n=[DEBUG]=========\n", implode("\n", $result), "\n=========[DEBUG]=\n";
 					}
 				}
