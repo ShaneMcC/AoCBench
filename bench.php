@@ -2,24 +2,6 @@
 <?php
 	require_once(__DIR__ . '/functions.php');
 
-	getLock();
-
-	$startTime = time();
-	echo 'Bench starting at: ', date('r', $startTime), "\n";
-
-	$data = loadData($resultsFile);
-	$data['starttime'] = time();
-
-	// Set our hardware.
-	$hardware = [];
-	exec('lscpu 2>&1', $hardware);
-	$hardware = implode("\n", $hardware);
-	$data['hardware'] = $hardware;
-
-	if (!isset($data['healthcheck'])) { $data['healthcheck'] = []; }
-
-	$hasRun = false;
-
 	// Get CLI Options.
 	$__CLIOPTS = getopt('fp:d:h', ['force', 'participant:', 'day:', 'help', 'no-update', 'no-hyperfine', 'remove', 'debug']);
 
@@ -53,6 +35,24 @@
 		echo 'participants/days.', "\n";
 		die();
 	}
+
+	getLock();
+
+	$startTime = time();
+	echo 'Bench starting at: ', date('r', $startTime), "\n";
+
+	$data = loadData($resultsFile);
+	$data['starttime'] = time();
+
+	// Set our hardware.
+	$hardware = [];
+	exec('lscpu 2>&1', $hardware);
+	$hardware = implode("\n", $hardware);
+	$data['hardware'] = $hardware;
+
+	if (!isset($data['healthcheck'])) { $data['healthcheck'] = []; }
+
+	$hasRun = false;
 
 	// Ensure we save if we exit:
 	$shutdownFunc = function() {
