@@ -14,10 +14,21 @@
 	echo '<p class="text-muted text-right sticky">';
 	echo '<small><strong>Jump to day:</strong> ';
 	if ($hasMatrix) {
+		if (isset($_REQUEST['day'])) {
+			$dayLinks[] = ' <a href="?">All</a>';
+		}
 		for ($day = 1; $day <= 25; $day++) {
 			foreach ($matrix['results'] as $data) {
 				if (isset($data['days'][$day])) {
-					$dayLinks []= ' <a href="#day' . $day . '">' . $day . '</a>';
+					if (isset($_REQUEST['day'])) {
+						if ($day == $_REQUEST['day']) {
+							$dayLinks[] = ' <strong>' . $day . '</strong>';
+						} else {
+							$dayLinks[] = ' <a href="?day=' . $day . '">' . $day . '</a>';
+						}
+					} else {
+						$dayLinks[] = ' <a href="#day' . $day . '">' . $day . '</a>';
+					}
 					break;
 				}
 			}
