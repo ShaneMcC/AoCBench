@@ -170,13 +170,16 @@
 					echo 'Removing missing/wip/ignored day ', $day, '.', "\n";
 					$data['healthcheck'][$person]['days'][$day]['log'] = 'Removed';
 					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
-
-					unset($data['healthcheck'][$person]['days'][$day]['input']);
-					unset($data['healthcheck'][$person]['days'][$day]['answers']);
-					unset($data['healthcheck'][$person]['days'][$day]['runtype']);
-					unset($data['healthcheck'][$person]['days'][$day]['length']);
+				} else {
+					$data['healthcheck'][$person]['days'][$day]['log'] = 'Not run - missing/wip/ignored.';
+					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 				}
 				unset($data['results'][$person]['days'][$day]);
+
+				unset($data['healthcheck'][$person]['days'][$day]['input']);
+				unset($data['healthcheck'][$person]['days'][$day]['answers']);
+				unset($data['healthcheck'][$person]['days'][$day]['runtype']);
+				unset($data['healthcheck'][$person]['days'][$day]['length']);
 				continue;
 			}
 			if (!preg_match('#^' . $wantedDay. '$#', $day)) { continue; }
