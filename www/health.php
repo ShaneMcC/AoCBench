@@ -47,10 +47,14 @@
 
             echo '<table class="table table-bordered table-striped">';
             foreach ($pdata['days'] as $day => $ddata) {
+
+                $unlock = strtotime($leaderboardYear . '-12-' . $day . ' 05:00+0000');
+                if ($unlock > time()) { continue; }
+
                 $rowspan = 1;
 
                 ob_start();
-                echo '<tr class="', ($ddata['exists'] ? 'table-success' : 'table-true'), '">';
+                echo '<tr class="', ($ddata['exists'] ? 'table-success' : 'table-danger'), '">';
                 echo '<th>Day Exists</th>';
                 echo '<td>', ($ddata['exists'] ? 'true' : 'false'), '</td>';
                 echo '</tr>';
