@@ -45,6 +45,8 @@
 	$rabbitmq['password'] = 'aocbench';
 	$rabbitmq['vhost'] = 'aocbench';
 
+	$yamlParser = 'Symphony';
+
 	// Local configuration.
 	if (file_exists(dirname(__FILE__) . '/config.local.php')) {
 		include(dirname(__FILE__) . '/config.local.php');

@@ -5,19 +5,59 @@
 	if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 		require_once(__DIR__ . '/vendor/autoload.php');
 	}
-
-	use Symfony\Component\Yaml\Yaml;
+	use Symfony\Component\Yaml\Yaml as SymfonyYaml;
+	require_once(__DIR__ . '/Spyc.php');
 
 	function yaml_decode($str) {
-		return Yaml::parse($str);
+		global $yamlParser;
+
+		switch (strtolower($yamlParser)) {
+			case 'php':
+				return yaml_parse($str);
+
+			case 'spyc':
+				return Spyc::YAMLLoadString($str);
+
+			case 'symphony':
+				return SymfonyYaml::parse($str);
+
+			default:
+				throw new Exception('Unknown yaml parser: ' . $yamlParser);
+		}
 	}
 
 	function yaml_decode_file($file) {
-		return Yaml::parseFile($file);
+		global $yamlParser;
+		switch (strtolower($yamlParser)) {
+			case 'php':
+				return yaml_parse_file($file);
+
+			case 'spyc':
+				return Spyc::YAMLLoad($file);
+
+			case 'symphony':
+				return SymfonyYaml::parseFile($file);
+
+			default:
+				throw new Exception('Unknown yaml parser: ' . $yamlParser);
+		}
 	}
 
 	function yaml_encode($var) {
-		return Yaml::dump($var);
+		global $yamlParser;
+		switch (strtolower($yamlParser)) {
+			case 'php':
+				return yaml_emit($var);
+
+			case 'spyc':
+				return Spyc::YAMLDump($var);
+
+			case 'symphony':
+				return SymfonyYaml::dump($var);
+
+			default:
+				throw new Exception('Unknown yaml parser: ' . $yamlParser);
+		}
 	}
 
 	function getLock() {
