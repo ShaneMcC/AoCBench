@@ -43,7 +43,7 @@
 			$dayParticipants = [];
 
 			if (empty($displayParticipants)) {
-				if ($lang === True) {
+				if ($lang === True || $lang === ['*']) {
 					$displayParticipants = array_keys($matrix['results']);
 				} else {
 					$displayParticipants = [];

@@ -12,6 +12,8 @@
 		if (isset($_REQUEST['timesOnly'])) {
 			$dumpData = [];
 			foreach ($data['results'] as $particpant => $pdata) {
+				if (!isset($ddata['times'])) { continue; }
+
 				$dumpData[$particpant] = ['days' => []];
 				foreach ($pdata['days'] as $day => $ddata) {
 					$dumpData[$particpant]['days'][$day] = [];

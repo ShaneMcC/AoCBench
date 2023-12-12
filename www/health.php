@@ -286,7 +286,7 @@
 
         echo '<script src="./index.js"></script>';
     } else {
-        echo 'No results yet.';
+        echo 'No healthcheck data yet.';
     }
 
     require_once(__DIR__ . '/footer.php');

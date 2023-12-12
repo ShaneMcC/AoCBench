@@ -41,7 +41,7 @@
 		echo '<th class="day">&nbsp;</th>';
 		$p = 1;
 		if (empty($displayParticipants)) {
-			if ($lang === True) {
+			if ($lang === True || $lang === ['*']) {
 				$displayParticipants = array_keys($data['results']);
 			} else {
 				$displayParticipants = [];

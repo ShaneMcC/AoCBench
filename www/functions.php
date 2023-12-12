@@ -220,13 +220,17 @@
 	}
 
 	function getPartitipantLink($pdata) {
+		global $hasHealthCheck;
+
 		$link = $pdata['name'];
 
 		if (isset($pdata['repo']) && !empty($pdata['repo'])) {
 			$link .= ' <a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="github.ico" alt="github"></a>';
 		}
 
-		$link .= ' <a href="./health.php?person=' . $pdata['name'] . '">🗹</a>';
+		if ($hasHealthCheck) {
+			$link .= ' <a href="./health.php?person=' . $pdata['name'] . '">🗹</a>';
+		}
 
 		return $link;
 	}
