@@ -92,7 +92,7 @@
 
 			$lastRank = 0;
 			echo '<br><br>';
-			echo '<h2 id="day' , $day, '">Day ', $day, '</h2>';
+			echo '<h2 id="day' , $day, '">Day ', $day, ' <small><a class="daylink" href="./matrix.php?day=', $day, '">📋</a></small></h2>';
 			echo '<table class="table table-striped table-bordered">';
 			echo '<tr>';
 			echo '<th>Rank</th>';

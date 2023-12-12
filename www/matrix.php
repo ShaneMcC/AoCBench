@@ -97,7 +97,7 @@
 
 			if (!$hasDay) { continue; }
 
-			echo '<h2 id="day', $day, '">Day ', $day, '</h2>', "\n";
+			echo '<h2 id="day', $day, '">Day ', $day, '<small><a class="daylink" href="./ranking.php?day=', $day, '">📊</a></small></h2>', "\n";
 			if (isset($leaderboardYear) && !empty($leaderboardYear)) {
 				echo '<a href="https://adventofcode.com/', (isset($leaderboardYear) ? $leaderboardYear : date('Y')), '/day/', $day, '">Problem</a><br><br>';
 			}
