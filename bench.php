@@ -156,9 +156,6 @@
 			$data['healthcheck'][$person]['config'] = [];
 			$data['healthcheck'][$person]['config']['subheading'] = $participant->getSubheading();
 			$data['healthcheck'][$person]['config']['language'] = $participant->getLanguage();
-			$data['healthcheck'][$person]['config']['daypath'] = $participant->getDayFilename();
-			$data['healthcheck'][$person]['config']['inputfile'] = $participant->getInputFilename(1);
-			$data['healthcheck'][$person]['config']['answerfile'] = $participant->getInputAnswerFilename(1);
 		}
 
 		// Run day.
@@ -169,6 +166,7 @@
 			$data['healthcheck'][$person]['days'][$day]['exists'] = $participant->hasDay($day);
 			$data['healthcheck'][$person]['days'][$day]['wip'] = $participant->isWIP($day);
 			$data['healthcheck'][$person]['days'][$day]['ignored'] = in_array($day, $participant->getIgnored());
+			$data['healthcheck'][$person]['days'][$day]['path'] = $participant->getDayFilename($day);
 
 			if (!$participant->hasDay($day) || $participant->isWIP($day) || in_array($day, $participant->getIgnored())) {
 				// If this day no longer exists, remove it.
@@ -190,9 +188,10 @@
 			}
 			if (!preg_match('#^' . $wantedDay. '$#', $day)) { continue; }
 
-			$data['healthcheck'][$person]['days'][$day]['input'] = ['version' => $participant->getInputVersion($day, false)];
+			$data['healthcheck'][$person]['days'][$day]['input'] = ['version' => $participant->getInputVersion($day, false), 'path' => $participant->getInputFilename($day)];
 			$answers = [$participant->getInputAnswer($day, 1), $participant->getInputAnswer($day, 2)];
 			$data['healthcheck'][$person]['days'][$day]['answers'] = ['version' => $participant->getInputAnswerVersion($day, false),
+			                                                      'path' => $participant->getInputAnswerFilename($day),
 			                                                      'part1' => (isset($answers[0]) && !empty($answers[0])),
 																  'part2' => (isset($answers[1]) && !empty($answers[1]))];
 
