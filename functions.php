@@ -5,7 +5,20 @@
 	if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 		require_once(__DIR__ . '/vendor/autoload.php');
 	}
-	require_once(__DIR__ . '/Spyc.php');
+
+	use Symfony\Component\Yaml\Yaml;
+
+	function yaml_decode($str) {
+		return Yaml::parse($str);
+	}
+
+	function yaml_decode_file($file) {
+		return Yaml::parseFile($file);
+	}
+
+	function yaml_encode($var) {
+		return Yaml::dump($var);
+	}
 
 	function getLock() {
 		global $lockfile, $__LOCK;
@@ -33,7 +46,7 @@
 		$lastRun = '';
 		foreach ($data['results'] as $participant => $pdata) {
 			foreach ($pdata['days'] as $day => $ddata) {
-				if ($ddata['time'] > $latestTime) {
+				if (isset($ddata['time']) && $ddata['time'] > $latestTime) {
 					$latestTime = $ddata['time'];
 					$lastRun = $participant. '/'.$day;
 				}
@@ -235,11 +248,4 @@
 			$lines = count($commandout);
 			return ($lines > 0) ? $commandout[$lines - 1] : '';
 		}
-	}
-
-	function cacheBuster() {
-		return max([filemtime(__DIR__ . '/styles.css'),
-		            filemtime(__DIR__ . '/index.js'),
-					filemtime(__DIR__ . '/graphs.js')
-	               ]);
 	}

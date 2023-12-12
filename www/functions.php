@@ -171,3 +171,16 @@
 			return sqrt($carry / $n);
 		}
 	}
+
+	function cacheBuster() {
+		$files = ['style.css', 'index.js', 'graphs.js'];
+
+		$mtime = 0;
+		foreach ($files as $f) {
+			if (file_exists(__DIR__ . '/' . $f)) {
+				$mtime = max($mtime, filemtime(__DIR__ . '/' . $f));
+			}
+		}
+
+		return $mtime;
+	}

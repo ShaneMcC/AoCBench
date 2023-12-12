@@ -101,7 +101,7 @@
 			echo '<th>' . ucfirst(strtolower($method)) . ' Time</th>';
 			echo '<th>Difference from first</th>';
 			echo '<th>Difference from previous</th>';
-			echo '<th>Graph</th>';
+			echo '<th>Runtime Graph</th>';
 			echo '</tr>';
 			foreach ($times as $participant => $timeData) {
 				if (!isset($data['results'][$participant])) { continue; }

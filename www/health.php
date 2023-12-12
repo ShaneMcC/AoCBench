@@ -35,7 +35,7 @@
             echo '<strong>Config:</strong> ';
             echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-config" class="btn btn-sm btn-secondary">show/hide</button>';
             echo '<code id="' . $person . '-config" class="collapse codeview"><pre>';
-            echo spyc_dump($pdata['config']);
+            echo yaml_encode($pdata['config']);
             echo '</pre></code><br>';
 
 			if (isset($pdata['repo']) && !empty($pdata['repo'])) {
@@ -115,32 +115,36 @@
                     echo '</tr>';
                     $rowspan++;
 
-                    echo '<tr class="collapse dayinfo ', (empty($ddata['input']['version']) ? 'table-danger' : ''), '">';
+                    $inputVersion = $ddata['input']['version'] ?? '';
+                    echo '<tr class="collapse dayinfo ', (empty($inputVersion) ? 'table-danger' : ''), '">';
                     echo '<th>Input Version</th>';
-                    echo '<td>', $ddata['input']['version'], '</td>';
+                    echo '<td>', $inputVersion, '</td>';
                     echo '</tr>';
-                    if (empty($ddata['input']['version'])) { $dayClass = 'table-danger'; }
+                    if (empty($inputVersion)) { $dayClass = 'table-danger'; }
                     $rowspan++;
 
-                    echo '<tr class="collapse dayinfo ', (empty($ddata['answers']['version']) ? 'table-danger' : ''), '">';
+                    $answerVersion = $ddata['input']['version'] ?? '';
+                    echo '<tr class="collapse dayinfo ', (empty($answerVersion) ? 'table-danger' : ''), '">';
                     echo '<th>Answers Version</th>';
-                    echo '<td>', $ddata['answers']['version'], '</td>';
+                    echo '<td>', $answerVersion, '</td>';
                     echo '</tr>';
-                    if (empty($ddata['answers']['version'])) { $dayClass = 'table-danger'; }
+                    if (empty($answerVersion)) { $dayClass = 'table-danger'; }
                     $rowspan++;
 
-                    echo '<tr class="collapse dayinfo ', ($ddata['answers']['part1'] ? 'table-success' : 'table-danger'), '">';
+                    $answerPart1 = $ddata['answers']['part1'] ?? False;
+                    echo '<tr class="collapse dayinfo ', ($answerPart1 ? 'table-success' : 'table-danger'), '">';
                     echo '<th>Has part 1 answer?</th>';
-                    echo '<td>', ($ddata['answers']['part1'] ? 'true' : 'false'), '</td>';
+                    echo '<td>', ($answerPart1 ? 'true' : 'false'), '</td>';
                     echo '</tr>';
-                    if (!$ddata['answers']['part1']) { $dayClass = 'table-danger'; }
+                    if (!$answerPart1) { $dayClass = 'table-danger'; }
                     $rowspan++;
 
-                    echo '<tr class="collapse dayinfo ', ($ddata['answers']['part2'] ? 'table-success' : 'table-danger'), '">';
+                    $answerPart2 = $ddata['answers']['part2'] ?? False;
+                    echo '<tr class="collapse dayinfo ', ($answerPart2 ? 'table-success' : 'table-danger'), '">';
                     echo '<th>Has part 2 answer?</th>';
-                    echo '<td>', ($ddata['answers']['part2'] ? 'true' : 'false'), '</td>';
+                    echo '<td>', ($answerPart2 ? 'true' : 'false'), '</td>';
                     echo '</tr>';
-                    if (!$ddata['answers']['part2']) { $dayClass = 'table-danger'; }
+                    if (!$answerPart2) { $dayClass = 'table-danger'; }
                     $rowspan++;
 
                     if (isset($ddata['runonce'])) {
@@ -162,9 +166,10 @@
                         $rowspan++;
                     }
 
-                    if (empty($ddata['runtype'])) { $runClass = 'table-success'; } // For now.
-                    else if ($ddata['runtype'] == 'hyperfine') { $runClass = 'table-success'; }
-                    else if ($ddata['runtype'] == 'time' && $pdata['participantversion'] != 1) {
+                    $runType = $ddata['runtype'] ?? 'unknown';
+                    if (empty($runType)) { $runClass = 'table-success'; } // For now.
+                    else if ($runType == 'hyperfine') { $runClass = 'table-success'; }
+                    else if ($runType == 'time' && $pdata['participantversion'] != 1) {
                         $runClass = 'table-warning';
                     } else {
                         $runClass = 'table-danger';
@@ -175,14 +180,15 @@
 
                     echo '<tr class="collapse dayinfo ', $runClass, '">';
                     echo '<th>Run Type</th>';
-                    echo '<td>', $ddata['runtype'], '</td>';
+                    echo '<td>', $runType, '</td>';
                     echo '</tr>';
                     $rowspan++;
 
-                    if (!empty($ddata['length']) && $ddata['length'] != 'normal' && $dayClass != 'table-danger') { $dayClass = 'table-warning'; }
-                    echo '<tr class="collapse dayinfo ', (!empty($ddata['length']) && $ddata['length'] != 'normal' ? 'table-warning' : 'table-success'), '">';
+                    $runLength = $ddata['length'] ?? 'unknown';
+                    if (!empty($runLength) && $runLength != 'normal' && $dayClass != 'table-danger') { $dayClass = 'table-warning'; }
+                    echo '<tr class="collapse dayinfo ', (!empty($runLength) && $runLength != 'normal' ? 'table-warning' : 'table-success'), '">';
                     echo '<th>Run Length</th>';
-                    echo '<td>', $ddata['length'], '</td>';
+                    echo '<td>', $runLength, '</td>';
                     echo '</tr>';
                     $rowspan++;
 

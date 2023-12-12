@@ -412,7 +412,7 @@
 					}
 				}
 
-				$this->yaml = $this->getAOCBenchConfigOverride($filename != null ? spyc_load_file($filename) : []);
+				$this->yaml = $this->getAOCBenchConfigOverride($filename != null ? yaml_decode_file($filename) : []);
 			}
 
 			return $this->yaml;
