@@ -115,12 +115,6 @@
 				$diffPrev = $time - $lastTime;
 				$lastTime = $time;
 
-				if (isset($pdata['repo']) && !empty($pdata['repo'])) {
-					$link = '<a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="github.ico" alt="github"></a>';
-				} else {
-					$link = '';
-				}
-
 				if (!isset($pdata['language']) || empty($pdata['language'])) { $pdata['language'] = []; }
 				$langList = is_array($pdata['language']) ? $pdata['language'] : [$pdata['language']];
 
@@ -137,7 +131,7 @@
 				if ($lastRank != $timeData['rank']) {
 					echo '<th rowspan="', $ranks[$timeData['rank']], '">', $timeData['rank'], '</th>';
 				}
-				echo '<th>', $participant, ' ' , $link, '</th>';
+				echo '<th>', getPartitipantLink($pdata), '</th>';
 				echo '<td>', $language, '</td>';
 				echo '<td>', formatTime($time, $timeFormat), '</td>';
 				echo '<td>', $diffFirst > 0 ? '+' . formatTime($diffFirst, $timeFormat) : '-', '</td>';

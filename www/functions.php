@@ -184,3 +184,49 @@
 
 		return $mtime;
 	}
+
+
+	function repoFileAsLink($participant, $file, $title = null) {
+		if ($title == null) { $title = $file; }
+
+		$link = $title;
+		if (stristr($participant['repo'], 'github.com') !== false) {
+			$branch = $participant['branch'] ?? '-';
+			$url = $participant['repo'] . '/blob/' . $branch .'/' . $file;
+			$link = '<a href="' . $url . '">' . $title . '</a>';
+		} else if (stristr($participant['repo'], 'gitlab.com') !== false) {
+			// HEAD is not *quite* right, but close enough in most cases I guess.
+			$branch = $participant['branch'] ?? 'HEAD';
+			$url = $participant['repo'] . '/-/blob/' . $branch . '/' . $file;
+			$link = '<a href="' . $url . '">' . $title . '</a>';
+		}
+
+		return $link;
+	}
+
+	function repoCommitAsLink($participant, $commit, $title = null) {
+		if ($title == null) { $title = $commit; }
+
+		$link = $title;
+		if (stristr($participant['repo'], 'github.com') !== false) {
+			$url = $participant['repo'] . '/commit/' . $commit;
+			$link = '<a href="' . $url . '">' . $title . '</a>';
+		} else if (stristr($participant['repo'], 'gitlab.com') !== false) {
+			$url = $participant['repo'] . '/-/commit/' . $commit;
+			$link = '<a href="' . $url . '">' . $title . '</a>';
+		}
+
+		return $link;
+	}
+
+	function getPartitipantLink($pdata) {
+		$link = $pdata['name'];
+
+		if (isset($pdata['repo']) && !empty($pdata['repo'])) {
+			$link .= ' <a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="github.ico" alt="github"></a>';
+		}
+
+		$link .= ' <a href="./health.php?person=' . $pdata['name'] . '">🗹</a>';
+
+		return $link;
+	}

@@ -1,11 +1,11 @@
 <?php
-	require_once(__DIR__ . '/functions.php');
+    require_once(__DIR__ . '/functions.php');
 
-	$pageid = 'health';
-	require_once(__DIR__ . '/header.php');
+    $pageid = 'health';
+    require_once(__DIR__ . '/header.php');
 
-	if ($hasHealthCheck) {
-		echo '<h1>Health Check</h1>', "\n";
+    if ($hasHealthCheck) {
+        echo '<h1>Health Check</h1>', "\n";
 
         echo '<ul>';
         foreach ($data['healthcheck'] as $person => $pdata) {
@@ -22,39 +22,39 @@
 
             echo '<h3 id="', $person, '">', $pdata['name'], '</h3>';
 
-			echo '<strong>Valid:</strong> ', ($pdata['valid'] ? 'true' : 'false - ' . $data['valid_info']), '<br>';
-            echo '<strong>Prepared:</strong> ', ($pdata['prepared'] ? 'true' : 'false');
-            if (!$pdata['prepared']) {
-                echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-prepare" class="btn btn-sm btn-secondary">show/hide</button>';
-                echo '<code id="' . $person . '-prepare" class="collapse codeview"><pre>';
-                echo htmlspecialchars($data['prepare_info']);
-                echo '</pre></code><br>';
-            }
-            echo '<br>';
-            echo '<strong>Participant Type:</strong> ', ($pdata['participanttype'] == 2 ? 'yaml' : 'legacy'), '<br>';
-            echo '<strong>Config:</strong> ';
-            echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-config" class="btn btn-sm btn-secondary">show/hide</button>';
-            echo '<code id="' . $person . '-config" class="collapse codeview"><pre>';
-            echo yaml_encode($pdata['config']);
-            echo '</pre></code><br>';
-
-			if (isset($pdata['repo']) && !empty($pdata['repo'])) {
-				echo '<strong>Repo:</strong> <a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="github.ico" alt="github"> ' . $pdata['repo'] . '</a>';
+            if (isset($pdata['repo']) && !empty($pdata['repo'])) {
+                echo '<strong>Repo:</strong> <a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="github.ico" alt="github"> ' . $pdata['repo'] . '</a>';
                 if (isset($pdata['branch']) && !empty($pdata['branch'])) {
                     echo ' (<strong>Branch:</strong> ' . $pdata['branch'] . ')';
                 }
                 echo '<br>';
-			}
+            }
 
-			if (isset($pdata['language']) && !empty($pdata['language'])) {
-				$langList = is_array($pdata['language']) ? $pdata['language'] : [$pdata['language']];
-				foreach ($langList as $l) {
-					$language .= $l . ' / ';
-				}
-				$language = rtrim($language, ' /');
-			} else {
-				$language = '';
-			}
+            echo '<strong>Valid:</strong> ', ($pdata['valid'] ? '<span class="text-success">true</span>' : '<span class="text-danger">false - ' . $data['valid_info'] . '</span>'), '<br>';
+            echo '<strong>Prepared:</strong> ', ($pdata['prepared'] ? '<span class="text-success">true</span>' : '<span class="text-danger">false</span>');
+            if (!$pdata['prepared']) {
+                echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-prepare" class="btn btn-sm btn-secondary">show/hide</button>';
+                echo '<div id="' . $person . '-prepare" class="collapse"><br><code class="codeview"><pre>';
+                echo htmlspecialchars($data['prepare_info']);
+                echo '</pre></code><br>';
+            }
+            echo '<br>';
+            echo '<strong>Participant Type:</strong> ', ($pdata['participanttype'] == 2 ? '<span class="text-success">yaml</span>' : '<span class="text-warning">legacy</span>'), '<br>';
+            echo '<strong>Config:</strong> ';
+            echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-config" class="btn btn-sm btn-secondary">show/hide</button><br>';
+            echo '<div id="' . $person . '-config" class="collapse"><br><code class="codeview"><pre>';
+            echo yaml_encode($pdata['config']);
+            echo '</pre></code></div><br>';
+
+            if (isset($pdata['language']) && !empty($pdata['language'])) {
+                $langList = is_array($pdata['language']) ? $pdata['language'] : [$pdata['language']];
+                foreach ($langList as $l) {
+                    $language .= $l . ' / ';
+                }
+                $language = rtrim($language, ' /');
+            } else {
+                $language = '';
+            }
             if (!empty($language)) {
                 $language = '<strong>Language:</strong> ' . $language;
             }
@@ -105,31 +105,55 @@
                     $bits = explode(':', $ddata['version']);
                     echo '<tr class="collapse dayinfo">';
                     echo '<th>Common Version</th>';
-                    echo '<td>', $bits[0], '</td>';
+                    echo '<td>', repoCommitAsLink($pdata, $bits[0]), '</td>';
                     echo '</tr>';
                     $rowspan++;
 
                     echo '<tr class="collapse dayinfo">';
                     echo '<th>Day Version</th>';
-                    echo '<td>', $bits[1], '</td>';
+                    echo '<td>', repoCommitAsLink($pdata, $bits[1]), '</td>';
                     echo '</tr>';
                     $rowspan++;
+
+                    if (isset($ddata['path'])) {
+                        echo '<tr class="collapse dayinfo">';
+                        echo '<th>Day Path</th>';
+                        echo '<td>', repoFileAsLink($pdata, $ddata['path']), '</td>';
+                        echo '</tr>';
+                        $rowspan++;
+                    }
 
                     $inputVersion = $ddata['input']['version'] ?? '';
                     echo '<tr class="collapse dayinfo ', (empty($inputVersion) ? 'table-danger' : ''), '">';
                     echo '<th>Input Version</th>';
-                    echo '<td>', $inputVersion, '</td>';
+                    echo '<td>', repoCommitAsLink($pdata, $inputVersion), '</td>';
                     echo '</tr>';
                     if (empty($inputVersion)) { $dayClass = 'table-danger'; }
                     $rowspan++;
 
+                    if (isset($ddata['input']['path'])) {
+                        echo '<tr class="collapse dayinfo">';
+                        echo '<th>Input Path</th>';
+                        echo '<td>', repoFileAsLink($pdata, $ddata['input']['path']), '</td>';
+                        echo '</tr>';
+                        $rowspan++;
+                    }
+
                     $answerVersion = $ddata['input']['version'] ?? '';
                     echo '<tr class="collapse dayinfo ', (empty($answerVersion) ? 'table-danger' : ''), '">';
                     echo '<th>Answers Version</th>';
-                    echo '<td>', $answerVersion, '</td>';
+                    echo '<td>', repoCommitAsLink($pdata, $answerVersion), '</td>';
                     echo '</tr>';
                     if (empty($answerVersion)) { $dayClass = 'table-danger'; }
                     $rowspan++;
+
+                    if (isset($ddata['answers']['path'])) {
+                        echo '<tr class="collapse dayinfo">';
+                        echo '<th>Answer Path</th>';
+                        echo '<td>', repoFileAsLink($pdata, $ddata['answers']['path']), '</td>';
+                        echo '</tr>';
+                        $rowspan++;
+                    }
 
                     $answerPart1 = $ddata['answers']['part1'] ?? False;
                     echo '<tr class="collapse dayinfo ', ($answerPart1 ? 'table-success' : 'table-danger'), '">';
@@ -155,9 +179,9 @@
 
                         if (isset($data['runonce_info'])) {
                             echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-' . $day . '-runonce" class="btn btn-sm btn-secondary">show/hide</button>';
-                            echo '<code id="' . $person . '-' . $day . '-runonce" class="collapse codeview"><pre>';
+                            echo '<div id="' . $person . '-' . $day . '-runonce" class="collapse"><br><br><code class="codeview"><pre>';
                             echo htmlspecialchars($data['runonce_info']);
-                            echo '</pre></code><br>';
+                            echo '</pre></code></div><br>';
                         }
 
                         echo '</td>';
@@ -251,18 +275,18 @@
             echo '</table>';
         }
 
-		echo '<p class="text-muted text-right"><small>';
-		if (isset($data['time'])) {
-			echo ' <span>Last updated: ', date('r', $data['time']), '</span>';
-		}
-		if (!empty($logFile) && file_exists($logFile)) {
-			echo ' <span><a href="log.php">log</a></span>';
-		}
-		echo '</small></p>';
+        echo '<p class="text-muted text-right"><small>';
+        if (isset($data['time'])) {
+            echo ' <span>Last updated: ', date('r', $data['time']), '</span>';
+        }
+        if (!empty($logFile) && file_exists($logFile)) {
+            echo ' <span><a href="log.php">log</a></span>';
+        }
+        echo '</small></p>';
 
-		echo '<script src="./index.js"></script>';
-	} else {
-		echo 'No results yet.';
-	}
+        echo '<script src="./index.js"></script>';
+    } else {
+        echo 'No results yet.';
+    }
 
-	require_once(__DIR__ . '/footer.php');
+    require_once(__DIR__ . '/footer.php');
