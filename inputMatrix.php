@@ -233,6 +233,7 @@
 						echo 'RunOnce error.', "\n";
 						$wantedInput = ''; // Force skipping everything
 					} else {
+						echo "\t", 'Bulk runnning: ', implode(', ', array_keys($bulkFiles)), "\n";
 						list($ret, $bulkResults) = $participant->doRun($day, 'bulkinput', ['files' => $bulkFiles]);
 						if ($ret != 0) {
 							echo 'Bulk run error.', "\n";
