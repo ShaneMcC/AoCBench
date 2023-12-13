@@ -42,12 +42,18 @@ When benchmarking, the following happens per-participant:
    - This will either be taken from `./inputs/<day>.txt` or fallback to the file referenced by the first-defined participant who has completed the day
      - The answers for this input will be taken from the `answerfile` yaml setting
        - this is a 2-line text file with answers for part1 on the first and part2 on the second
- - The participant's `runonce` code will then be run a single time (for compiling a day)
+ - The participant's `runonce` code will then be run a single time (for compiling a day) usually in a dedicated conatiner
  - The particpant's `cmd` will be run multiple times for benchmarking.
+   - The `prerun` command if specified will be run (at least) once per new-container per day
    - This will first be once to check if the output is correct.
    - If the output is correct, it will then be run using [hyperfine](https://github.com/sharkdp/hyperfine) to get accurate benchmarks (unless disabled in the yaml file)
    - If hyperfine fails to run for some reason, then we will fallback to running multiple times using `time`
+ - Containers may run multiple commands (In this case, `runonce` for a given day will always happen at least once before the `cmd` for that day)
  - After all the days are run the repo will be cleaned up using `git reset --hard`
+
+For the input matrix, the process is mostly the same, however `cmd` will only be run once-per-input to test against.
+
+Like with benchmarking, it's possible that a container may be re-used for multiple days/inputs, or may just be used for a single execution. `runonce`, `prerun` and `cmd` will still be run in the expected orders as required.
 
 ## Repo Requirements
 All repos need a `.aocbench.yaml` file in them to tell us how to run.
@@ -102,13 +108,15 @@ persistence:
 workdir: "/code/%day%"
 
 ### [%] Before benchmarking, command to run once to build a given day if needed.
-### This runs once in a separate container instance than the regular code runs.
+### This runs once and may be in a separate container instance than the regular
+### code runs.
 ### This will always be run at least once before the cmd for the day is run.
 ### Default: none
 runonce: "/code/docker/build.sh %day%"
 
 ### [%] When running image, command to run before the benchmarking occurs.
-### This runs once in the same container instance as the regular code runs and gets run every time the code is run
+### This runs once in the same container instance as the regular code runs and gets run (once) for every time that container
+### is used for a given day.
 ### This should not be used for slow/time-consuming jobs such as compiling, and is mostly tweaking the environment if needed
 ### Default: none
 # prerun: "/code/docker/enableJit.sh"
