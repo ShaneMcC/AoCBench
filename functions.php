@@ -289,3 +289,22 @@
 			return ($lines > 0) ? $commandout[$lines - 1] : '';
 		}
 	}
+
+	// From https://www.php.net/rmdir
+	function rrmdir($src) {
+		if (empty($src) || empty(trim($src, '/'))) { return; }
+
+		$dir = opendir($src);
+		while (false !== ($file = readdir($dir))) {
+			if (($file != '.') && ($file != '..')) {
+				$full = $src . '/' . $file;
+				if (is_dir($full)) {
+					rrmdir($full);
+				} else {
+					unlink($full);
+				}
+			}
+		}
+		closedir($dir);
+		rmdir($src);
+	}

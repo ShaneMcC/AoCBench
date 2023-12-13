@@ -206,6 +206,42 @@
 			}
 
 			$needsRunOnce = true;
+			$bulkResults = false;
+
+			// Can we bulk-run this?
+			if ($participant instanceof V2Participant) {
+				$bulkFiles = [];
+				foreach ($inputs[$day] as $inputPerson => $input) {
+					if (!preg_match('#^' . $wantedInput. '$#', $inputPerson)) { continue; }
+
+					$thisInputVersion = isset($thisDay['outputs'][$inputPerson]['version']) ? $thisDay['outputs'][$inputPerson]['version'] : 'Unknown';
+
+					if ($input['answer1'] !== NULL && $input['answer2'] !== NULL && !isset($thisDay['outputs'][$inputPerson]['correct'])) {
+						$skip = false;
+					}
+
+					if ($skip && $thisInputVersion == $input['version']) { continue; }
+
+					$bulkFiles[$inputPerson] = $input['input'];
+				}
+
+				if (!empty($bulkFiles)) {
+					list($ret, $result) = $participant->runOnce($day);
+					$needsRunOnce = false;
+
+					if ($ret != 0) {
+						echo 'RunOnce error.', "\n";
+						$wantedInput = ''; // Force skipping everything
+					} else {
+						list($ret, $bulkResults) = $participant->doRun($day, 'bulkinput', ['files' => $bulkFiles]);
+						if ($ret != 0) {
+							echo 'Bulk run error.', "\n";
+							$wantedInput = ''; // Force skipping everything
+						}
+					}
+				}
+			}
+
 			foreach ($inputs[$day] as $inputPerson => $input) {
 				if (!preg_match('#^' . $wantedInput. '$#', $inputPerson)) { continue; }
 
@@ -235,9 +271,21 @@
 						break;
 					}
 				}
-				list($ret, $result) = $participant->run($day);
-				usleep($sleepTime); // Sleep a bit so that we're not constantly running.
-				$hasRun = true;
+				if ($bulkResults === FALSE) {
+					list($ret, $result) = $participant->run($day);
+					usleep($sleepTime); // Sleep a bit so that we're not constantly running.
+					$hasRun = true;
+				} else {
+					if (isset($bulkResults['INPUT - ' . $inputPerson])) {
+						$ret = intval(implode('', $bulkResults['EXITCODE - ' . $inputPerson]));
+						$result = $bulkResults['INPUT - ' . $inputPerson];
+						$hasRun = true;
+					} else {
+						echo 'Did not run.', "\n";
+						break;
+					}
+				}
+
 
 				if ($ret == 124) {
 					// We timed-out, abort.
@@ -252,6 +300,8 @@
 						$rightAnswer = preg_match('#' . preg_quote($input['answer1'], '#') . '.+' . preg_quote($input['answer2'], '#') . '#i', implode(' ', $result));
 						$thisDay['outputs'][$inputPerson]['correct'] = $rightAnswer;
 					}
+				} else {
+					$rightAnswer = false;
 				}
 
 				echo 'Done - ', ($rightAnswer ? 'correct' : ($ret == 0 ? 'wrong' : 'error')), '!', "\n";

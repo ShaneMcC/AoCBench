@@ -616,8 +616,45 @@
 						exit \${EXITCODE}
 						RUNSCRIPT;
 
+				case 'bulkinput':
+					$inputFile = $this->getCodeDir() . '/' . $this->getInputFilename($day);
+					// Allow the script to override it.
+					chmod($this->getInputFilename($day), 0777);
+
+					$script = <<<RUNSCRIPT
+						#!/bin/bash
+
+						cd $workdir
+						echo '### $canary START - PRE ###';
+						$prerun
+						echo '### $canary END ###';
+
+						cd $workdir
+						RUNSCRIPT;
+					$script .= "\n";
+
+					foreach (array_keys($opts['files'] ?? []) as $file) {
+						$script .= <<<RUNSCRIPT
+							echo '### $canary START - INPUT - $file ###';
+							cat /.aocbench_run/$file > $inputFile
+							time $cmd
+							EXITCODE=\${?}
+							echo '### $canary END ###';
+							echo '### $canary START - EXITCODE - $file ###';
+							echo \${EXITCODE};
+							echo '### $canary END ###';
+							RUNSCRIPT;
+						$script .= "\n";
+					}
+
+					$script .= <<<RUNSCRIPT
+						exit 0;
+						RUNSCRIPT;
+					$script .= "\n";
+
+					return $script;
+
 				case 'time':
-				default:
 					return <<<RUNSCRIPT
 						#!/bin/bash
 
@@ -634,6 +671,15 @@
 						echo '### $canary END ###';
 
 						exit \${EXITCODE}
+						RUNSCRIPT;
+
+				default:
+					return <<<RUNSCRIPT
+						#!/bin/bash
+						echo '### $canary START - ERROR ###';
+						echo 'Unknown runscript type provided.';
+						echo '### $canary END ###';
+						exit 1
 						RUNSCRIPT;
 			}
 		}
@@ -714,7 +760,7 @@
 		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of lines of output.
 		 */
 		public function runOnce($day) {
-			[$ret, $result] = $this->doRun($day, true, false);
+			[$ret, $result] = $this->doRun($day, 'runonce');
 			return [$ret, $result['ONCE'] ?? []];
 		}
 
@@ -725,7 +771,7 @@
 		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of lines of output.
 		 */
 		public function run($day) {
-			[$ret, $result] = $this->doRun($day, false, false);
+			[$ret, $result] = $this->doRun($day, 'run');
 			return [$ret, $result['TIME'] ?? []];
 		}
 
@@ -737,7 +783,7 @@
 		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of lines of output.
 		 */
 		public function runHyperfine($day, $opts = null) {
-			[$ret, $result] = $this->doRun($day, false, empty($opts) ? true : $opts);
+			[$ret, $result] = $this->doRun($day, 'hyperfine', !empty($opts) ? $opts : null);
 			$result['HYPERFINEDATA'] = json_decode(implode("\n", $result['HYPERFINEDATA']), true);
 
 			return [$ret, $result];
@@ -747,19 +793,14 @@
 		 * Run the given day.
 		 *
 		 * @param int $day Day number.
-		 * @param bool $doRunOnce Do runOnce commands rather than reqular commands.
-		 * @param bool|array $useHyperfine Use hyperfine for this run if possible. If this is an array then they are options for hyperfine.
+		 * @param bool $runType Run Type
+		 * @param array $opts Options for this run
 		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of arrays of sections of output.
 		 */
-		private function doRun($day, $doRunOnce, $useHyperfine) {
+		public function doRun($day, $runType, $opts = []) {
 			global $execTimeout, $localHyperfine, $runDebugMode;
 
-			if (is_array($useHyperfine)) {
-				$hyperfineOpts = $useHyperfine;
-				$useHyperfine = true;
-			} else {
-				$hyperfineOpts = [];
-			}
+			if (!is_array($opts)) { $opts = []; }
 
 			if (($this->getAOCBenchConfig()['version'] ?? '') != "1") {
 				return [1, ['TIME' => ['AoCBench Error: Unknown config file version (Got: "' . $this->getAOCBenchConfig()['version'] . '" - Wanted: "1").']]];
@@ -779,18 +820,30 @@
 			// Run Command:
 			$pwd = getcwd();
 
-			if ($useHyperfine) { $scriptType = 'hyperfine'; }
-			else if ($doRunOnce) { $scriptType = 'runonce'; }
+			if ($runType == 'hyperfine') { $scriptType = 'hyperfine'; }
+			else if ($runType == 'runonce') { $scriptType = 'runonce'; }
+			else if ($runType == 'bulkinput') { $scriptType = 'bulkinput'; }
 			else { $scriptType = 'time'; }
 
 			$runScriptFilename = './.aocbench_run/aocbench-' . uniqid(true) . '.sh';
-			// $runScriptFilename = './.aocbench_run/aocbench.sh';
 			if ($runDebugMode) {
 				$runScriptFilename = './.aocbench_run/aocbench-' . $day . '-' . $scriptType . '.sh';
 			}
 
-			file_put_contents($runScriptFilename, $this->getRunScript($day, $scriptType, $hyperfineOpts));
+			file_put_contents($runScriptFilename, $this->getRunScript($day, $scriptType, $opts));
 			chmod($runScriptFilename, 0777);
+
+			$extraFilePath = $pwd . '/.aocbench_run/.aocbench_run/';
+			if (file_exists($extraFilePath)) {
+				rrmdir($extraFilePath);
+			}
+			mkdir($extraFilePath);
+			chmod($extraFilePath, 0777);
+			foreach ($opts['files'] ?? [] as $filename => $content) {
+				$fullPath = $extraFilePath . '/' . $filename;
+				file_put_contents($fullPath, $content);
+				chmod($fullPath, 0777);
+			}
 
 			$cmd = 'docker run --init --rm ';
 			if (!($this->getAOCBenchConfig()['notty'] ?? false)) {
@@ -802,12 +855,16 @@
 			$cmd .= ' -v ' . escapeshellarg($pwd . ':' . $this->getCodeDir());
 
 			foreach ($this->getPersistence() as $location) {
+				if (startsWith($location, '/.aocbench_run')) { continue; }
+
 				$location = $this->doReplacements($location, $day);
 				$path = $pwd . '/.aocbench_run/' . crc32($location) . '_' . basename($location);
 				if (!file_exists($path)) { mkdir($path); }
 				chmod($path, 0777);
 				$cmd .= ' -v ' . escapeshellarg($path . ':' . $location);
 			}
+
+			$cmd .= ' -v ' . escapeshellarg($extraFilePath . ':/.aocbench_run');
 
 			if (file_exists($localHyperfine) && $this->useHyperfine() === true) {
 				$cmd .= ' -v ' . escapeshellarg($localHyperfine . ':/aocbench-hyperfine');
@@ -828,16 +885,22 @@
 			$cmd .= ' ' . escapeshellarg($imageName);
 			$cmd .= ' 2>&1';
 
-			if ($useHyperfine) {
-				$estimatedTime = ceil($hyperfineOpts['estimated']) ?? $execTimeout;
-				$runCount = $hyperfineOpts['max'] ?? ($hyperfineOpts['count'] ?? 20);
+			if ($scriptType == 'hyperfine') {
+				$estimatedTime = ceil($opts['estimated'] ?? $execTimeout);
+				$runCount = $opts['max'] ?? ($opts['count'] ?? 20);
 
 				$thisExecTimeout = ($estimatedTime * $runCount) + 60;
-				if ($runDebugMode && !empty($hyperfineOpts)) {
-					echo "\n=[DEBUG hyperfineopts]=========\n", json_encode($hyperfineOpts, JSON_PRETTY_PRINT), "\n=========[DEBUG]=\n";
-				}
+			} else if ($scriptType == 'bulkinput') {
+				$estimatedTime = ceil($opts['estimated'] ?? $execTimeout);
+				$runCount = count($opts['files'] ?? []);
+
+				$thisExecTimeout = ($estimatedTime * $runCount) + 60;
 			} else {
 				$thisExecTimeout = $execTimeout;
+			}
+
+			if ($runDebugMode && !empty($opts)) {
+				echo "\n=[DEBUG opts]=========\n", json_encode($opts, JSON_PRETTY_PRINT), "\n=========[DEBUG]=\n";
 			}
 
 			if ($runDebugMode) {
