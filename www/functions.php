@@ -234,3 +234,9 @@
 
 		return $link;
 	}
+
+	if (!function_exists('str_starts_with')) {
+		function str_starts_with($haystack, $needle) {
+			return strlen($needle) === 0 || strpos($haystack, $needle) === 0;
+		}
+	}

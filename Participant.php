@@ -855,7 +855,7 @@
 			$cmd .= ' -v ' . escapeshellarg($pwd . ':' . $this->getCodeDir());
 
 			foreach ($this->getPersistence() as $location) {
-				if (startsWith($location, '/.aocbench_run')) { continue; }
+				if (str_starts_with($location, '/.aocbench_run')) { continue; }
 
 				$location = $this->doReplacements($location, $day);
 				$path = $pwd . '/.aocbench_run/' . crc32($location) . '_' . basename($location);
