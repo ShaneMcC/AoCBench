@@ -25,75 +25,151 @@ The important bit is configuring participants.
 An example participant:
 
 ```php
-	$participants[] = new class extends Participant {
-      public function getName() { return 'Dataforce'; }
-      public function getRepo() { return 'https://github.com/ShaneMcC/aoc-2018'; }
-      public function getDayFilename($day) { return $day; }
-      public function getInputFilename($day) { return $this->getDayFilename($day) . '/input.txt'; }
-      public function getRunCommand($day) { return './docker.sh --time ' . $day; }
-	};
+$participants[] = new V2Participant('Dataforce', 'https://github.com/ShaneMcC/aoc-2023');
 ```
 
 The important bits are:
- - The participant name (Spaces will be removed and used as the folder name for the repo on disk)
- - The participant repo (This will be automatically checked out)
- - The `getDayFilename($day)` function should return the path to the directory or file containing the day.
- - The `getInputFilename($day)` function should return the path to the input file for the day.
-   - Shown here is the default implementation of this, which if sufficient, can be ignored.
- - The input for each day needs to be a text file on disk (If all participants are to be benchmarked against the same input)
- - It is assumed (Though not explicitly required) that each participant's code will run in Docker.
-   - In most cases, the Docker image is just a basic runtime environment for the language of choice, with the code mounted as a bind-mount from the on-disk repo.
-   - At the very least `getInputFilename($day)` should return a (relative to the repo root) path that will ultimately be mounted inside the container.
- - `getInputAnswer($day, $part)` can also be defined, by default this will look for answers.txt within `getDayFilename($day)` with part 1 on line 1 and part 2 on line 2.
+ - The first variable is the participant name (Spaces will be removed and used as the folder name for the repo on disk)
+ - The second variable is the participant repo (This will be automatically checked out)
+ - Legacy (non-V2) participants were configured using method overrides which are no longer the expected way to define participants and no longer documented (You can look back at [An older version of README.md](https://github.com/ShaneMcC/AoCBench/blob/39b4e2adb78550dfc6f4b3c98d6f9c28f7bb4f73/README.md) for configuration information for legacy participants)
+ - Modern (v2) participants, it is expected that the repo must then contain a `.aocbench.yaml` file for benchmarking to work. (This file is documented later)
 
 When benchmarking, the following happens per-participant:
- - The `updateRepo($dir)` method of the Participant is called.
-   - The default implementation should suffice for most people, it checks out the latest copy of the repo or calls `git update`
- - The `prepare()` method of the Participant is called.
-   - The default implementation will run docker.sh or run.sh if found.
-   - This should build the required docker container for the Participant for example.
- - `hasDay($day)` will be checked for the participant.
-   - The default implementation checks the git version of `getDayFilename($day)` returns non-null
- - If `$normaliseInput` is set, then the file specified by `getInputFilename($day)` will be overwritten with the input for the day.
-   - This will either be taken from `./inputs/<day>.txt` or fallback to the file referenced by `getInputFilename($day)` on the first-defined participant.
-   - The user should implement `getInputAnswer($day, $part)` as either a global function `config.local.php` or within the first-defined participant.
-     - This should return a non-`NULL` string to look for in the output to allow for validation.
- - `run($day)` will be called multiple times to run the day the required number of times
-   - By default this will call `getRunCommand($day)` and then run that and return the output.
-   - If a custom `run($day)` implementation is required, this should return `[$returnCode, $outputArray]`. A non-0 `$returnCode` is considered a fail and `$outputArray` will be displayed for debugging.
- - `extractTime($outputArray)` will be called on the result from `run($day)` to extract the time value.
-   - The default implementation assumes that the 3rd-from-last line of the output will contain `real 0m0.000s` or so as per the `time` function in `bash`.
-   - If the output time is not in `real` format, it should be converted to `0m0.000s` format for the frontend to understand.
- - After all the days are run, `cleanup()` will be called.
-   - The default implementation runs `cleanup.sh` if it exists, and then `git reset --hard origin`
-
+ - The participant repo is cloned if it does not exist, or updated using `git fetch` and `git reset` commands
+ - The repo is then prepared - this step includes building any required docker containers or pulling any required images
+ - We will then check to see if a participant has a given day by checking that the `daypath` yaml setting points at a valid file or directory
+ - If `$normaliseInput` is set, then the file specified by `inputfile` yaml setting will be overwritten with the input for the day.
+   - This will either be taken from `./inputs/<day>.txt` or fallback to the file referenced by the first-defined participant who has completed the day
+     - The answers for this input will be taken from the `answerfile` yaml setting
+       - this is a 2-line text file with answers for part1 on the first and part2 on the second
+ - The participant's `runonce` code will then be run a single time (for compiling a day)
+ - The particpant's `cmd` will be run multiple times for benchmarking.
+   - This will first be once to check if the output is correct.
+   - If the output is correct, it will then be run using [hyperfine](https://github.com/sharkdp/hyperfine) to get accurate benchmarks (unless disabled in the yaml file)
+   - If hyperfine fails to run for some reason, then we will fallback to running multiple times using `time`
+ - After all the days are run the repo will be cleaned up using `git reset --hard`
 
 ## Repo Requirements
-A repo that conforms to the following behaviour should just work "out of the box" with a `Participant` that consists of just a `getName()` and `getRepo()` configuration. Most bits can be changed with the additional functions mentioned above.
+All repos need a `.aocbench.yaml` file in them to tell us how to run.
 
-  - Days are stored in directories named `1`, `2`, ... `24`, `25`
-  - Input file for each day is stored as `input.txt` within the appropriate directory (eg `1/input.txt`)
-  - Expected answers for each day optionally within `answers.txt` within the appropriate directory (eg `1/answers.txt`)
-  - A script in the root repo called `run.sh` or `docker.sh`
-    - This will be run with the checked out repo as `pwd`
-      - This directory will be chmoded so that any user can write to it (eg if the container runs with `USER nobody`)
-      - You should not assume any other directory is writable.
-    - When run without any arguments, this should build any required containers. It is expected that this container can be built infrequently and reused.
-    - When run with a day argument (eg `./run.sh 1`) this will compile (if required) and then run that day using bash `time`.
-      - Any compilation output should be stored between runs of the same day for speed/efficiency between test runs.
-        - Compilation should happen within the docker container, and store the output within the mounted `pwd` directory so that it will be rediscovered by future runs of the container.
-      - `time` output should be the very last 3 lines in the result of the `./run.sh 1` command.
-        - `time` should not include any time spent compiling, just the time to run the script or compiled binary
-      - The code should always use `${pwd}/<day>/input.txt` as the input source.
-        - The input file may be overwritten before running to ensure the same input is tested for each participant in case some yield a faster solve time.
-        - The input file should be mounted within the container (either on it's own or the whole `pwd` or so)
-      - The container should exit as soon as the single-run has finished.
-  - A `cleanup.sh` script can optionally exist in the repo to run any post-test cleanup required beyond `git reset --hard origin; git clean -fx`
+Each individual day should be runable standalone, reading input from disk from the location specified in the `inputfile` setting.
 
+A full and complete example with all possible options is here:
+
+```yaml
+### .aocbench.yaml version
+### Default: none - This must be specified as 1.
+version: 1
+
+### Repo Author
+### Default: none
+author: "Dataforce"
+
+### Language used.
+### Default: none
+language: PHP
+
+### Optional version prefix, changing this will invalidate all previous runs without needing to make
+### other code changes.
+### Default: none
+# versionprefix: "1"
+
+### Path to Dockerfile to build image
+### The image will be rebuilt if this file changes.
+### This should just produce an environment that can compile/run the code
+### (and can be reused every day), it should not compile the code itself
+### Default: none - Must be specified if image is not.
+dockerfile: "docker/Dockerfile"
+
+### Or image (this takes priority, same idea as above)
+### Default: none - Must be specified if dockerfile is not.
+# image: "php:8.3-cli"
+
+### Location where repo checkout should be mounted
+### Default: /code
+code: "/code"
+
+### [%] Additional directories that need persisting across container runs.
+### Separate container instances are created each time we run commands.
+### Anything not included here will be lost across runs.
+### The code directory is automatically persisted.
+### Default: none
+persistence:
+ - /tmp
+
+### [%] What directory to run commands from.
+### Default: the value of the `code` setting
+workdir: "/code/%day%"
+
+### [%] Before benchmarking, command to run once to build a given day if needed.
+### This runs once in a separate container instance than the regular code runs.
+### This will always be run at least once before the cmd for the day is run.
+### Default: none
+runonce: "/code/docker/build.sh %day%"
+
+### [%] When running image, command to run before the benchmarking occurs.
+### This runs once in the same container instance as the regular code runs and gets run every time the code is run
+### This should not be used for slow/time-consuming jobs such as compiling, and is mostly tweaking the environment if needed
+### Default: none
+# prerun: "/code/docker/enableJit.sh"
+
+### [%] When running image, command to run a given day, this is passed to `hyperfine` or `time` to actually benchmark the day
+### Default: none - This must be specified
+cmd: "php /code/%day%/run.php --file %input%"
+
+### When running docker images, don't use `-it` on the `docker run` command line
+### Default: False
+# notty: True
+
+### Enable or disable hyperfine for measurement (Default: enabled)
+### Default: True
+# hyperfine: False
+
+### Enable or disable using a shell for hyperfine runs (Default: disabled)
+### Default: True
+# hyperfineshell: True
+
+### [%] Environment vars to set on container
+### These will exist on every type of container run
+### Default: none
+environment:
+ - TIMED=1
+
+### [%] Path to per-day code. (Directory or File)
+### This will be checked to decide if the day exists and needs running, and to check the code version
+### If this is a file only changes to that file will trigger a re-run, if it is a directory then any changes to any files within the
+### directory will trigger a re-run.
+### Default: %day%
+daypath: "%day%"
+
+### Path to any additional common files that should count as changing all days.
+### Behaves similar to daypath, any entry in this list can be a file or directory.
+### (the .aocbench.yaml file is included in this list by default)
+### Default: none
+common:
+ - common
+
+### [%] Path to per-day input file.
+### This is the file that will be overwritten with other test inputs, or used to feed input to other participants
+### This is also the path that will be used to generate %inputpath%
+### Default: `%day%/input.txt`
+inputfile: "%day%/input.txt"
+
+### [%] Path to per-day answer file used to validate other participant answers
+### Default: `%day%/answers.txt`
+answerfile: "%day%/answers.txt"
+```
+
+Options marked with a `[%]` will allow variable replacements:
+
+ - `%day%` - The day to run, without zero padding.
+ - `%zeroday%` or `%dayzero%` - The day to run, with zero padding.
+ - `%year%` - The year that is being run (for monorepos) (This is the `$leaderboardYear` config setting)
+ - `%input%` - The input file path if needed (This will be an absolute path) (If the application automatically reads from the inputfile location rather than taking a parameter, then this is unrequired)
 
 ## Updating
 
-`git pull` or equivalent.
+`git pull; composer install` or equivalent.
 
 ## Comments, Questions, Bugs, Feature Requests etc.
 
