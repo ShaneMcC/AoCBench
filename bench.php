@@ -80,6 +80,7 @@
 
 			$answer1 = $input !== FALSE ? getInputAnswer($day, 1) : null;
 			$answer2 = $input !== FALSE ? getInputAnswer($day, 2) : null;
+			$sourceName = 'inputdir';
 		} else {
 			$source = $participants[0];
 			$cwd = getcwd();
@@ -88,15 +89,16 @@
 			$input = $source->getInput($day);
 			$answer1 = $input !== FALSE ? $source->getInputAnswer($day, 1) : null;
 			$answer2 = $input !== FALSE ? $source->getInputAnswer($day, 2) : null;
-
-			if (in_array($day . '', $ignoreResult)) { $answer1 = NULL; $answer2 = NULL; }
-			if (in_array($day . '/1', $ignoreResult)) { $answer1 = ''; }
-			if (in_array($day . '/2', $ignoreResult)) { $answer2 = ''; }
+			$sourceName = $person;
 
 			chdir($cwd);
 		}
 
-		return [$input, $answer1, $answer2];
+		if (in_array($day . '', $ignoreResult)) { $answer1 = NULL; $answer2 = NULL; }
+		if (in_array($day . '/1', $ignoreResult)) { $answer1 = ''; }
+		if (in_array($day . '/2', $ignoreResult)) { $answer2 = ''; }
+
+		return [$input, $answer1, $answer2, $sourceName];
 	}
 
 	foreach ($participants as $participant) {
@@ -205,20 +207,25 @@
 			}
 
 			if ($normaliseInput) {
-				[$input, $answer1, $answer2] = getInput($day);
+				[$input, $answer1, $answer2, $sourceName] = getInput($day);
 				$checkOutput = ($answer1 !== NULL && $answer2 !== NULL);
 			} else {
-				$input = $answer1 = $answer2 = NULL;
+				$input = $answer1 = $answer2 = $sourceName = NULL;
 				$checkOutput = FALSE;
 			}
 
+			$testInputVersion = crc32(json_encode([$checkOutput, $input, $answer1, $answer2, $sourceName]));
 			$currentVersion = isset($thisDay['version']) ? $thisDay['version'] : 'Unknown';
 			$checkedOutput = isset($thisDay['checkedOutput']) ? $thisDay['checkedOutput'] : FALSE;
 
 			// Should we skip this?
-			$skip = !empty($thisDay['times']);
+			if (isset($thisDay['testInputVersion'])) {
+				$skip = ($testInputVersion == $thisDay['testInputVersion']);
+			} else {
+				$skip = !empty($thisDay['times']);
+				$skip &= (!$checkOutput || $checkOutput == $checkedOutput);
+			}
 			$skip &= ($currentVersion == $participant->getDayVersion($day));
-			$skip &= (!$checkOutput || $checkOutput == $checkedOutput);
 
 			if ($force) {
 				echo ' [Forced]';
@@ -432,6 +439,7 @@
 
 				$thisDay['time'] = time();
 				$thisDay['version'] = $participant->getDayVersion($day);
+				$thisDay['testInputVersion'] = $testInputVersion;
 				$data['results'][$person]['days'][$day] = $thisDay;
 			}
 
