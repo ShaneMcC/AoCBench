@@ -213,14 +213,14 @@
 				$bulkFiles = [];
 				foreach ($inputs[$day] as $inputPerson => $input) {
 					if (!preg_match('#^' . $wantedInput. '$#', $inputPerson)) { continue; }
-
+					$bulkSkip = $skip;
 					$thisInputVersion = isset($thisDay['outputs'][$inputPerson]['version']) ? $thisDay['outputs'][$inputPerson]['version'] : 'Unknown';
 
 					if ($input['answer1'] !== NULL && $input['answer2'] !== NULL && !isset($thisDay['outputs'][$inputPerson]['correct'])) {
-						$skip = false;
+						$bulkSkip = false;
 					}
 
-					if ($skip && $thisInputVersion == $input['version']) { continue; }
+					if ($bulkSkip && $thisInputVersion == $input['version']) { continue; }
 
 					$bulkFiles[$inputPerson] = $input['input'];
 				}
