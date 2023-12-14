@@ -213,14 +213,9 @@
 				$bulkFiles = [];
 				foreach ($inputs[$day] as $inputPerson => $input) {
 					if (!preg_match('#^' . $wantedInput. '$#', $inputPerson)) { continue; }
-					$bulkSkip = $skip;
 					$thisInputVersion = isset($thisDay['outputs'][$inputPerson]['version']) ? $thisDay['outputs'][$inputPerson]['version'] : 'Unknown';
 
-					if ($input['answer1'] !== NULL && $input['answer2'] !== NULL && !isset($thisDay['outputs'][$inputPerson]['correct'])) {
-						$bulkSkip = false;
-					}
-
-					if ($bulkSkip && $thisInputVersion == $input['version']) { continue; }
+					if ($skip && $thisInputVersion == $input['version']) { continue; }
 
 					$bulkFiles[$inputPerson] = $input['input'];
 				}
@@ -256,10 +251,6 @@
 
 				$thisInputVersion = isset($thisDay['outputs'][$inputPerson]['version']) ? $thisDay['outputs'][$inputPerson]['version'] : 'Unknown';
 
-				if ($input['answer1'] !== NULL && $input['answer2'] !== NULL && !isset($thisDay['outputs'][$inputPerson]['correct'])) {
-					$skip = false;
-				}
-
 				if ($skip && $thisInputVersion == $input['version']) { echo 'Up to date.', "\n"; continue; }
 
 				$participant->setInput($day, $input['input']);
@@ -287,14 +278,13 @@
 					}
 				}
 
+				$thisDay['outputs'][$inputPerson] = ['version' => $input['version'], 'return' => $ret, 'output' => $result, 'time' => time()];
 
 				if ($ret == 124) {
 					// We timed-out, abort.
 					echo 'Timeout.', "\n";
 					break;
 				}
-
-				$thisDay['outputs'][$inputPerson] = ['version' => $input['version'], 'return' => $ret, 'output' => $result, 'time' => time()];
 
 				if ($ret == 0) {
 					if ($input['answer1'] !== NULL && $input['answer2'] !== NULL) {
