@@ -75,22 +75,30 @@
 	function getInput($day) {
 		global $participants, $participantsDir, $inputsDir, $ignoreResult;
 
+		$input = $answer1 = $answer2 = $sourceName = NULL;
+
 		if (file_exists($inputsDir . '/' . $day . '.txt')) {
 			$input = file_get_contents($inputsDir . '/' . $day . '.txt');
 
-			$answer1 = $input !== FALSE ? getInputAnswer($day, 1) : null;
-			$answer2 = $input !== FALSE ? getInputAnswer($day, 2) : null;
-			$sourceName = 'inputdir';
+			if ($input !== FALSE) {
+				$answer1 = getInputAnswer($day, 1);
+				$answer2 = getInputAnswer($day, 2);
+				$sourceName = 'inputdir';
+			}
 		} else {
-			$source = $participants[0];
 			$cwd = getcwd();
-			$person = $source->getDirName(false);
-			chdir($participantsDir . '/' . $person);
-			$input = $source->getInput($day);
-			$answer1 = $input !== FALSE ? $source->getInputAnswer($day, 1) : null;
-			$answer2 = $input !== FALSE ? $source->getInputAnswer($day, 2) : null;
-			$sourceName = $person;
-
+			foreach ($participants as $source) {
+				$person = $source->getDirName(false);
+				chdir($participantsDir . '/' . $person);
+				$input = $source->getInput($day);
+				if ($input !== FALSE) {
+					$answer1 = $source->getInputAnswer($day, 1);
+					$answer2 = $source->getInputAnswer($day, 2);
+					$sourceName = $person;
+					break;
+				}
+				chdir($cwd);
+			}
 			chdir($cwd);
 		}
 
