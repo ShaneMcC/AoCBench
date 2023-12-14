@@ -74,39 +74,44 @@
 	// Get input for a given day.
 	function getInput($day) {
 		global $participants, $participantsDir, $inputsDir, $ignoreResult;
+		static $__INPUTCACHE = [];
 
-		$input = $answer1 = $answer2 = $sourceName = NULL;
+		if (!isset($__INPUTCACHE[$day])) {
+			$input = $answer1 = $answer2 = $sourceName = NULL;
 
-		if (file_exists($inputsDir . '/' . $day . '.txt')) {
-			$input = file_get_contents($inputsDir . '/' . $day . '.txt');
+			if (file_exists($inputsDir . '/' . $day . '.txt')) {
+				$input = file_get_contents($inputsDir . '/' . $day . '.txt');
 
-			if ($input !== FALSE) {
-				$answer1 = getInputAnswer($day, 1);
-				$answer2 = getInputAnswer($day, 2);
-				$sourceName = 'inputdir';
-			}
-		} else {
-			$cwd = getcwd();
-			foreach ($participants as $source) {
-				$person = $source->getDirName(false);
-				chdir($participantsDir . '/' . $person);
-				$input = $source->getInput($day);
 				if ($input !== FALSE) {
-					$answer1 = $source->getInputAnswer($day, 1);
-					$answer2 = $source->getInputAnswer($day, 2);
-					$sourceName = $person;
-					break;
+					$answer1 = getInputAnswer($day, 1);
+					$answer2 = getInputAnswer($day, 2);
+					$sourceName = 'inputdir';
+				}
+			} else {
+				$cwd = getcwd();
+				foreach ($participants as $source) {
+					$person = $source->getDirName(false);
+					chdir($participantsDir . '/' . $person);
+					$input = $source->getInput($day);
+					if ($input !== FALSE) {
+						$answer1 = $source->getInputAnswer($day, 1);
+						$answer2 = $source->getInputAnswer($day, 2);
+						$sourceName = $person;
+						break;
+					}
+					chdir($cwd);
 				}
 				chdir($cwd);
 			}
-			chdir($cwd);
+
+			if (in_array($day . '', $ignoreResult)) { $answer1 = NULL; $answer2 = NULL; }
+			if (in_array($day . '/1', $ignoreResult)) { $answer1 = ''; }
+			if (in_array($day . '/2', $ignoreResult)) { $answer2 = ''; }
+
+			$__INPUTCACHE[$day] = [$input, $answer1, $answer2, $sourceName];
 		}
 
-		if (in_array($day . '', $ignoreResult)) { $answer1 = NULL; $answer2 = NULL; }
-		if (in_array($day . '/1', $ignoreResult)) { $answer1 = ''; }
-		if (in_array($day . '/2', $ignoreResult)) { $answer2 = ''; }
-
-		return [$input, $answer1, $answer2, $sourceName];
+		return $__INPUTCACHE[$day];
 	}
 
 	foreach ($participants as $participant) {
