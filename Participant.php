@@ -914,6 +914,10 @@
 				@unlink($runScriptFilename);
 			}
 
+			if ($runDebugMode) {
+				echo "\n=[DEBUG output]=========\n", json_encode($output, JSON_PRETTY_PRINT), "\n=========[DEBUG]=\n";
+			}
+
 			return [$ret, $this->parseRunOutput($output)];
 		}
 

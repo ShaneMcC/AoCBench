@@ -294,9 +294,9 @@
 					break;
 				}
 
-				if ($ret == 0) {
-					$thisDay['outputs'][$inputPerson] = ['version' => $input['version'], 'return' => $ret, 'output' => $result, 'time' => time()];
+				$thisDay['outputs'][$inputPerson] = ['version' => $input['version'], 'return' => $ret, 'output' => $result, 'time' => time()];
 
+				if ($ret == 0) {
 					if ($input['answer1'] !== NULL && $input['answer2'] !== NULL) {
 						$rightAnswer = preg_match('#' . preg_quote($input['answer1'], '#') . '.+' . preg_quote($input['answer2'], '#') . '#i', implode(' ', $result));
 						$thisDay['outputs'][$inputPerson]['correct'] = $rightAnswer;
