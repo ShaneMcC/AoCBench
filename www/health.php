@@ -179,7 +179,7 @@
 
                         if (isset($data['runonce_info'])) {
                             echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-' . $day . '-runonce" class="btn btn-sm btn-secondary">show/hide</button>';
-                            echo '<div id="' . $person . '-' . $day . '-runonce" class="collapse"><br><br><code class="codeview"><pre>';
+                            echo '<div id="' . $person . '-' . $day . '-runonce" class="collapse"><br><code class="codeview"><pre>';
                             echo htmlspecialchars($data['runonce_info']);
                             echo '</pre></code></div><br>';
                         }
@@ -204,7 +204,37 @@
 
                     echo '<tr class="collapse dayinfo ', $runClass, '">';
                     echo '<th>Run Type</th>';
-                    echo '<td>', $runType, '</td>';
+                    echo '<td>';
+                    echo $runType;
+
+                    if ($runClass == 'table-danger') {
+                        $runOutput = implode("\n", $matrix['results'][$person]['days'][$day]['outputs'][$ddata['testInputSource']]['output'] ?? []);
+
+                        if (!empty(trim($runOutput)) || isset($ddata['testInputAnswers'])) {
+                            echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-' . $day . '-runtype" class="btn btn-sm btn-secondary">show/hide</button>';
+                            echo '<div id="' . $person . '-' . $day . '-runtype" class="collapse"><br><code class="codeview"><pre>';
+                            if (!empty(trim($runOutput))) {
+                                echo htmlspecialchars($runOutput);
+                            }
+
+                            if (isset($ddata['testInputAnswers'])) {
+                                echo "\n\n";
+                                echo 'Wanted Answers:', "\n";
+                                echo "\t", 'Part 1:', $ddata['testInputAnswers']['part1'], "\n";
+                                echo "\t", 'Part 2:', $ddata['testInputAnswers']['part2'], "\n";
+                            }
+
+                            echo '</pre></code></div><br>';
+                        }
+                    }
+
+                    echo '</td>';
+                    echo '</tr>';
+                    $rowspan++;
+
+                    echo '<tr class="collapse dayinfo">';
+                    echo '<th>Run Input Source</th>';
+                    echo '<td>', $ddata['testInputSource'], '</td>';
                     echo '</tr>';
                     $rowspan++;
 

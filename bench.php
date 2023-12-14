@@ -228,6 +228,7 @@
 			}
 
 			$testInputVersion = crc32(json_encode([$checkOutput, $input, $answer1, $answer2, $sourceName]));
+			$testInputSource = $sourceName ?? $person;
 			$currentVersion = isset($thisDay['version']) ? $thisDay['version'] : 'Unknown';
 			$checkedOutput = isset($thisDay['checkedOutput']) ? $thisDay['checkedOutput'] : FALSE;
 
@@ -252,7 +253,15 @@
 
 			if ($input !== FALSE && $input !== NULL && $input !== '') {
 				$participant->setInput($day, $input);
+				$data['healthcheck'][$person]['days'][$day]['testInputAnswers'] = ['part1' => $answer1, 'part2' => $answer2];
+			} else {
+				$testInputSource = $person;
+				$testInputVersion = crc32(json_encode([FALSE, null, null, null, null]));
+				unset($data['healthcheck'][$person]['days'][$day]['testInputAnswers']);
 			}
+
+			$data['healthcheck'][$person]['days'][$day]['testInputVersion'] = $testInputVersion;
+			$data['healthcheck'][$person]['days'][$day]['testInputSource'] = $testInputSource;
 
 			// Run the day.
 			$long = false;
