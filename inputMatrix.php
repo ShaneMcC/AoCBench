@@ -198,8 +198,7 @@
 			$currentVersion = isset($thisDay['version']) ? $thisDay['version'] : 'Unknown';
 
 			// Should we skip this?
-			$skip = !empty($thisDay['outputs']);
-			$skip &= ($currentVersion == $participant->getDayVersion($day));
+			$skip = ($currentVersion == $participant->getDayVersion($day));
 			if ($force) {
 				echo ' [Forced]', "\n";
 				$skip = false;
