@@ -347,6 +347,7 @@
 
 					$data['healthcheck'][$person]['days'][$day]['runonce'] = ($ret === 0);
 
+					unset($data['healthcheck'][$person]['days'][$day]['runonce_info']);
 					if ($ret != 0) {
 						echo 'F';
 						$data['healthcheck'][$person]['days'][$day]['log'] .= 'F';

@@ -177,10 +177,10 @@
                         echo '<td>';
                         echo ($ddata['runonce'] ? 'true' : 'false');
 
-                        if (isset($data['runonce_info'])) {
+                        if (isset($ddata['runonce_info'])) {
                             echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-' . $day . '-runonce" class="btn btn-sm btn-secondary">show/hide</button>';
                             echo '<div id="' . $person . '-' . $day . '-runonce" class="collapse"><br><code class="codeview"><pre>';
-                            echo htmlspecialchars($data['runonce_info']);
+                            echo htmlspecialchars($ddata['runonce_info']);
                             echo '</pre></code></div><br>';
                         }
 
