@@ -2,7 +2,7 @@
 	require_once(__DIR__ . '/functions.php');
 
 	$pageid = 'ranking';
-	$fluid = count($data['results']) > 4;
+	$fluid = count($data['results'] ?? []) > 4;
 
 	$dayLinks = [];
 	if (isset($_REQUEST['day'])) {

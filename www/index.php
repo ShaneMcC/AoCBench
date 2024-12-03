@@ -2,7 +2,7 @@
 	require_once(__DIR__ . '/functions.php');
 
 	$pageid = 'index';
-	$fluid = count($data['results']) > 4;
+	$fluid = count($data['results'] ?? []) > 4;
 
 	$averagingLinks = [];
 	foreach (['MEDIAN' => 'Median', 'MIN' => 'Minimum', 'Mean' => 'Mean', 'MAX' => 'Maximum'] as $m => $title) {
