@@ -254,7 +254,6 @@
 
 				if ($skip && $thisInputVersion == $input['version']) { echo 'Up to date.', "\n"; continue; }
 
-				$participant->setInput($day, $input['input']);
 				if ($needsRunOnce) {
 					list($ret, $result) = $participant->runOnce($day);
 					$needsRunOnce = False;
@@ -264,6 +263,7 @@
 						break;
 					}
 				}
+				$participant->setInput($day, $input['input']);
 				if ($bulkResults === FALSE) {
 					list($ret, $result) = $participant->run($day);
 					usleep($sleepTime); // Sleep a bit so that we're not constantly running.
