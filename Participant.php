@@ -338,6 +338,7 @@
 				@chmod($dir, 0777); // YOLO.
 				exec('git fetch 2>&1', $out, $ret);
 				exec('git reset --hard @{upstream} 2>&1', $out, $ret);
+				exec('git submodule foreach git reset --hard 2>&1', $out, $ret);
 				exec('git submodule update --init --recursive 2>&1', $out, $ret);
 				if ($ret != 0) { return false; }
 			} else {
