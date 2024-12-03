@@ -206,6 +206,7 @@
 
 			$needsRunOnce = true;
 			$bulkResults = false;
+			$preRunFail = false;
 
 			// Can we bulk-run this?
 			if ($participant instanceof V2Participant) {
@@ -225,19 +226,20 @@
 
 					if ($ret != 0) {
 						echo 'RunOnce error.', "\n";
-						$wantedInput = ''; // Force skipping everything
+						$preRunFail = true; // Force skipping everything
 					} else {
 						echo "\t", 'Bulk runnning: ', implode(', ', array_keys($bulkFiles)), "\n";
 						list($ret, $bulkResults) = $participant->doRun($day, 'bulkinput', ['files' => $bulkFiles]);
 						if ($ret != 0) {
 							echo 'Bulk run error.', "\n";
-							$wantedInput = ''; // Force skipping everything
+							$preRunFail = true; // Force skipping everything
 						}
 					}
 				}
 			}
 
 			foreach ($inputs[$day] as $inputPerson => $input) {
+				if ($preRunFail) { break; };
 				if (!preg_match('#^' . $wantedInput. '$#', $inputPerson)) { continue; }
 
 				echo '        ', $inputPerson, ': ';
