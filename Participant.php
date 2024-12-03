@@ -338,6 +338,7 @@
 				@chmod($dir, 0777); // YOLO.
 				exec('git fetch 2>&1', $out, $ret);
 				exec('git reset --hard @{upstream} 2>&1', $out, $ret);
+				exec('git submodule update --init --recursive 2>&1', $out, $ret);
 				if ($ret != 0) { return false; }
 			} else {
 				echo 'Cloning Repo.', "\n";
@@ -348,6 +349,7 @@
 				} else {
 					exec('git clone --branch ' . $branch . ' '. $this->getRepo() . ' ' . $dir . ' 2>&1', $out, $ret);
 				}
+				exec('git submodule update --init --recursive 2>&1', $out, $ret);
 				chdir($dir);
 				@chmod($dir, 0777); // YOLO.
 			}
