@@ -251,8 +251,10 @@
 			$data['healthcheck'][$person]['days'][$day]['log'] = '';
 			$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 
+			$needsInputSet = FALSE;
+
 			if ($input !== FALSE && $input !== NULL && $input !== '') {
-				$participant->setInput($day, $input);
+				$needsInputSet = True;
 				$data['healthcheck'][$person]['days'][$day]['testInputAnswers'] = ['part1' => $answer1, 'part2' => $answer2];
 			} else {
 				$testInputSource = $person;
@@ -362,6 +364,11 @@
 					} else if ($runDebugMode) {
 						echo "\n=[DEBUG]=========\n", implode("\n", $result), "\n=========[DEBUG]=\n";
 					}
+				}
+
+				if ($needsInputSet) {
+					$participant->setInput($day, $input);
+					$needsInputSet = False;
 				}
 
 				$start = time();
