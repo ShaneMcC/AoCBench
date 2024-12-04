@@ -660,10 +660,20 @@
 			$cmd = $this->getValueWithReplacements('cmd', $day);
 			$cmdWrapped = escapeshellarg($cmd);
 			$workdir = $this->getValueWithReplacements('workdir', $day) ?? $this->getAOCBenchConfig()['code'];
+			$codedir = $this->getAOCBenchConfig()['code'];
 			$canary = $this->getCanary();
 			$hyperfineOutput = '/tmp/' . uniqid('aocbench-hyperfine-', true) . '.csv';
 
 			switch ($scriptType) {
+				case 'shell':
+					return <<<RUNSCRIPT
+						#!/bin/bash
+
+						cd $codedir;
+						echo "### Running shell - $canary";
+						exec /bin/bash;
+						RUNSCRIPT;
+
 				case 'runonce':
 					return <<<RUNSCRIPT
 						#!/bin/bash
@@ -896,6 +906,13 @@
 		}
 
 		/**
+		 * Run a shell in the participants docker container.
+		 */
+		public function runShell() {
+			$this->doRun(0, 'shell');
+		}
+
+		/**
 		 * Run the given day.
 		 *
 		 * @param int $day Day number.
@@ -929,6 +946,7 @@
 			if ($runType == 'hyperfine') { $scriptType = 'hyperfine'; }
 			else if ($runType == 'runonce') { $scriptType = 'runonce'; }
 			else if ($runType == 'bulkinput') { $scriptType = 'bulkinput'; }
+			else if ($runType == 'shell') { $scriptType = 'shell'; }
 			else { $scriptType = 'time'; }
 
 			$runScriptFilename = './.aocbench_run/aocbench-' . uniqid(true) . '.sh';
@@ -952,7 +970,7 @@
 			}
 
 			$cmd = 'docker run --init --rm ';
-			if (!($this->getAOCBenchConfig()['notty'] ?? false)) {
+			if ($scriptType != 'shell' || !($this->getAOCBenchConfig()['notty'] ?? false)) {
 				$cmd .= ' -it';
 			}
 			$cmd .= ' --name ' . escapeshellarg($containerName);
@@ -989,7 +1007,10 @@
 			}
 
 			$cmd .= ' ' . escapeshellarg($imageName);
-			$cmd .= ' 2>&1';
+
+			if ($scriptType != 'shell') {
+				$cmd .= ' 2>&1';
+			}
 
 			if ($scriptType == 'hyperfine') {
 				$estimatedTime = ceil($opts['estimated'] ?? $execTimeout);
@@ -1001,6 +1022,8 @@
 				$runCount = count($opts['files'] ?? []);
 
 				$thisExecTimeout = ($estimatedTime * $runCount) + 60;
+			} else if ($scriptType == 'shell') {
+				$thisExecTimeout = '';
 			} else {
 				$thisExecTimeout = $execTimeout;
 			}
@@ -1015,13 +1038,19 @@
 
 			$output = [];
 			$ret = -1;
-			dockerTimedExec($containerName, $cmd, $output, $ret, $thisExecTimeout);
-			if (!$runDebugMode) {
-				@unlink($runScriptFilename);
+			if ($scriptType == 'shell') {
+				passthru($cmd, $ret);
+				$output = [];
+			} else {
+				dockerTimedExec($containerName, $cmd, $output, $ret, $thisExecTimeout);
+
+				if ($runDebugMode) {
+					echo "\n=[DEBUG output]=========\n", json_encode($output, JSON_PRETTY_PRINT), "\n=========[DEBUG]=\n";
+				}
 			}
 
-			if ($runDebugMode) {
-				echo "\n=[DEBUG output]=========\n", json_encode($output, JSON_PRETTY_PRINT), "\n=========[DEBUG]=\n";
+			if (!$runDebugMode) {
+				@unlink($runScriptFilename);
 			}
 
 			return [$ret, $this->parseRunOutput($output)];
