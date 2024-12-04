@@ -115,7 +115,7 @@
 		 * By default this is `/input.txt` appended to `getDayFilename($day)`
 		 *
 		 * @param int $day Day number.
-		 * @return Path to intput file.
+		 * @return String Path to intput file.
 		 */
 		public function getInputFilename($day) {
 			return $this->getDayFilename($day) . '/input.txt';
@@ -188,6 +188,11 @@
 			return FALSE;
 		}
 
+		public function isValidFilePath($filename) {
+			// Ensure path is part of the repo.
+			return file_exists($filename) && str_starts_with(realpath($filename), realpath($this->getDirName(true)));
+		}
+
 		/**
 		 * Get the input for the given day from this participant.
 		 *
@@ -195,7 +200,8 @@
 		 * @return String Input file contents for this day.
 		 */
 		public function getInput($day) {
-			return file_exists($this->getInputFilename($day)) ? file_get_contents($this->getInputFilename($day)) : '';
+			$filename = $this->getInputFilename($day);
+			return $this->isValidFilePath($filename) ? file_get_contents($filename) : '';
 		}
 
 		/**
@@ -227,7 +233,10 @@
 		 * @param String $input new input file content
 		 */
 		public function setInput($day, $input) {
-			file_put_contents($this->getInputFilename($day), $input);
+			$filename = $this->getInputFilename($day);
+			if ($this->isValidFilePath($filename)) {
+				file_put_contents($this->getInputFilename($day), $input);
+			}
 		}
 
 		/**
@@ -249,7 +258,7 @@
 		 */
 		public function getInputAnswer($day, $part) {
 			$answerFile = $this->getInputAnswerFilename($day);
-			if ($answerFile !== NULL && file_exists($answerFile)) {
+			if ($answerFile !== NULL && $this->isValidFilePath($answerFile)) {
 				$answers = file($answerFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 				if (isset($answers[$part - 1])) {
 					return $answers[$part - 1];
