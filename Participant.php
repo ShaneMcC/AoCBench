@@ -364,10 +364,12 @@
 				} else {
 					exec('git clone --branch ' . $branch . ' '. $this->getRepo() . ' ' . $dir . ' 2>&1', $out, $ret);
 				}
-				$finalResult = $finalResult && ($ret == 0);
-				exec('git submodule update --init --recursive 2>&1', $out, $ret);
-				$finalResult = $finalResult && ($ret == 0);
 				chdir($dir);
+				$finalResult = $finalResult && ($ret == 0);
+				if ($finalResult) {
+					exec('git submodule update --init --recursive 2>&1', $out, $ret);
+					$finalResult = $finalResult && ($ret == 0);
+				}
 				@chmod($dir, 0777); // YOLO.
 			}
 
@@ -637,8 +639,10 @@
 
 				case 'bulkinput':
 					$inputFile = $this->getCodeDir() . '/' . $this->getInputFilename($day);
-					// Allow the script to override it.
-					chmod($this->getInputFilename($day), 0777);
+					if ($this->isValidFilePath($this->getInputFilename($day))) {
+						// Allow the script to override it.
+						chmod($this->getInputFilename($day), 0777);
+					}
 
 					$script = <<<RUNSCRIPT
 						#!/bin/bash
