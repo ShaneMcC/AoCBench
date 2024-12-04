@@ -160,10 +160,12 @@ common:
 ### [%] Path to per-day input file.
 ### This is the file that will be overwritten with other test inputs, or used to feed input to other participants
 ### This is also the path that will be used to generate %inputpath%
+### This should be relative to the `code` dir above, not `workdir`
 ### Default: `%day%/input.txt`
 inputfile: "%day%/input.txt"
 
 ### [%] Path to per-day answer file used to validate other participant answers
+### This should be relative to the `code` dir above, not `workdir`
 ### Default: `%day%/answers.txt`
 answerfile: "%day%/answers.txt"
 ```

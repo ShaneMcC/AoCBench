@@ -332,15 +332,20 @@
 			global $runDebugMode;
 			$out = [];
 			$ret = 0;
+			$finalResult = true;
+			putenv("GIT_TERMINAL_PROMPT=0");
 			if (file_exists($dir . '/.git')) {
 				echo 'Updating Repo.', "\n";
 				chdir($dir);
 				@chmod($dir, 0777); // YOLO.
 				exec('git fetch 2>&1', $out, $ret);
+				$finalResult = $finalResult && ($ret == 0);
 				exec('git reset --hard @{upstream} 2>&1', $out, $ret);
+				$finalResult = $finalResult && ($ret == 0);
 				exec('git submodule foreach git reset --hard 2>&1', $out, $ret);
+				$finalResult = $finalResult && ($ret == 0);
 				exec('git submodule update --init --recursive 2>&1', $out, $ret);
-				if ($ret != 0) { return false; }
+				$finalResult = $finalResult && ($ret == 0);
 			} else {
 				echo 'Cloning Repo.', "\n";
 				@mkdir($dir, 0755, true);
@@ -350,7 +355,9 @@
 				} else {
 					exec('git clone --branch ' . $branch . ' '. $this->getRepo() . ' ' . $dir . ' 2>&1', $out, $ret);
 				}
+				$finalResult = $finalResult && ($ret == 0);
 				exec('git submodule update --init --recursive 2>&1', $out, $ret);
+				$finalResult = $finalResult && ($ret == 0);
 				chdir($dir);
 				@chmod($dir, 0777); // YOLO.
 			}
@@ -359,7 +366,7 @@
 				echo "\n=[DEBUG]=========\n", implode("\n", $out), "\n=========[DEBUG]=\n";
 			}
 
-			return $ret == 0 ? file_exists($dir . '/.git') : false;
+			return $finalResult ? file_exists($dir . '/.git') : false;
 		}
 
 		/**
