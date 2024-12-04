@@ -121,6 +121,18 @@
 			return $this->getDayFilename($day) . '/input.txt';
 		}
 
+		protected function findGitDir($path) {
+			$output = [];
+			if (file_exists($path)) {
+				$pwd = getcwd();
+				$dir = is_dir($path) ? $path : dirname($path);
+				chdir($dir);
+				exec('git rev-parse --git-dir', $output);
+				chdir($pwd);
+			}
+			return $output[0] ?? NULL;
+		}
+
 		/**
 		 * Get the latest commit id for a given path.
 		 *
@@ -128,17 +140,32 @@
 		 * @return String Git version or NULL.
 		 */
 		protected function getGitVersion($path) {
-			$cmd = 'git rev-list -1 HEAD --';
+			$cmd = '';
 			if (!is_array($path)) { $path = [$path]; }
+
+			$gitDir = null;
 
 			$hasValidPaths = false;
 			foreach ($path as $p) {
-				if (!empty(glob($p))) {
+				$glob = glob($p);
+				if (!empty($glob)) {
 					$hasValidPaths = true;
-					$cmd .= ' ' . escapeshellarg($p);
+					foreach ($glob as $g) {
+						$g = realpath($g);
+						if ($gitDir == null) {
+							$gitDir = $this->findGitDir($g);
+						}
+						$cmd .= ' ' . escapeshellarg(realpath($g));
+					}
 				}
 			}
 			$cmd .= ' 2>&1';
+
+			if ($gitDir == null) {
+				$gitDir = $this->findGitDir($this->getDirName(true));
+			}
+
+			$cmd = 'git --git-dir ' . escapeshellarg($gitDir) . ' rev-list -1 HEAD --' . $cmd;
 
 			if ($hasValidPaths) {
 				exec($cmd, $output);
@@ -384,8 +411,10 @@
 		 * Clean up after running the day(s).
 		 */
 		public function cleanup() {
-			exec('git reset --hard origin 2>&1');
+			exec('git reset --hard @{upstream} 2>&1');
 			exec('git clean -fx 2>&1');
+			exec('git submodule foreach git reset --hard 2>&1', $out, $ret);
+			exec('git submodule foreach git clean -fx 2>&1', $out, $ret);
 			if (file_exists('./cleanup.sh')) {
 				exec('bash ./cleanup.sh 2>&1 </dev/null');
 			}
@@ -533,13 +562,10 @@
 		 * Clean up after running the day(s).
 		 */
 		public function cleanup() {
-			$branch = $this->getBranch();
-			if (empty($branch)) {
-				exec('git reset --hard origin 2>&1');
-			} else {
-				exec('git reset --hard origin/' . $branch . ' 2>&1');
-			}
+			exec('git reset --hard @{upstream} 2>&1');
 			exec('git clean -fx 2>&1');
+			exec('git submodule foreach git reset --hard 2>&1', $out, $ret);
+			exec('git submodule foreach git clean -fx 2>&1', $out, $ret);
 		}
 
 		public function getImageInfo() {
