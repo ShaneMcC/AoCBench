@@ -2,13 +2,15 @@
 	class Participant {
 		private $name;
 		private $repo;
+		private $extraSettings;
 
 		/**
 		 * Create a basic participant.
 		 */
-		public function __construct($name = '', $repo = '') {
+		public function __construct($name = '', $repo = '', $extraSettings = []) {
 			$this->name = $name;
 			$this->repo = $repo;
+			$this->extraSettings = $extraSettings;
 		}
 
 		public function isValidParticipant() {
@@ -75,6 +77,15 @@
 		 * @return String Languages for participant
 		 */
 		function getLanguage() { return ''; }
+
+		/**
+		 * Get encryption settings if any
+		 *
+		 * @return Array|False Encryption settings
+		 */
+		function getEncryptionSettings() {
+			return $this->extraSettings['encryption'] ?? FALSE;
+		}
 
 		/**
 		 * Get the filename that should be versioned for this day.
@@ -359,6 +370,49 @@
 		}
 
 		/**
+		 * Called prior to fetching for updates to the repo.
+		 * This is only called on update, and not on a fresh clone.
+		 */
+		public function updatePreFetch() {
+			global $localTranscrypt;
+			$encryption = $this->getEncryptionSettings();
+			if (is_array($encryption)) {
+				$type = $encryption['type'] ?? '';
+				if ($type == 'transcrypt' && file_exists($localTranscrypt)) {
+					exec(escapeshellarg($localTranscrypt) . ' -y --flush-credentials 2>&1', $out, $ret);
+				}
+			}
+		}
+
+		/**
+		 * Called after running all the repo update/clone commands.
+		 *
+		 * @param $success Was the clone/update a success?
+		 * @return bool Was this a success?
+		 */
+		public function updatePostFetch($success = True) {
+			global $localTranscrypt;
+			$encryption = $this->getEncryptionSettings();
+			if (is_array($encryption)) {
+				$type = $encryption['type'] ?? '';
+				if ($type == 'transcrypt' && file_exists($localTranscrypt)) {
+					$cipher = $encryption['cipher'] ?? 'aes-256-cbc';
+					$password = $encryption['password'] ?? '';
+					if (!empty($cipher) && !empty($password)) {
+						exec(escapeshellarg($localTranscrypt) . ' -y -c ' . escapeshellarg($cipher) . ' -p ' . escapeshellarg($password) . ' 2>&1', $out, $ret);
+						return ($ret == 0);
+					} else {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		/**
 		 * In the given directory, either update the git repository, or clone a
 		 * fresh copy.
 		 *
@@ -374,6 +428,7 @@
 				echo 'Updating Repo.', "\n";
 				chdir($dir);
 				@chmod($dir, 0777); // YOLO.
+				$this->updatePreFetch();
 				exec('git fetch 2>&1', $out, $ret);
 				$finalResult = $finalResult && ($ret == 0);
 				exec('git reset --hard @{upstream} 2>&1', $out, $ret);
@@ -382,6 +437,7 @@
 				$finalResult = $finalResult && ($ret == 0);
 				exec('git submodule update --init --recursive 2>&1', $out, $ret);
 				$finalResult = $finalResult && ($ret == 0);
+				$finalResult = $finalResult && $this->updatePostFetch($finalResult);
 			} else {
 				echo 'Cloning Repo.', "\n";
 				@mkdir($dir, 0755, true);
@@ -398,6 +454,7 @@
 					$finalResult = $finalResult && ($ret == 0);
 				}
 				@chmod($dir, 0777); // YOLO.
+				$finalResult = $finalResult && $this->updatePostFetch($finalResult);
 			}
 
 			if ($runDebugMode) {

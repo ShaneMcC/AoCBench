@@ -27,6 +27,7 @@
 	$sleepTime = 100;
 
 	$localHyperfine = null;
+	$localTranscrypt = null;
 
 	$normaliseInput = true;
 	$inputsDir = __DIR__ . '/inputs/';
