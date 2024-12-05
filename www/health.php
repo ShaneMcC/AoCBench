@@ -324,17 +324,17 @@
 
                                 $rowData .= $matrixperson . ' => <span class="' . $matrixClass . '">' . $result . '</span><br>';
                             } else {
-                                $rowData .= $matrixperson . ' => No matrix run not found.<br>';
+                                $rowData .= $matrixperson . ' => Matrix run not found for our input.<br>';
                             }
                         } else {
-                            $rowData .= $matrixperson . ' => No matrix runs found.<br>';
+                            $rowData .= $matrixperson . ' => No matrix runs found for day.<br>';
                         }
                     }
 
                     echo '<tr class="collapse dayinfo ' . $rowClass .'">';
                     echo '<th><a class="daylink" href="./matrix.php?day=', $day, '&input=', $person,'">Other People Matrix Results</a></th>';
                     echo '<td>';
-                    echo $rowData;
+                    echo empty($rowData) ? 'No matrix runs found.' : $rowData;
                     echo '</td>';
                     echo '</tr>';
                     $rowspan++;
