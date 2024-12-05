@@ -73,6 +73,10 @@
 
 			$dayInputs = $dayParticipants;
 
+			if (isset($_REQUEST['participant'])) {
+				$dayParticipants = array_filter($dayParticipants, fn ($x) => preg_match('#^' . $_REQUEST['participant'] . '$#', $x));
+			}
+
 			$hasDay = false;
 			foreach ($dayParticipants as $p1) {
 				if (isset($matrix['results'][$p1]['days'][$day])) {
@@ -85,6 +89,10 @@
 						}
 					}
 				}
+			}
+
+			if (isset($_REQUEST['input'])) {
+				$dayInputs = array_filter($dayInputs, fn ($x) => preg_match('#^' . $_REQUEST['input'] . '$#', $x));
 			}
 
 			if (isset($_REQUEST['day'])) {
