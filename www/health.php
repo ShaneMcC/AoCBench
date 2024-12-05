@@ -294,7 +294,45 @@
                     }
 
                     echo '<tr class="collapse dayinfo ' . $rowClass .'">';
-                    echo '<th>Matrix Results</th>';
+                    echo '<th><a class="daylink" href="./matrix.php?day=', $day, '&participant=', $person,'">My Matrix Results</a></th>';
+                    echo '<td>';
+                    echo $rowData;
+                    echo '</td>';
+                    echo '</tr>';
+                    $rowspan++;
+
+                    $rowClass = '';
+                    $rowData = '';
+                    foreach (array_keys($matrix['results']) as $matrixperson) {
+                        if (isset($matrix['results'][$matrixperson]['days'][$day])) {
+                            $odata = $matrix['results'][$matrixperson]['days'][$day]['outputs'][$person] ?? [];
+                            if (!empty($odata)) {
+                                $matrixClass = '';
+                                if ($odata['return'] != '0') {
+                                    $result = 'Failed to run';
+                                    $matrixClass = 'text-danger';
+                                } else if (isset($odata['correct']) && $odata['correct']) {
+                                    $result = 'Correct';
+                                    $matrixClass = 'text-success';
+                                } else if (isset($odata['correct']) && !$odata['correct']) {
+                                    $result = 'Failed';
+                                    $matrixClass = 'text-danger';
+                                } else {
+                                    $result = 'Unknown';
+                                    $matrixClass = 'text-secondary';
+                                }
+
+                                $rowData .= $matrixperson . ' => <span class="' . $matrixClass . '">' . $result . '</span><br>';
+                            } else {
+                                $rowData .= $matrixperson . ' => No matrix run not found.<br>';
+                            }
+                        } else {
+                            $rowData .= $matrixperson . ' => No matrix runs found.<br>';
+                        }
+                    }
+
+                    echo '<tr class="collapse dayinfo ' . $rowClass .'">';
+                    echo '<th><a class="daylink" href="./matrix.php?day=', $day, '&input=', $person,'">Other People Matrix Results</a></th>';
                     echo '<td>';
                     echo $rowData;
                     echo '</td>';
