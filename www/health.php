@@ -19,8 +19,8 @@
             if ($_REQUEST['person'] != '*' && $_REQUEST['person'] != $person) {
                 continue;
             }
-
-            echo '<h3 id="', $person, '">', $pdata['name'], '</h3>';
+            $link .= ' ';
+            echo '<h3 id="', $person, '">', $pdata['name'], ' (<a href="./matrix.php?participant=', $person, '">📋</a>)</h3>';
 
             if (isset($pdata['repo']) && !empty($pdata['repo'])) {
                 echo '<strong>Repo:</strong> <a href="' . $pdata['repo'] . '"><img height="16px" width="16px" src="github.ico" alt="github"> ' . $pdata['repo'] . '</a>';

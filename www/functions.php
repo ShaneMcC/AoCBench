@@ -252,6 +252,8 @@
 			$link .= ' <a href="./health.php?person=' . $pdata['name'] . '">🗹</a>';
 		}
 
+		$link .= ' <a href="./matrix.php?participant=' . $pdata['name'] . '">📋</a>';
+
 		return $link;
 	}
 

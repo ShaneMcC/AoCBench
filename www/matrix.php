@@ -151,7 +151,7 @@
 				} else {
 					$name = ucwords(preg_replace('#^custom-#', 'custom input: ', $p2));
 				}
-				echo '<th class="who">', $name, '</th>';
+				echo '<th class="who">', $name, ' <a href="./matrix.php?input=', $name, '">📋</a></th>';
 				foreach ($dayParticipants as $p1) {
 					$classes = ['output'];
 
