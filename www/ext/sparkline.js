@@ -197,8 +197,15 @@ function getY(max, height, diff, value) {
       }
     });
 
+    var realWidth;
+
+    interactionLayer.addEventListener("mouseover", event => {
+        realWidth = svg.clientWidth;
+    });
+
     interactionLayer.addEventListener("mousemove", event => {
       const mouseX = event.offsetX;
+      // const mouseX = (event.offsetX * width) / realWidth;
 
       let nextDataPoint = datapoints.find(entry => {
         return entry.x >= mouseX;

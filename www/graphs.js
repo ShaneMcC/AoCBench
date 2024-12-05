@@ -14,6 +14,7 @@ function handleTimes(times) {
         var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute("width", "200");
         svg.setAttribute("height", "30");
+        svg.setAttribute("viewBox", "0 0 200 30");
         svg.setAttribute("stroke-width", "2");
         svg.setAttribute("stroke", "blue");
         svg.setAttribute("fill", "rgba(0, 0, 255, .2)");

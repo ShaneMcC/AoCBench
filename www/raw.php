@@ -12,10 +12,11 @@
 		if (isset($_REQUEST['timesOnly'])) {
 			$dumpData = [];
 			foreach ($data['results'] as $particpant => $pdata) {
-				if (!isset($ddata['times'])) { continue; }
+				if (!isset($pdata['days'])) { continue; }
 
 				$dumpData[$particpant] = ['days' => []];
 				foreach ($pdata['days'] as $day => $ddata) {
+					if (!isset($ddata['times'])) { continue; }
 					$dumpData[$particpant]['days'][$day] = [];
 					$dumpData[$particpant]['days'][$day]['times'] = array_map(function($t) use ($timeFormat) {
 						$time = parseTime($t);
