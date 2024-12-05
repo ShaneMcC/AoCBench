@@ -380,7 +380,7 @@
 						$failedRun = true;
 						break;
 					} else if ($runDebugMode) {
-						echo "\n=[DEBUG]=========\n", implode("\n", $result), "\n=========[DEBUG]=\n";
+						echo "\n=[DEBUG]=========\n\t", implode("\n\t", $result), "\n========[/DEBUG]=\n";
 					}
 				}
 
@@ -433,7 +433,7 @@
 						}
 					}
 					if ($runDebugMode && $i == 0) {
-						echo "\n=[DEBUG]=========\n", implode("\n", $result), "\n=========[DEBUG]=\n";
+						echo "\n=[DEBUG]=========\n\t", implode("\n\t", $result), "\n========[/DEBUG]=\n";
 					}
 				}
 

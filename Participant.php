@@ -464,7 +464,7 @@
 			}
 
 			if ($runDebugMode) {
-				echo "\n=[DEBUG]=========\n", implode("\n", $out), "\n========[/DEBUG]=\n";
+				echo "\n=[DEBUG]=========\n\t", implode("\n\t", $out), "\n========[/DEBUG]=\n";
 			}
 
 			return $finalResult ? file_exists($dir . '/.git') : false;
@@ -600,7 +600,7 @@
 					chdir(dirname($dockerFile));
 					$cmd = 'docker build . -t ' . escapeshellarg($imageName) . ' --file ' . escapeshellarg(basename($dockerFile)) . ' 2>&1';
 					if ($runDebugMode) {
-						echo "\n=[DEBUG]=========\n", $cmd, "\n========[/DEBUG]=\n";
+						echo "\n=[DEBUG]=========\n\t", $cmd, "\n========[/DEBUG]=\n";
 					}
 					exec($cmd, $out, $ret);
 					if ($ret != 0) {
@@ -1051,7 +1051,7 @@
 				dockerTimedExec($containerName, $cmd, $output, $ret, $thisExecTimeout);
 
 				if ($runDebugMode) {
-					echo "\n=[DEBUG output]=========\n", "\t", implode("\n\t", $output), "\n========[/DEBUG]=\n";
+					echo "\n=[DEBUG output]=========\n\t", implode("\n\t", $output), "\n========[/DEBUG]=\n";
 				}
 			}
 
