@@ -669,6 +669,10 @@
 			$codedir = $this->getAOCBenchConfig()['code'];
 			$canary = $this->getCanary();
 			$hyperfineOutput = '/tmp/' . uniqid('aocbench-hyperfine-', true) . '.csv';
+			$singleCmd = '';
+			foreach (($opts['args'] ?? []) as $a) {
+				$singleCmd .= ' ' . escapeshellarg($a);
+			}
 
 			switch ($scriptType) {
 				case 'shell':
@@ -678,6 +682,19 @@
 						cd $codedir;
 						echo "### Running shell - $canary";
 						exec /bin/bash;
+						RUNSCRIPT;
+
+				case 'single':
+					return <<<RUNSCRIPT
+						#!/bin/bash
+
+						cd $workdir
+						echo '### $canary START - SINGLE ###';
+						$singleCmd
+						EXITCODE=\${?}
+						echo '### $canary END ###';
+
+						exit \${EXITCODE}
 						RUNSCRIPT;
 
 				case 'runonce':
@@ -953,6 +970,7 @@
 			else if ($runType == 'runonce') { $scriptType = 'runonce'; }
 			else if ($runType == 'bulkinput') { $scriptType = 'bulkinput'; }
 			else if ($runType == 'shell') { $scriptType = 'shell'; }
+			else if ($runType == 'single') { $scriptType = 'single'; }
 			else { $scriptType = 'time'; }
 
 			$runScriptFilename = './.aocbench_run/aocbench-' . uniqid(true) . '.sh';
