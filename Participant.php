@@ -132,16 +132,22 @@
 			return $this->getDayFilename($day) . '/input.txt';
 		}
 
-		protected function findGitDir($path) {
+		/**
+		 * Get the git directories for a given path
+		 *
+		 * @param String $path Path to check (single or array).
+		 * @return String Git version or NULL.
+		 */
+		public function findGitDir($path) {
 			$output = [];
 			if (file_exists($path)) {
 				$pwd = getcwd();
 				$dir = is_dir($path) ? $path : dirname($path);
 				chdir($dir);
-				exec('git rev-parse --git-dir', $output);
+				exec('git rev-parse --git-dir --show-toplevel; git remote get-url origin', $output);
 				chdir($pwd);
 			}
-			return $output[0] ?? NULL;
+			return $output ?? [null, null, null];
 		}
 
 		/**
@@ -164,7 +170,7 @@
 					foreach ($glob as $g) {
 						$g = realpath($g);
 						if ($gitDir == null) {
-							$gitDir = $this->findGitDir($g);
+							$gitDir = $this->findGitDir($g)[0];
 						}
 						$cmd .= ' ' . escapeshellarg(realpath($g));
 					}
@@ -173,7 +179,7 @@
 			$cmd .= ' 2>&1';
 
 			if ($gitDir == null) {
-				$gitDir = $this->findGitDir($this->getDirName(true));
+				$gitDir = $this->findGitDir($this->getDirName(true))[0];
 			}
 
 			$cmd = 'git --git-dir ' . escapeshellarg($gitDir) . ' rev-list -1 HEAD --' . $cmd;

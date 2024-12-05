@@ -203,10 +203,28 @@
 			}
 			if (!preg_match('#^' . $wantedDay. '$#', $day)) { continue; }
 
-			$data['healthcheck'][$person]['days'][$day]['input'] = ['version' => $participant->getInputVersion($day, false), 'path' => $participant->getInputFilename($day)];
+			$inputFilename = $participant->getInputFilename($day);
+			$inputGitDir = $participant->findGitDir($inputFilename);
+			$inputGitRelative = str_replace(realpath($inputGitDir[1]) . '/', '', realpath($inputFilename));
+			if ($inputGitRelative[0] == '/') { $inputGitRelative = $inputFilename; }
+
+			$data['healthcheck'][$person]['days'][$day]['input'] = ['version' => $participant->getInputVersion($day, false),
+			                                                        'path' => $inputFilename,
+																	'gitRelativePath' => $inputGitRelative,
+																	'gitRepoURL' => $inputGitDir[2],
+																   ];
+
+
+			$answerFilename = $participant->getInputAnswerFilename($day);
+			$answerGitDir = $participant->findGitDir($answerFilename);
+			$answerGitRelative = str_replace(realpath($answerGitDir[1]) . '/', '', realpath($answerFilename));
+			if ($answerGitRelative[0] == '/') { $answerGitRelative = $answerFilename; }
+
 			$answers = [$participant->getInputAnswer($day, 1), $participant->getInputAnswer($day, 2)];
 			$data['healthcheck'][$person]['days'][$day]['answers'] = ['version' => $participant->getInputAnswerVersion($day, false),
-			                                                      'path' => $participant->getInputAnswerFilename($day),
+			                                                      'path' => $answerFilename,
+																  'gitRelativePath' => $answerGitRelative,
+																  'gitRepoURL' => $answerGitDir[2],
 			                                                      'part1' => (isset($answers[0]) && !empty($answers[0])),
 																  'part2' => (isset($answers[1]) && !empty($answers[1]))];
 

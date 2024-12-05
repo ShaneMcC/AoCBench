@@ -185,19 +185,32 @@
 		return $mtime;
 	}
 
+	function convertRepoURL($repourl) {
+		if (!str_starts_with($repourl, 'http') && preg_match('#^.*@(.*):(.*?)(?:\.git)?$#', $repourl, $m)) {
+			$repourl = 'https://' . $m[1] . '/' . $m[2];
+		}
+		return $repourl;
+	}
 
 	function repoFileAsLink($participant, $file, $title = null) {
 		if ($title == null) { $title = $file; }
 
+		$repourl = convertRepoURL($participant['repo']);
+
 		$link = $title;
-		if (stristr($participant['repo'], 'github.com') !== false) {
+		if (stristr($repourl, 'github.com') !== false) {
 			$branch = $participant['branch'] ?? '-';
-			$url = $participant['repo'] . '/blob/' . $branch .'/' . $file;
+			$url = $repourl . '/blob/' . $branch .'/' . $file;
 			$link = '<a href="' . $url . '">' . $title . '</a>';
-		} else if (stristr($participant['repo'], 'gitlab.com') !== false) {
+		} else if (stristr($repourl, 'gitlab.com') !== false) {
 			// HEAD is not *quite* right, but close enough in most cases I guess.
 			$branch = $participant['branch'] ?? 'HEAD';
-			$url = $participant['repo'] . '/-/blob/' . $branch . '/' . $file;
+			$url = $repourl . '/-/blob/' . $branch . '/' . $file;
+			$link = '<a href="' . $url . '">' . $title . '</a>';
+		} else {
+			// Guess at something half-standard hopefully?
+			$branch = $participant['branch'] ?? 'HEAD';
+			$url = $repourl . '/src/branch/' . $branch . '/' . $file;
 			$link = '<a href="' . $url . '">' . $title . '</a>';
 		}
 
@@ -207,14 +220,21 @@
 	function repoCommitAsLink($participant, $commit, $title = null) {
 		if ($title == null) { $title = $commit; }
 
+		$repourl = convertRepoURL($participant['repo']);
+
 		$link = $title;
-		if (stristr($participant['repo'], 'github.com') !== false) {
-			$url = $participant['repo'] . '/commit/' . $commit;
+		if (stristr($repourl, 'github.com') !== false) {
+			$url = $repourl . '/commit/' . $commit;
 			$link = '<a href="' . $url . '">' . $title . '</a>';
-		} else if (stristr($participant['repo'], 'gitlab.com') !== false) {
-			$url = $participant['repo'] . '/-/commit/' . $commit;
+		} else if (stristr($repourl, 'gitlab.com') !== false) {
+			$url = $repourl . '/-/commit/' . $commit;
+			$link = '<a href="' . $url . '">' . $title . '</a>';
+		} else {
+			// Guess at something half-standard hopefully?
+			$url = $repourl . '/commit/' . $commit;
 			$link = '<a href="' . $url . '">' . $title . '</a>';
 		}
+
 
 		return $link;
 	}

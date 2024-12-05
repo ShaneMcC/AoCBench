@@ -123,10 +123,13 @@
                         $rowspan++;
                     }
 
+                    $inputpdata = $pdata;
+                    $inputpdata['repo'] = $ddata['input']['gitRepoURL'] ?? $pdata['repo'];
+
                     $inputVersion = $ddata['input']['version'] ?? '';
                     echo '<tr class="collapse dayinfo ', (empty($inputVersion) ? 'table-danger' : ''), '">';
                     echo '<th>Input Version</th>';
-                    echo '<td>', repoCommitAsLink($pdata, $inputVersion), '</td>';
+                    echo '<td>', repoCommitAsLink($inputpdata, $inputVersion), '</td>';
                     echo '</tr>';
                     if (empty($inputVersion)) { $dayClass = 'table-danger'; }
                     $rowspan++;
@@ -134,15 +137,25 @@
                     if (isset($ddata['input']['path'])) {
                         echo '<tr class="collapse dayinfo">';
                         echo '<th>Input Path</th>';
-                        echo '<td>', repoFileAsLink($pdata, $ddata['input']['path']), '</td>';
+                        if (empty($ddata['input']['gitRelativePath'] ?? '') || $ddata['input']['path'] == $ddata['input']['gitRelativePath']) {
+                            echo '<td>', repoFileAsLink($inputpdata, $ddata['input']['path']), '</td>';
+                        } else {
+                            echo '<td>';
+                            echo str_replace($ddata['input']['gitRelativePath'], '', $ddata['input']['path']);
+                            echo repoFileAsLink($inputpdata, $ddata['input']['gitRelativePath']);
+                            echo '</td>';
+                        }
                         echo '</tr>';
                         $rowspan++;
                     }
 
+                    $answerspdata = $pdata;
+                    $answerspdata['repo'] = $ddata['answers']['gitRepoURL'] ?? $pdata['repo'];
+
                     $answerVersion = $ddata['input']['version'] ?? '';
                     echo '<tr class="collapse dayinfo ', (empty($answerVersion) ? 'table-danger' : ''), '">';
                     echo '<th>Answers Version</th>';
-                    echo '<td>', repoCommitAsLink($pdata, $answerVersion), '</td>';
+                    echo '<td>', repoCommitAsLink($answerspdata, $answerVersion), '</td>';
                     echo '</tr>';
                     if (empty($answerVersion)) { $dayClass = 'table-danger'; }
                     $rowspan++;
@@ -150,7 +163,14 @@
                     if (isset($ddata['answers']['path'])) {
                         echo '<tr class="collapse dayinfo">';
                         echo '<th>Answer Path</th>';
-                        echo '<td>', repoFileAsLink($pdata, $ddata['answers']['path']), '</td>';
+                        if (empty($ddata['answers']['gitRelativePath'] ?? '') || $ddata['answers']['path'] == $ddata['answers']['gitRelativePath']) {
+                            echo '<td>', repoFileAsLink($answerspdata, $ddata['answers']['path']), '</td>';
+                        } else {
+                            echo '<td>';
+                            echo str_replace($ddata['answers']['gitRelativePath'], '', $ddata['answers']['path']);
+                            echo repoFileAsLink($answerspdata, $ddata['answers']['gitRelativePath']);
+                            echo '</td>';
+                        }
                         echo '</tr>';
                         $rowspan++;
                     }
