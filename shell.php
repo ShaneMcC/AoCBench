@@ -3,7 +3,7 @@
 	require_once(__DIR__ . '/functions.php');
 
 	// Get CLI Options.
-	$__CLIOPTS = getopt('p:d:s:h', ['participant:', 'day:', 'script:', 'section:', 'help', 'debug', 'noclean', 'lock', 'globallock'], $restIndex);
+	$__CLIOPTS = getopt('p:d:s:h', ['participant:', 'day:', 'script:', 'section:', 'help', 'debug', 'preclean', 'update', 'noclean', 'lock', 'globallock'], $restIndex);
 
 	$wantedParticipant = getOptionValue('p', 'participant', '');
 	$runDebugMode = getOptionValue(NULL, 'debug', NULL) !== NULL;
@@ -11,6 +11,8 @@
 	$wantedDay = getOptionValue('d', 'day', '0');
 	$restArgs = array_slice($argv, $restIndex);
 	$noClean = getOptionValue(NULL, 'noclean', NULL) !== NULL;
+	$preClean = getOptionValue(NULL, 'preclean', NULL) !== NULL;
+	$wantUpdate = getOptionValue(NULL, 'update', NULL) !== NULL;
 	$wantedSection = getOptionValue(NULL, 'section', '.*');
 
 	$wantedLock = getOptionValue(NULL, 'lock', NULL) !== NULL;
@@ -30,6 +32,8 @@
 		echo '  -d, --day <day>               Some script types need a day, specify it here. (Default: 1)', "\n";
 		echo '      --debug                   Enable extra debugging in various places.', "\n";
 		echo '      --noclean                 Do not run clean() after our command.', "\n";
+		echo '      --preclean                Run clean at the start.', "\n";
+		echo '      --update                  Update the repo.', "\n";
 		echo '      --lock                    Require lock file acquisition before running.', "\n";
 		echo '      --globallock              Require global lock file acquisition before running (implies --lock).', "\n";
 		echo '', "\n";
@@ -57,13 +61,19 @@
 
 		echo "\n", $participant->getName() , ': ', "\n";
 		$dir = $participantsDir . '/' . $person;
-		if (!file_exists($dir)) {
+		if (!file_exists($dir) || $wantUpdate) {
 			if (!$participant->updateRepo($dir)) {
 				echo 'Failed to clone/update repo.', "\n";
 				continue;
 			}
 		}
 		chdir($dir);
+
+		if ($preClean) {
+			echo 'Pre-cleanup.', "\n";
+			$participant->cleanup();
+		}
+
 		$valid = $participant->isValidParticipant();
 		if ($valid !== true) {
 			echo 'Repo not valid: ', $valid, "\n";
