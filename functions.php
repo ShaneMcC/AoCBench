@@ -106,12 +106,34 @@
 		file_put_contents($file, json_encode($data));
 	}
 
-	function getOptionValue($short = NULL, $long = NULL, $default = '') {
+	function getOptionValueAll($short = NULL, $long = NULL, $default = '') {
 		global $__CLIOPTS;
 
-		if ($short !== NULL && array_key_exists($short, $__CLIOPTS)) { $val = $__CLIOPTS[$short]; }
-		else if ($long !== NULL && array_key_exists($long, $__CLIOPTS)) { $val = $__CLIOPTS[$long]; }
-		else { $val = $default; }
+		$found = False;
+
+		$val = [];
+		if ($short !== NULL && array_key_exists($short, $__CLIOPTS)) {
+			$found = true;
+			$shortVal = $__CLIOPTS[$short];
+			$val = array_merge($val, is_array($shortVal) ? $shortVal : [$shortVal]);
+		}
+		if ($long !== NULL && array_key_exists($long, $__CLIOPTS)) {
+			$found = true;
+			$longVal = $__CLIOPTS[$long];
+			$val = array_merge($val, is_array($longVal) ? $longVal : [$longVal]);
+		}
+
+		if (!$found) {
+			$val[] = $default;
+		}
+
+		if (count($val) == 1) { $val = array_pop($val); }
+
+		return $val;
+	}
+
+	function getOptionValue($short = NULL, $long = NULL, $default = '') {
+		$val = getOptionValueAll($short, $long, $default);
 
 		if (is_array($val)) { $val = array_pop($val); }
 
