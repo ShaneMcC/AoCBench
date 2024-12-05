@@ -72,6 +72,18 @@
 		}
 	}
 
+	function getGlobalLock() {
+		global $globalLockfile, $__GLOBALLOCK;
+
+		if (!file_exists($globalLockfile)) { file_put_contents($globalLockfile, ''); }
+
+		$__GLOBALLOCK = fopen($globalLockfile, 'r+');
+		if (!flock($__GLOBALLOCK, LOCK_EX | LOCK_NB)) {
+			echo 'Unable to get lock on ', $globalLockfile, "\n";
+			exit(1);
+		}
+	}
+
 	function loadData($file) {
 		$data = ['results' => []];
 		if (file_exists($file)) {

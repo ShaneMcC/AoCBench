@@ -3,7 +3,7 @@
 	require_once(__DIR__ . '/functions.php');
 
 	// Get CLI Options.
-	$__CLIOPTS = getopt('p:d:s:h', ['participant:', 'day:', 'script:', 'section:', 'help', 'debug', 'noclean'], $restIndex);
+	$__CLIOPTS = getopt('p:d:s:h', ['participant:', 'day:', 'script:', 'section:', 'help', 'debug', 'noclean', 'lock', 'globallock'], $restIndex);
 
 	$wantedParticipant = getOptionValue('p', 'participant', '');
 	$runDebugMode = getOptionValue(NULL, 'debug', NULL) !== NULL;
@@ -12,6 +12,9 @@
 	$restArgs = array_slice($argv, $restIndex);
 	$noClean = getOptionValue(NULL, 'noclean', NULL) !== NULL;
 	$wantedSection = getOptionValue(NULL, 'section', '.*');
+
+	$wantedLock = getOptionValue(NULL, 'lock', NULL) !== NULL;
+	$wantedGlobalLock = getOptionValue(NULL, 'globallock', NULL) !== NULL;
 
 	if (getOptionValue('h', 'help', NULL) !== NULL) {
 		echo 'AoCBench Shell.', "\n";
@@ -27,6 +30,8 @@
 		echo '  -d, --day <day>               Some script types need a day, specify it here. (Default: 1)', "\n";
 		echo '      --debug                   Enable extra debugging in various places.', "\n";
 		echo '      --noclean                 Do not run clean() after our command.', "\n";
+		echo '      --lock                    Require lock file acquisition before running.', "\n";
+		echo '      --globallock              Require global lock file acquisition before running (implies --lock).', "\n";
 		echo '', "\n";
 		echo 'Any additional args passed will be passed to the script but may be ignored.', "\n";
 		echo '', "\n";
@@ -35,6 +40,16 @@
 
 	$startTime = time();
 	echo 'Shell starting at: ', date('r', $startTime), "\n";
+
+	if ($wantedGlobalLock) {
+		echo 'Grabbing global lock.', "\n";
+		getGlobalLock();
+	}
+
+	if ($wantedLock || $wantedGlobalLock) {
+		echo 'Grabbing local lock.', "\n";
+		getLock();
+	}
 
 	foreach ($participants as $participant) {
 		$person = $participant->getDirName(false);

@@ -1,5 +1,6 @@
 <?php
 
+	$globalLockfile = '/tmp/.aocbench-runlock';
 	$lockfile = __DIR__ . '/.benchlock';
 	$resultsFile = __DIR__ . '/results.json';
 	$outputResultsFile = __DIR__ . '/outputresults.json';
