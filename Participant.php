@@ -3,6 +3,7 @@
 		private $name;
 		private $repo;
 		private $extraSettings;
+		private $updateState = [];
 
 		/**
 		 * Create a basic participant.
@@ -406,6 +407,7 @@
 					$password = $encryption['password'] ?? '';
 					if (!empty($cipher) && !empty($password)) {
 						exec(escapeshellarg($localTranscrypt) . ' -y -c ' . escapeshellarg($cipher) . ' -p ' . escapeshellarg($password) . ' 2>&1', $out, $ret);
+						$this->updateState['results']['transcrypt'] = [$out, $ret];
 						return ($ret == 0);
 					} else {
 						return false;
@@ -429,35 +431,49 @@
 			$out = [];
 			$ret = 0;
 			$finalResult = true;
+			$this->updateState = ['results' => []];
 			putenv("GIT_TERMINAL_PROMPT=0");
 			if (file_exists($dir . '/.git')) {
 				echo 'Updating Repo.', "\n";
+				$this->updateState['type'] = 'update';
 				chdir($dir);
 				@chmod($dir, 0777); // YOLO.
 				$this->updatePreFetch();
 				exec('git fetch 2>&1', $out, $ret);
 				$finalResult = $finalResult && ($ret == 0);
+				$this->updateState['results']['fetch'] = [$out, $ret];
+
 				exec('git reset --hard @{upstream} 2>&1', $out, $ret);
 				$finalResult = $finalResult && ($ret == 0);
+				$this->updateState['results']['reset'] = [$out, $ret];
+
 				exec('git submodule foreach git reset --hard 2>&1', $out, $ret);
 				$finalResult = $finalResult && ($ret == 0);
+				$this->updateState['results']['submodule_reset'] = [$out, $ret];
+
 				exec('git submodule update --init --recursive 2>&1', $out, $ret);
 				$finalResult = $finalResult && ($ret == 0);
+				$this->updateState['results']['submodule_init'] = [$out, $ret];
+
 				$finalResult = $finalResult && $this->updatePostFetch($finalResult);
 			} else {
 				echo 'Cloning Repo.', "\n";
 				@mkdir($dir, 0755, true);
 				$branch = $this->getBranch();
 				if (empty($branch)) {
+					$this->updateState['type'] = 'clone';
 					exec('git clone ' . $this->getRepo() . ' ' . $dir . ' 2>&1', $out, $ret);
 				} else {
+					$this->updateState['type'] = 'clonebranch';
 					exec('git clone --branch ' . $branch . ' '. $this->getRepo() . ' ' . $dir . ' 2>&1', $out, $ret);
 				}
+				$this->updateState['results']['clone'] = [$out, $ret];
 				chdir($dir);
 				$finalResult = $finalResult && ($ret == 0);
 				if ($finalResult) {
 					exec('git submodule update --init --recursive 2>&1', $out, $ret);
 					$finalResult = $finalResult && ($ret == 0);
+					$this->updateState['results']['submodule_init'] = [$out, $ret];
 				}
 				@chmod($dir, 0777); // YOLO.
 				$finalResult = $finalResult && $this->updatePostFetch($finalResult);
@@ -467,7 +483,17 @@
 				echo "\n=[DEBUG]=========\n\t", implode("\n\t", $out), "\n========[/DEBUG]=\n";
 			}
 
-			return $finalResult ? file_exists($dir . '/.git') : false;
+			$this->updateState['repoexists'] = file_exists($dir . '/.git');
+			$this->updateState['finalstate'] = $finalResult ? file_exists($dir . '/.git') : false;
+
+			return $this->updateState['finalstate'];
+		}
+
+		/**
+		 * Return more information about the result of update()
+		 */
+		public function getUpdateState() {
+			return $this->updateState;
 		}
 
 		/**

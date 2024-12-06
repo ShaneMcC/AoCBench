@@ -130,6 +130,12 @@
 		if (!$noUpdate) {
 			if (!$participant->updateRepo($dir)) {
 				echo 'Failed to clone/update repo.', "\n";
+				foreach ($participant->getUpdateState()['results'] as $type => $updateResult) {
+					echo "\t", $type, ' => ', ($updateResult[1] == 0 ? 'Success' : 'Fail'), "\n";
+					if ($runDebugMode && $updateResult[1] !== 0) {
+						echo "\t\t> ", implode("\n\t\t> ", $updateResult[0]), "\n";
+					}
+				}
 				continue;
 			}
 		}
