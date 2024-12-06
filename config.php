@@ -2,17 +2,17 @@
 
 	$globalLockfile = '/tmp/.aocbench-runlock';
 	$lockfile = __DIR__ . '/.benchlock';
-	$resultsFile = __DIR__ . '/results.json';
-	$outputResultsFile = __DIR__ . '/outputresults.json';
+	$resultsFile = __DIR__ . '/results/results.json';
+	$outputResultsFile = __DIR__ . '/results/outputresults.json';
 	$participantsDir = __DIR__ . '/participants/';
-	$logFile = __DIR__ . '/run.log';
-	$schedulerStateFile = __DIR__ . '/aocbench-scheduler.json';
+	$logFile = __DIR__ . '/results/run.log';
+	$schedulerStateFile = __DIR__ . '/results/aocbench-scheduler.json';
 
 	$leaderboardID = '';
 	$leaderboardYear = '';
 	$instanceid = NULL;
 
-	$podium = false;
+	$podium = true;
 
 	$repeatCount = 20;
 
@@ -27,8 +27,15 @@
 	// $sleepTime = 250000;
 	$sleepTime = 100;
 
-	$localHyperfine = null;
-	$localTranscrypt = null;
+	$localHyperfine = file_exists('/usr/bin/hyperfine') ? '/usr/bin/hyperfine' : null;
+	$localTranscrypt = file_exists('/usr/local/bin/transcrypt') ? '/usr/local/bin/transcrypt' : null;
+
+	$localBashStatic = null;
+	if (file_exists('/usr/bin/bash-static')) {
+		$localBashStatic = '/usr/bin/bash-static';
+	} else if (file_exists('/bin/bash-static')) {
+		$localBashStatic = '/bin/bash-static';
+	}
 
 	$normaliseInput = true;
 	$inputsDir = __DIR__ . '/inputs/';

@@ -970,7 +970,7 @@
 		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of arrays of sections of output.
 		 */
 		public function doRun($day, $runType, $opts = []) {
-			global $execTimeout, $localHyperfine, $runDebugMode;
+			global $execTimeout, $localHyperfine, $localBashStatic, $runDebugMode;
 
 			if (!is_array($opts)) { $opts = []; }
 
@@ -1043,7 +1043,9 @@
 			if (file_exists($localHyperfine) && $this->useHyperfine() === true) {
 				$cmd .= ' -v ' . escapeshellarg($localHyperfine . ':/aocbench-hyperfine');
 			}
-			if (file_exists('/usr/bin/bash-static')) {
+			if (!empty($localBashStatic) && file_exists($localBashStatic)) {
+				$cmd .= ' -v ' . escapeshellarg($localBashStatic . ':/bin/bash');
+			} else if (file_exists('/usr/bin/bash-static')) {
 				$cmd .= ' -v ' . escapeshellarg('/usr/bin/bash-static:/bin/bash');
 			} else if (file_exists('/bin/bash-static')) {
 				$cmd .= ' -v ' . escapeshellarg('/bin/bash-static:/bin/bash');
