@@ -25,6 +25,8 @@
 		$lastScheduledRunTime = $schedulerState[$instanceid]['time'] ?? 0;
 	}
 
+	$lastMatrixStartTime = $lastMatrixEndTime = $lastBenchStartTime = $lastBenchEndTime = time();
+
 	$hasResults = false;
 	$hasHealthCheck = false;
 	if (file_exists($resultsFile)) {
@@ -51,6 +53,8 @@
 
 	function getDayParticipantTimes($day, $method, $format = null) {
 		global $data, $displayParticipants;
+
+		if (!isset($data['results'])) { return []; }
 
 		$times = [];
 		foreach ($data['results'] as $participant => $pdata) {

@@ -8,19 +8,21 @@
 	if (isset($_REQUEST['day'])) {
 		$dayLinks[] = ' <a href="?">All</a>';
 	}
-	for ($day = 1; $day <= 25; $day++) {
-		foreach ($matrix['results'] as $data) {
-			if (isset($data['days'][$day])) {
-				if (isset($_REQUEST['day'])) {
-					if ($day == $_REQUEST['day']) {
-						$dayLinks[] = ' <strong>' . $day . '</strong>';
+	if (isset($matrix['results'])) {
+		for ($day = 1; $day <= 25; $day++) {
+			foreach ($matrix['results'] as $data) {
+				if (isset($data['days'][$day])) {
+					if (isset($_REQUEST['day'])) {
+						if ($day == $_REQUEST['day']) {
+							$dayLinks[] = ' <strong>' . $day . '</strong>';
+						} else {
+							$dayLinks[] = ' <a href="?day=' . $day . '">' . $day . '</a>';
+						}
 					} else {
-						$dayLinks[] = ' <a href="?day=' . $day . '">' . $day . '</a>';
+						$dayLinks[] = ' <a href="#day' . $day . '">' . $day . '</a>';
 					}
-				} else {
-					$dayLinks[] = ' <a href="#day' . $day . '">' . $day . '</a>';
+					break;
 				}
-				break;
 			}
 		}
 	}
