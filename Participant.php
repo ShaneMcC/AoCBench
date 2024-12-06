@@ -1031,6 +1031,25 @@
 			}
 
 			$dockerMountPWD = $pwd;
+			if (runInDocker()) {
+				if ($hyperfineMountSource != null) {
+					copy($hyperfineMountSource, $extraFilePath . '/hyperfine');
+					chmod($extraFilePath . '/hyperfine', 0777);
+					$hyperfineMountSource = getDockerHostPath($extraFilePath . '/hyperfine');
+				}
+				if ($bashMountSource != null) {
+					copy($bashMountSource, $extraFilePath . '/bash');
+					chmod($extraFilePath . '/bash', 0777);
+					$bashMountSource = getDockerHostPath($extraFilePath . '/bash');
+				}
+
+				$dockerMountPWD = getDockerHostPath($pwd);
+				$extraFilePath = getDockerHostPath($extraFilePath);
+				if ($dockerMountPWD === False || $extraFilePath === False || $hyperfineMountSource === False || $bashMountSource === False) {
+					return [1, [$errorSection => ['AoCBench Error: We appear to already be running inside a docker container, and were unable to figure out our file paths.']]];
+				}
+			}
+
 			$cmd = 'docker run --init --rm ';
 			if ($scriptType != 'shell' || !($this->getAOCBenchConfig()['notty'] ?? false)) {
 				$cmd .= ' -it';

@@ -255,6 +255,38 @@
 		return is_resource($process['process']);
 	}
 
+	function runInDocker() {
+		return file_exists("/.dockerenv");
+	}
+
+	function getDockerHostPath($path) {
+		if (!runInDocker()) { return $path; }
+
+		$path = realpath($path);
+		$mounts = explode("\n", file_get_contents('/proc/self/mountinfo'));
+
+		$paths = [];
+		foreach ($mounts as $line) {
+			$bits = explode(' ', $line);
+			if (count($bits) < 4) { continue; }
+
+			$outside = $bits[3];
+			$realInside = realpath($bits[4]);
+
+			if ($realInside == '/') { continue; }
+
+			if (str_starts_with($path, $realInside)) {
+				$paths[] = preg_replace('/^' . preg_quote($realInside, '/') . '/', $outside, $path);
+			}
+		}
+
+		if (count($paths) == 1) {
+			return $paths[0];
+		} else {
+			return FALSE;
+		}
+	}
+
 	function getLastContainerID() {
 		$out = [];
 		exec('docker ps -n 1', $out);
