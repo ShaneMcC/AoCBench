@@ -972,32 +972,32 @@
 		public function doRun($day, $runType, $opts = []) {
 			global $execTimeout, $localHyperfine, $localBashStatic, $runDebugMode;
 
+			if ($runType == 'hyperfine') { $scriptType = 'hyperfine'; $errorSection = 'ERROR'; }
+			else if ($runType == 'runonce') { $scriptType = 'runonce'; $errorSection = 'ONCE'; }
+			else if ($runType == 'bulkinput') { $scriptType = 'bulkinput'; $errorSection = 'ERROR'; }
+			else if ($runType == 'shell') { $scriptType = 'shell'; $errorSection = 'ERROR'; }
+			else if ($runType == 'single') { $scriptType = 'single'; $errorSection = 'ERROR'; }
+			else { $scriptType = 'time'; $errorSection = 'TIME'; }
+
 			if (!is_array($opts)) { $opts = []; }
 
 			if (($this->getAOCBenchConfig()['version'] ?? '') != "1") {
-				return [1, ['TIME' => ['AoCBench Error: Unknown config file version (Got: "' . $this->getAOCBenchConfig()['version'] . '" - Wanted: "1").']]];
+				return [1, [$errorSection => ['AoCBench Error: Unknown config file version (Got: "' . $this->getAOCBenchConfig()['version'] . '" - Wanted: "1").']]];
 			}
 
 			$imageName = $this->getDockerImageName();
 			if ($imageName == null) {
 				$dockerFile = $this->getDockerfile();
 				if ($dockerFile == null) {
-					return [1, ['TIME' => ['AoCBench Error: Unable to find docker file.']]];
+					return [1, [$errorSection => ['AoCBench Error: Unable to find docker file.']]];
 				}
-				return [1, ['TIME' => ['AoCBench Error: Unable to find docker image.']]];
+				return [1, [$errorSection => ['AoCBench Error: Unable to find docker image.']]];
 			}
 
 			$containerName = 'aocbench_' . uniqid(strtolower($this->getDirName(false)), true);
 
 			// Run Command:
 			$pwd = getcwd();
-
-			if ($runType == 'hyperfine') { $scriptType = 'hyperfine'; }
-			else if ($runType == 'runonce') { $scriptType = 'runonce'; }
-			else if ($runType == 'bulkinput') { $scriptType = 'bulkinput'; }
-			else if ($runType == 'shell') { $scriptType = 'shell'; }
-			else if ($runType == 'single') { $scriptType = 'single'; }
-			else { $scriptType = 'time'; }
 
 			$runScriptFilename = './.aocbench_run/aocbench-' . uniqid(true) . '.sh';
 			if ($runDebugMode) {
@@ -1019,6 +1019,18 @@
 				chmod($fullPath, 0777);
 			}
 
+			$hyperfineMountSource = file_exists($localHyperfine) && $this->useHyperfine() === true ? $localHyperfine : null;
+			if (!empty($localBashStatic) && file_exists($localBashStatic)) {
+				$bashMountSource = $localBashStatic;
+			} else if (file_exists('/usr/bin/bash-static')) {
+				$bashMountSource = '/usr/bin/bash-static';
+			} else if (file_exists('/bin/bash-static')) {
+				$bashMountSource = '/bin/bash-static';
+			} else {
+				$bashMountSource = null;
+			}
+
+			$dockerMountPWD = $pwd;
 			$cmd = 'docker run --init --rm ';
 			if ($scriptType != 'shell' || !($this->getAOCBenchConfig()['notty'] ?? false)) {
 				$cmd .= ' -it';
@@ -1026,31 +1038,27 @@
 			$cmd .= ' --name ' . escapeshellarg($containerName);
 			$cmd .= ' --entrypoint ' . '/aocbench.sh';
 
-			$cmd .= ' -v ' . escapeshellarg($pwd . ':' . $this->getCodeDir());
+			$cmd .= ' -v ' . escapeshellarg($dockerMountPWD . ':' . $this->getCodeDir());
 
 			foreach ($this->getPersistence() as $location) {
 				if (str_starts_with($location, '/.aocbench_run')) { continue; }
 
 				$location = $this->doReplacements($location, $day);
-				$path = $pwd . '/.aocbench_run/' . crc32($location) . '_' . basename($location);
-				if (!file_exists($path)) { mkdir($path); }
-				chmod($path, 0777);
-				$cmd .= ' -v ' . escapeshellarg($path . ':' . $location);
+				$path = '/.aocbench_run/' . crc32($location) . '_' . basename($location);
+				if (!file_exists($pwd . $path)) { mkdir($pwd . $path); }
+				chmod($pwd . $path, 0777);
+				$cmd .= ' -v ' . escapeshellarg($dockerMountPWD . $path . ':' . $location);
 			}
 
 			$cmd .= ' -v ' . escapeshellarg($extraFilePath . ':/.aocbench_run');
 
-			if (file_exists($localHyperfine) && $this->useHyperfine() === true) {
-				$cmd .= ' -v ' . escapeshellarg($localHyperfine . ':/aocbench-hyperfine');
+			if (!empty($hyperfineMountSource)) {
+				$cmd .= ' -v ' . escapeshellarg($hyperfineMountSource . ':/aocbench-hyperfine');
 			}
-			if (!empty($localBashStatic) && file_exists($localBashStatic)) {
-				$cmd .= ' -v ' . escapeshellarg($localBashStatic . ':/bin/bash');
-			} else if (file_exists('/usr/bin/bash-static')) {
-				$cmd .= ' -v ' . escapeshellarg('/usr/bin/bash-static:/bin/bash');
-			} else if (file_exists('/bin/bash-static')) {
-				$cmd .= ' -v ' . escapeshellarg('/bin/bash-static:/bin/bash');
+			if (!empty($bashMountSource)) {
+				$cmd .= ' -v ' . escapeshellarg($bashMountSource . ':/bin/bash');
 			}
-			$cmd .= ' -v ' . escapeshellarg($pwd . '/' . $runScriptFilename . ':/aocbench.sh');
+			$cmd .= ' -v ' . escapeshellarg($dockerMountPWD . '/' . $runScriptFilename . ':/aocbench.sh');
 
 			foreach ($this->getEnvironment() as $env) {
 				$env = explode('=', $env, 2);
