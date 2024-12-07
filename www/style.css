@@ -116,3 +116,40 @@ div.settingsbox a {
   fill: red;
   stroke: red;
 }
+
+
+th.whotop {
+  width: 200px;
+  height: 73.5px;
+  padding: 0;
+  margin: 0;
+}
+
+th.whotop .line {
+  width: 210px;
+  height: 75px;
+  border-bottom: 2px solid rgb(222, 226, 230);
+  transform: translateY(-35px) translateX(6px) rotate(19.5deg);
+  position: absolute;
+  z-index: -1;
+}
+
+th.whotop>div {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+th.whotop span.bottom {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+}
+
+th.whotop span.top {
+  position: absolute;
+  top: 12px;
+  right: 5px;
+}

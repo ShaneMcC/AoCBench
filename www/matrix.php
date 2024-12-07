@@ -116,7 +116,11 @@
 			// Participants
 			echo '<thead>';
 			echo '<tr>';
-			echo '<th class="who">Input \ Participant</th>';
+			echo '<th class="who whotop"><div>';
+			echo '<span class="bottom">Input</span>';
+			echo '<div class="line"></div>';
+			echo '<span class="top">Participant</span>';
+			echo '</div></th>';
 			$p = 1;
 			foreach ($dayParticipants as $participant) {
 				$pdata = $matrix['results'][$participant];
