@@ -101,7 +101,7 @@
 
 		if (!is_array($wantedScript)) { $wantedScript = [$wantedScript]; }
 
-		foreach ($wantedScript as $ws) {
+		foreach ($wantedScript as &$ws) {
 			if ($ws == 'bulkinput') {
 				// Treat args as a list of participant matches.
 				$opts = ['files' => []];
@@ -113,6 +113,17 @@
 
 						$opts['files'][$person2] = $participant2->getInput($wantedDay);
 					}
+				}
+			} else if ($ws == 'bulkinputfiles') {
+				$ws = 'bulkinput';
+				// Treat args as a list of files.
+				$opts = ['files' => []];
+
+				$i = 0;
+				foreach ($restArgs as $arg) {
+					if (!file_exists($arg)) { continue; }
+					$i++;
+					$opts['files'][($i++) . '_' . basename($arg)] = file_get_contents($arg);
 				}
 			} else {
 				$opts = ['args' => $restArgs];
