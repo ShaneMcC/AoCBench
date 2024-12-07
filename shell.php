@@ -101,7 +101,9 @@
 
 		if (!is_array($wantedScript)) { $wantedScript = [$wantedScript]; }
 
-		foreach ($wantedScript as &$ws) {
+		foreach ($wantedScript as $ws) {
+			$runScript = $ws;
+
 			if ($ws == 'bulkinput') {
 				// Treat args as a list of participant matches.
 				$opts = ['files' => []];
@@ -115,7 +117,7 @@
 					}
 				}
 			} else if ($ws == 'bulkinputfiles') {
-				$ws = 'bulkinput';
+				$runScript = 'bulkinput';
 				// Treat args as a list of files.
 				$opts = ['files' => []];
 
@@ -129,7 +131,7 @@
 				$opts = ['args' => $restArgs];
 			}
 
-			$result = $participant->doRun($wantedDay, $ws, $opts);
+			$result = $participant->doRun($wantedDay, $runScript, $opts);
 
 			foreach ($result[1] as $section => $output) {
 				if (preg_match('#^' . $wantedSection . '$#', $section)) {
