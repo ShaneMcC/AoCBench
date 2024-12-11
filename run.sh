@@ -12,8 +12,8 @@ SLUGNAME=$(basename "${PWD}")
 		touch ${MYDIR}/.running
 		rm /tmp/${SLUGNAME}.log
 
-		${MYDIR}/bench.php "${@}" | tee -a /tmp/${SLUGNAME}.log
-		${MYDIR}/inputMatrix.php --no-update "${@}" | tee -a /tmp/${SLUGNAME}.log
+		${MYDIR}/bench.php "${@}" | ts -m "%H:%M:%S |" | tee -a /tmp/${SLUGNAME}.log
+		${MYDIR}/inputMatrix.php --no-update "${@}" | ts -m "%H:%M:%S |" | tee -a /tmp/${SLUGNAME}.log
 
 		rm ${MYDIR}/.running
 		exit 0;
