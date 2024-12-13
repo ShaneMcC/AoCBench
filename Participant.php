@@ -686,6 +686,8 @@
 		}
 
 		private function getRunScript($day, $scriptType, $opts) {
+			global $execTimeout;
+
 			$prerun = $this->getValueWithReplacements('prerun', $day);
 			$runOnce = $this->getValueWithReplacements('runonce', $day);
 			$hyperfineShell = $this->getAOCBenchConfig()['hyperfineshell'] ?? False;
@@ -797,6 +799,8 @@
 						cd $workdir
 						RUNSCRIPT;
 					$script .= "\n";
+
+					$estimatedTime = ceil($opts['estimated'] ?? $execTimeout);
 
 					foreach (array_keys($opts['files'] ?? []) as $file) {
 						$script .= <<<RUNSCRIPT

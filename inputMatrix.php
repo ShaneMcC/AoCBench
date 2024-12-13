@@ -188,10 +188,21 @@
 
 		// Run day.
 		for ($day = 1; $day <= 25; $day++) {
-			if (!$participant->hasDay($day) || $participant->isWIP($day) || in_array($day, $participant->getIgnored())) {
+			$inputFilename = $participant->getInputFilename($day);
+			$answerFilename = $participant->getInputAnswerFilename($day);
+
+			$abortRun = False;
+
+			if (!$participant->hasDay($day)) { $abortRun = 'noDay'; }
+			if ($participant->isWIP($day)) { $abortRun = 'isWip'; }
+			if (in_array($day, $participant->getIgnored())) { $abortRun = 'ignored'; }
+			if (!file_exists($inputFilename)) { $abortRun = 'noInput'; }
+			if (!file_exists($answerFilename)) { $abortRun = 'noAnswer'; }
+
+			if ($abortRun) {
 				// If this day no longer exists, remove it.
 				if (isset($data['results'][$person]['days'][$day])) {
-					echo 'Removing missing/wip/ignored day ', $day, '.', "\n";
+					echo 'Removing missing/wip/ignored (' , $abortRun, ') day ', $day, '.', "\n";
 				}
 				unset($data['results'][$person]['days'][$day]);
 				continue;

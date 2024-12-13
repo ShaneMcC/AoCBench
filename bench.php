@@ -189,14 +189,25 @@
 			$data['healthcheck'][$person]['days'][$day]['ignored'] = in_array($day, $participant->getIgnored());
 			$data['healthcheck'][$person]['days'][$day]['path'] = $participant->getDayFilename($day);
 
-			if (!$participant->hasDay($day) || $participant->isWIP($day) || in_array($day, $participant->getIgnored())) {
+			$inputFilename = $participant->getInputFilename($day);
+			$answerFilename = $participant->getInputAnswerFilename($day);
+
+			$abortRun = False;
+
+			if (!$participant->hasDay($day)) { $abortRun = 'noDay'; }
+			if ($participant->isWIP($day)) { $abortRun = 'isWip'; }
+			if (in_array($day, $participant->getIgnored())) { $abortRun = 'ignored'; }
+			if (!file_exists($inputFilename)) { $abortRun = 'noInput'; }
+			if (!file_exists($answerFilename)) { $abortRun = 'noAnswer'; }
+
+			if ($abortRun !== false) {
 				// If this day no longer exists, remove it.
 				if (isset($data['results'][$person]['days'][$day])) {
-					echo 'Removing missing/wip/ignored day ', $day, '.', "\n";
-					$data['healthcheck'][$person]['days'][$day]['log'] = 'Removed';
+					echo 'Removing missing/wip/ignored (' , $abortRun, ') day ', $day, '.', "\n";
+					$data['healthcheck'][$person]['days'][$day]['log'] = 'Removed '.'('.$abortRun.')';
 					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 				} else {
-					$data['healthcheck'][$person]['days'][$day]['log'] = 'Not run - missing/wip/ignored.';
+					$data['healthcheck'][$person]['days'][$day]['log'] = 'Not run - missing/wip/ignored. '.'('.$abortRun.')';
 					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 				}
 				unset($data['results'][$person]['days'][$day]);
@@ -209,7 +220,6 @@
 			}
 			if (!preg_match('#^' . $wantedDay. '$#', $day)) { continue; }
 
-			$inputFilename = $participant->getInputFilename($day);
 			$inputGitDir = $participant->findGitDir($inputFilename);
 			$inputGitRelative = str_replace(realpath($inputGitDir[1]) . '/', '', realpath($inputFilename));
 			if ($inputGitRelative[0] == '/') { $inputGitRelative = $inputFilename; }
@@ -221,7 +231,6 @@
 																   ];
 
 
-			$answerFilename = $participant->getInputAnswerFilename($day);
 			$answerGitDir = $participant->findGitDir($answerFilename);
 			$answerGitRelative = str_replace(realpath($answerGitDir[1]) . '/', '', realpath($answerFilename));
 			if ($answerGitRelative[0] == '/') { $answerGitRelative = $answerFilename; }
