@@ -24,8 +24,7 @@
 
 	$execTimeout = 300;
 
-	// $sleepTime = 250000;
-	$sleepTime = 100;
+	$sleepTime = 0;
 
 	$localHyperfine = file_exists('/usr/bin/hyperfine') ? '/usr/bin/hyperfine' : null;
 	$localTranscrypt = file_exists('/usr/local/bin/transcrypt') ? '/usr/local/bin/transcrypt' : null;
