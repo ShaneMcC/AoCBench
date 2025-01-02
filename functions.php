@@ -115,7 +115,20 @@
 		if ($setTime || !isset($data['time'])) { $data['time'] = time(); }
 
 		// Output results to disk.
-		file_put_contents($file, json_encode($data));
+		$tempFile = $file . '.tmp';
+		$jsonData = json_encode($data);
+		// Make sure we actually have something to write.
+		if (!empty($jsonData)) {
+			file_put_contents($tempFile, $jsonData);
+
+			// And then test that the data wrote successfully
+			if (file_get_contents($tempFile) == $jsonData) {
+
+				// then move it into place.
+				unlink($file);
+				rename($tempFile, $file);
+			}
+		}
 	}
 
 	function getOptionValueAll($short = NULL, $long = NULL, $default = '') {
