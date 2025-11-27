@@ -4,12 +4,16 @@
 	if (!$enableScheduledUpdates) { die('Scheduled updates not enabled for this instance.'."\n"); }
 
 	use PhpAmqpLib\Connection\AMQPStreamConnection;
-	use PhpAmqpLib\Message\AMQPMessage;
 	use PhpAmqpLib\Exception\AMQPTimeoutException;
 
 	echo date('r'), ' - Started', "\n";
 
-	$connection = new AMQPStreamConnection($rabbitmq['server'], $rabbitmq['port'], $rabbitmq['username'], $rabbitmq['password'], $rabbitmq['vhost']);
+	$connection = AMQPStreamConnection::create_connection([
+		['host' => $rabbitmq['server'], 'port' => $rabbitmq['port'], 'user' => $rabbitmq['username'], 'password' => $rabbitmq['password'], 'vhost' => $rabbitmq['vhost']]
+	], [
+		'heartbeat' => 60,
+		'keepalive' => true
+	]);
 	$channel = $connection->channel();
 
 	$channel->exchange_declare('events', 'topic', false, false, false);
@@ -23,10 +27,11 @@
 
 	while ($channel->is_consuming() && $channel->is_open()) {
 		try {
-			$connection->getIO()->check_heartbeat();
-			$connection->getIO()->read(0);
+			// The wait() call handles heartbeats internally when configured
 			$channel->wait(null, false, 30);
-		} catch (AMQPTimeoutException $e) { }
+		} catch (AMQPTimeoutException $e) {
+			// Normal timeout, continue - no messages received
+		}
 	}
 
 	echo date('r'), ' - Exited', "\n";
