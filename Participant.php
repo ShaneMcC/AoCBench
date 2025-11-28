@@ -15,7 +15,7 @@
 		}
 
 		public function isValidParticipant() {
-			return (file_exists('./docker.sh') || file_exists('./run.sh')) ?? 'Missing docker.sh or run.sh file.';
+			return (file_exists('./docker.sh') || file_exists('./run.sh')) ? True : 'Missing docker.sh or run.sh file.';
 		}
 
 		/**
@@ -437,7 +437,8 @@
 				echo 'Updating Repo.', "\n";
 				$this->updateState['type'] = 'update';
 				chdir($dir);
-				@chmod($dir, 0777); // YOLO.
+				// 777 to ensure that containers with weird UIDs can still read things in this dir when mounted in
+				@chmod($dir, 0777);
 				$this->updatePreFetch();
 				exec('git fetch 2>&1', $out, $ret);
 				$finalResult = $finalResult && ($ret == 0);
@@ -462,10 +463,10 @@
 				$branch = $this->getBranch();
 				if (empty($branch)) {
 					$this->updateState['type'] = 'clone';
-					exec('git clone ' . $this->getRepo() . ' ' . $dir . ' 2>&1', $out, $ret);
+					exec('git clone ' . escapeshellarg($this->getRepo()) . ' ' . $dir . ' 2>&1', $out, $ret);
 				} else {
 					$this->updateState['type'] = 'clonebranch';
-					exec('git clone --branch ' . $branch . ' '. $this->getRepo() . ' ' . $dir . ' 2>&1', $out, $ret);
+					exec('git clone --branch ' . escapeshellarg($branch) . ' '. escapeshellarg($this->getRepo()) . ' ' . $dir . ' 2>&1', $out, $ret);
 				}
 				$this->updateState['results']['clone'] = [$out, $ret];
 				chdir($dir);
@@ -475,7 +476,8 @@
 					$finalResult = $finalResult && ($ret == 0);
 					$this->updateState['results']['submodule_init'] = [$out, $ret];
 				}
-				@chmod($dir, 0777); // YOLO.
+				// 777 to ensure that containers with weird UIDs can still read things in this dir when mounted in
+				@chmod($dir, 0777);
 				$finalResult = $finalResult && $this->updatePostFetch($finalResult);
 			}
 

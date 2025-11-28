@@ -318,7 +318,7 @@
 		if ($timedout) {
 			if ($containerName != null) {
 				// Kill the docker container (we think) we started.
-				exec('docker kill ' . $containerName);
+				exec('docker kill ' . escapeshellarg($containerName));
 			}
 
 			proc_terminate($proc['process']);
