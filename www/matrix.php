@@ -148,6 +148,10 @@
 			}
 			echo '</tr>', "\n";
 
+			echo '</thead>';
+
+			echo '<tbody>';
+
 			$p = 1;
 			foreach ($dayInputs as $p2) {
 				echo '<tr>';
@@ -184,9 +188,6 @@
 				echo '</tr>';
 			}
 
-			echo '</thead>';
-
-			echo '<tbody>';
 			echo '</tbody>';
 			echo '</table>';
 		}

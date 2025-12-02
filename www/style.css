@@ -68,6 +68,10 @@ pre {
   line-height: 1.1em;
 }
 
+td pre {
+  max-height: 500px;
+}
+
 .sticky {
   position: sticky;
   top: 55px;
