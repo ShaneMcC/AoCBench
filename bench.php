@@ -450,6 +450,7 @@
 				// Output to show the day ran.
 				if ($ret != 0) {
 					$data['healthcheck'][$person]['days'][$day]['runtype'] = 'fail';
+					$data['healthcheck'][$person]['days'][$day]['run_output'] = $result;
 					$data['healthcheck'][$person]['days'][$day]['log'] .= 'F';
 					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 					if (!empty($unhandled)) {
@@ -468,10 +469,12 @@
 					break;
 				} else {
 					$data['healthcheck'][$person]['days'][$day]['runtype'] = 'time';
+					unset($data['healthcheck'][$person]['days'][$day]['run_output']);
 					if ($checkOutput) {
 						$rightAnswer = preg_match('#' . preg_quote($answer1, '#') . '.+' . preg_quote($answer2, '#') . '#i', implode(' ', $result));
 						if (!$rightAnswer) {
 							$data['healthcheck'][$person]['days'][$day]['runtype'] = 'incorrect';
+							$data['healthcheck'][$person]['days'][$day]['run_output'] = $result;
 							$data['healthcheck'][$person]['days'][$day]['log'] .= 'I';
 							$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 							echo 'I';

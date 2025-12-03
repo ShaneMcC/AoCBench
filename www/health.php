@@ -308,7 +308,13 @@
                     echo $runType;
 
                     if ($runClass == 'table-danger') {
-                        $runOutput = implode("\n", $matrix['results'][$person]['days'][$day]['outputs'][$ddata['testInputSource']]['output'] ?? []);
+                        // Prefer healthcheck run_output over matrix data
+                        if (isset($ddata['run_output'])) {
+                            $runOutput = implode("\n", $ddata['run_output']);
+                        } else {
+                            // Fallback to matrix data for backward compatibility
+                            $runOutput = implode("\n", $matrix['results'][$person]['days'][$day]['outputs'][$ddata['testInputSource']]['output'] ?? []);
+                        }
 
                         if (!empty(trim($runOutput)) || isset($ddata['testInputAnswers'])) {
                             echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-' . $day . '-runtype" class="btn btn-sm btn-secondary">show/hide</button>';
