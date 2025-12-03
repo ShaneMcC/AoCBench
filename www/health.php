@@ -40,11 +40,46 @@
             }
             echo '<br>';
             echo '<strong>Participant Type:</strong> ', ($pdata['participanttype'] == 2 ? '<span class="text-success">yaml</span>' : '<span class="text-warning">legacy</span>'), '<br>';
+
+            echo '<strong>Recent Update Status:</strong> ';
+            if (!empty($pdata['updatestate'])) {
+                $updateState = $pdata['updatestate'];
+                $updateSuccess = $updateState['finalstate'] ?? false;
+                echo $updateSuccess ? '<span class="text-success">Success</span>' : '<span class="text-danger">Failed</span>';
+                echo ' <button href="#" data-toggle="collapse" data-target="#' . $person . '-updatestate" class="btn btn-sm btn-secondary">details</button><br>';
+                echo '<div id="' . $person . '-updatestate" class="collapse"><br>';
+                echo '<table class="table table-sm table-bordered" style="width: auto;">';
+                echo '<tr><th>Operation</th><td>' . htmlspecialchars($updateState['type'] ?? 'unknown') . '</td></tr>';
+                echo '<tr><th>Repo Exists</th><td>' . (($updateState['repoexists'] ?? false) ? '<span class="text-success">Yes</span>' : '<span class="text-danger">No</span>') . '</td></tr>';
+                echo '<tr><th>Final State</th><td>' . ($updateSuccess ? '<span class="text-success">Success</span>' : '<span class="text-danger">Failed</span>') . '</td></tr>';
+                if (!empty($updateState['results'])) {
+                    echo '<tr><th colspan="2">Command Results</th></tr>';
+                    foreach ($updateState['results'] as $cmd => $result) {
+                        $cmdSuccess = ($result[1] ?? 1) === 0;
+                        $cmdClass = $cmdSuccess ? 'text-success' : 'text-danger';
+                        echo '<tr>';
+                        echo '<th>' . htmlspecialchars($cmd) . '</th>';
+                        echo '<td><span class="' . $cmdClass . '">' . ($cmdSuccess ? '✓' : '✗') . ' (exit ' . ($result[1] ?? '?') . ')</span>';
+                        if (!$cmdSuccess && !empty($result[0])) {
+                            $output = is_array($result[0]) ? implode("\n", $result[0]) : $result[0];
+                            echo '<br><code class="codeview"><pre style="margin: 5px 0; max-height: 150px; overflow: auto;">' . htmlspecialchars($output) . '</pre></code>';
+                        }
+                        echo '</td></tr>';
+                    }
+                }
+                echo '</table>';
+                echo '</div>';
+            } else {
+                echo '<span class="text-muted">No update data</span><br>';
+            }
+
             echo '<strong>Config:</strong> ';
-            echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-config" class="btn btn-sm btn-secondary">show/hide</button><br>';
+            echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-config" class="btn btn-sm btn-secondary">show/hide</button>';
             echo '<div id="' . $person . '-config" class="collapse"><br><code class="codeview"><pre>';
             echo yaml_encode($pdata['config']);
             echo '</pre></code></div><br>';
+
+            echo '<br>';
 
             if (isset($pdata['language']) && !empty($pdata['language'])) {
                 $langList = is_array($pdata['language']) ? $pdata['language'] : [$pdata['language']];

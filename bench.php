@@ -129,6 +129,8 @@
 		$dir = $participantsDir . '/' . $person;
 		if (!$noUpdate) {
 			if (!$participant->updateRepo($dir)) {
+				$data['healthcheck'][$person]['updatestate'] = $participant->getUpdateState();
+
 				echo 'Failed to clone/update repo.', "\n";
 				foreach ($participant->getUpdateState()['results'] as $type => $updateResult) {
 					echo "\t", $type, ' => ', ($updateResult[1] == 0 ? 'Success' : 'Fail'), "\n";
@@ -138,6 +140,8 @@
 				}
 				continue;
 			}
+
+			$data['healthcheck'][$person]['updatestate'] = $participant->getUpdateState();
 		}
 		chdir($dir);
 
