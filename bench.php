@@ -153,6 +153,26 @@
 			continue;
 		}
 
+		// Validate config
+		[$configState, $configMessages] = $participant->validateConfig();
+		$data['healthcheck'][$person]['configvalidation'] = [
+			'state' => $configState,
+			'messages' => $configMessages,
+		];
+
+		if ($configState === 'error') {
+			echo 'Config validation failed:', "\n";
+			foreach ($configMessages as $msg) {
+				echo '  - ', $msg, "\n";
+			}
+			continue;
+		} else if ($configState === 'warning') {
+			echo 'Config validation warnings:', "\n";
+			foreach ($configMessages as $msg) {
+				echo '  - ', $msg, "\n";
+			}
+		}
+
 		// Prepare.
 		echo 'Preparing.', "\n";
 		$prepResult = $participant->prepare();

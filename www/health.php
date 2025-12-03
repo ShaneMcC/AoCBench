@@ -79,6 +79,37 @@
             echo yaml_encode($pdata['config']);
             echo '</pre></code></div><br>';
 
+            echo '<strong>Config Validation:</strong> ';
+            if (!empty($pdata['configvalidation'])) {
+                $configValidation = $pdata['configvalidation'];
+                $configState = $configValidation['state'] ?? 'unknown';
+                $configMessages = $configValidation['messages'] ?? [];
+
+                if ($configState === 'ok') {
+                    echo '<span class="text-success">OK</span>';
+                } else if ($configState === 'warning') {
+                    echo '<span class="text-warning">Warning</span>';
+                } else if ($configState === 'error') {
+                    echo '<span class="text-danger">Error</span>';
+                } else {
+                    echo '<span class="text-muted">Unknown</span>';
+                }
+
+                if (!empty($configMessages) && ($configState === 'warning' || $configState === 'error')) {
+                    echo ' <button href="#" data-toggle="collapse" data-target="#' . $person . '-configvalidation" class="btn btn-sm btn-secondary">details</button>';
+                    echo '<div id="' . $person . '-configvalidation" class="collapse"><br>';
+                    echo '<ul class="' . ($configState === 'error' ? 'text-danger' : 'text-warning') . '">';
+                    foreach ($configMessages as $msg) {
+                        echo '<li>' . htmlspecialchars($msg) . '</li>';
+                    }
+                    echo '</ul>';
+                    echo '</div>';
+                }
+                echo '<br>';
+            } else {
+                echo '<span class="text-muted">Not validated yet</span><br>';
+            }
+
             echo '<br>';
 
             if (isset($pdata['language']) && !empty($pdata['language'])) {

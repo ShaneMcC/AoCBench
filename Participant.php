@@ -106,6 +106,17 @@
 		public function getRunCommand($day) { return './run.sh ' . $day; }
 
 		/**
+		 * Validate the config for this participant.
+		 *
+		 * For legacy (v1) participants, this always returns ok.
+		 *
+		 * @return Array [$state, $messages] where $state is 'ok', 'warning', or 'error'
+		 */
+		public function validateConfig() {
+			return ['ok', ['Legacy participant - no config validation.']];
+		}
+
+		/**
 		 * Prepare this participant.
 		 *
 		 * This will run either `docker.sh` or `run.sh` with no arguments.
@@ -527,6 +538,300 @@
 			return true;
 		}
 
+		/**
+		 * Get the path to the config file for this participant.
+		 *
+		 * @return String|null Path to config file or null if not found.
+		 */
+		public function getConfigFilePath() {
+			global $participantsDir;
+
+			$validFiles = [];
+			$validFiles[] = $participantsDir . '/' . $this->getDirName(false) . '.yaml';
+			$validFiles[] = $participantsDir . '/' . $this->getDirName(false) . '.yml';
+			$validFiles[] = $this->getDirName(true) . '/.aocbench.yaml';
+			$validFiles[] = $this->getDirName(true) . '/.aocbench.yml';
+
+			foreach ($validFiles as $f) {
+				if (file_exists($f)) {
+					return $f;
+				}
+			}
+
+			return null;
+		}
+
+		/**
+		 * Validate the config file for this participant.
+		 *
+		 * Checks:
+		 * - Config file exists and parses correctly
+		 * - Parser compatibility (warning if spyc and symfony parse differently)
+		 * - All fields are valid and known
+		 * - Required fields are present
+		 * - Field values are valid (e.g. absolute paths where required)
+		 *
+		 * @return Array [$state, $messages] where $state is 'ok', 'warning', or 'error'
+		 *               and $messages is an array of issues found.
+		 */
+		public function validateConfig() {
+			$state = 'ok';
+			$messages = [];
+
+			// Known valid fields from README.md
+			$validFields = [
+				'version',      // Required, must be "1"
+				'author',       // Optional string
+				'language',     // Optional string
+				'versionprefix', // Optional string
+				'dockerfile',   // Optional string or array of strings
+				'image',        // Optional string (required if no dockerfile)
+				'code',         // Optional string, default /code
+				'persistence',  // Optional array of absolute paths
+				'workdir',      // Optional string with replacements
+				'runonce',      // Optional string with replacements
+				'prerun',       // Optional string with replacements
+				'cmd',          // Required string with replacements
+				'notty',        // Optional boolean
+				'hyperfine',    // Optional boolean
+				'hyperfineshell', // Optional boolean
+				'environment',  // Optional array of strings
+				'daypath',      // Optional string with replacements
+				'common',       // Optional string or array of strings
+				'inputfile',    // Optional string with replacements
+				'answerfile',   // Optional string with replacements
+			];
+
+			// Check if config file exists
+			$configFile = $this->getConfigFilePath();
+			if ($configFile === null) {
+				return ['error', ['Config file not found.']];
+			}
+
+			// Try to read the raw file content
+			$rawContent = @file_get_contents($configFile);
+			if ($rawContent === false) {
+				return ['error', ['Could not read config file: ' . $configFile]];
+			}
+
+			// Check parser compatibility - compare spyc and symfony
+			$spycResult = null;
+			$symfonyResult = null;
+			$spycError = null;
+			$symfonyError = null;
+
+			try {
+				$spycResult = \Spyc::YAMLLoadString($rawContent);
+			} catch (\Exception $e) {
+				$spycError = $e->getMessage();
+			}
+
+			try {
+				$symfonyResult = \Symfony\Component\Yaml\Yaml::parse($rawContent);
+			} catch (\Exception $e) {
+				$symfonyError = $e->getMessage();
+			}
+
+			if ($spycError !== null) {
+				$messages[] = 'Spyc parse error: ' . $spycError;
+			}
+			if ($symfonyError !== null) {
+				$messages[] = 'Symfony YAML parse error: ' . $symfonyError;
+			}
+
+			if ($spycResult === null && $symfonyResult === null) {
+				return ['error', $messages];
+			}
+
+			// Compare parsers if both succeeded
+			if ($spycResult !== null && $symfonyResult !== null) {
+				if (json_encode($spycResult) !== json_encode($symfonyResult)) {
+					$state = 'warning';
+					$messages[] = 'Parser inconsistency: Spyc and Symfony YAML parsers produce different results. Consider simplifying YAML syntax.';
+				}
+			} else if ($spycError !== null || $symfonyError !== null) {
+				$state = 'warning';
+			}
+
+			// Get the actual config (after any overrides)
+			$config = $this->getAOCBenchConfig();
+			if (empty($config)) {
+				return ['error', array_merge($messages, ['Config is empty after parsing.'])];
+			}
+
+			// Check for unknown fields
+			foreach (array_keys($config) as $field) {
+				if (!in_array($field, $validFields)) {
+					if ($state === 'ok') { $state = 'warning'; }
+					$messages[] = "Unknown field: '$field'. This field will be ignored.";
+				}
+			}
+
+			// Check required fields
+			if (!isset($config['version'])) {
+				$state = 'error';
+				$messages[] = "Required field 'version' is missing.";
+			} else if ($config['version'] !== '1' && $config['version'] !== 1) {
+				$state = 'error';
+				$messages[] = "Field 'version' must be '1', got: '" . $config['version'] . "'.";
+			}
+
+			if (!isset($config['cmd'])) {
+				$state = 'error';
+				$messages[] = "Required field 'cmd' is missing.";
+			}
+
+			// Check that either image or dockerfile can be resolved
+			if (!isset($config['image'])) {
+				$dockerfile = $this->getDockerfile();
+				if ($dockerfile === null) {
+					$state = 'error';
+					$messages[] = "Neither 'image' is specified nor can a Dockerfile be found.";
+				}
+			}
+
+			// Validate persistence paths (must be absolute)
+			if (isset($config['persistence'])) {
+				if (!is_array($config['persistence'])) {
+					$state = 'error';
+					$messages[] = "Field 'persistence' must be an array.";
+				} else {
+					foreach ($config['persistence'] as $idx => $path) {
+						if (!is_string($path)) {
+							$state = 'error';
+							$messages[] = "Persistence entry $idx is not a string.";
+						} else if (strlen($path) === 0) {
+							$state = 'error';
+							$messages[] = "Persistence entry $idx is empty.";
+						} else if ($path[0] !== '/') {
+							$state = 'error';
+							$messages[] = "Persistence path '$path' must be absolute (start with /).";
+						}
+					}
+				}
+			}
+
+			// Validate code path (must be absolute)
+			if (isset($config['code'])) {
+				if (!is_string($config['code'])) {
+					$state = 'error';
+					$messages[] = "Field 'code' must be a string.";
+				} else if (strlen($config['code']) === 0) {
+					$state = 'error';
+					$messages[] = "Field 'code' is empty.";
+				} else if ($config['code'][0] !== '/') {
+					$state = 'error';
+					$messages[] = "Field 'code' must be an absolute path (start with /), got: '" . $config['code'] . "'.";
+				}
+			}
+
+			// Validate workdir (must be absolute if specified, after variable expansion it should be)
+			if (isset($config['workdir'])) {
+				if (!is_string($config['workdir'])) {
+					$state = 'error';
+					$messages[] = "Field 'workdir' must be a string.";
+				} else if (strlen($config['workdir']) === 0) {
+					$state = 'error';
+					$messages[] = "Field 'workdir' is empty.";
+				} else if ($config['workdir'][0] !== '/' && $config['workdir'][0] !== '%') {
+					// Allow % for variable replacements like %day%
+					$state = 'error';
+					$messages[] = "Field 'workdir' should be an absolute path or start with a variable (%), got: '" . $config['workdir'] . "'.";
+				}
+			}
+
+			// Validate environment (must be array of strings in KEY=VALUE format)
+			if (isset($config['environment'])) {
+				if (!is_array($config['environment'])) {
+					$state = 'error';
+					$messages[] = "Field 'environment' must be an array.";
+				} else {
+					foreach ($config['environment'] as $idx => $env) {
+						if (!is_string($env)) {
+							$state = 'error';
+							$messages[] = "Environment entry $idx is not a string.";
+						} else if (strpos($env, '=') === false) {
+							if ($state === 'ok') { $state = 'warning'; }
+							$messages[] = "Environment entry '$env' does not contain '='. Expected KEY=VALUE format.";
+						}
+					}
+				}
+			}
+
+			// Validate boolean fields
+			$boolFields = ['notty', 'hyperfine', 'hyperfineshell'];
+			foreach ($boolFields as $field) {
+				if (isset($config[$field]) && !is_bool($config[$field])) {
+					if ($state === 'ok') { $state = 'warning'; }
+					$messages[] = "Field '$field' should be a boolean (true/false), got: " . gettype($config[$field]) . ".";
+				}
+			}
+
+			// Validate string fields
+			$stringFields = ['author', 'versionprefix', 'image', 'runonce', 'prerun', 'cmd', 'daypath', 'inputfile', 'answerfile'];
+			foreach ($stringFields as $field) {
+				if (isset($config[$field]) && !is_string($config[$field])) {
+					$state = 'error';
+					$messages[] = "Field '$field' must be a string, got: " . gettype($config[$field]) . ".";
+				}
+			}
+
+			// Validate dockerfile (can be string or array of strings)
+			if (isset($config['dockerfile'])) {
+				if (is_string($config['dockerfile'])) {
+					// OK
+				} else if (is_array($config['dockerfile'])) {
+					foreach ($config['dockerfile'] as $idx => $df) {
+						if (!is_string($df)) {
+							$state = 'error';
+							$messages[] = "Dockerfile entry $idx is not a string.";
+						}
+					}
+				} else {
+					$state = 'error';
+					$messages[] = "Field 'dockerfile' must be a string or array of strings.";
+				}
+			}
+
+			// Validate common (can be string or array of strings)
+			if (isset($config['common'])) {
+				if (is_string($config['common'])) {
+					// OK
+				} else if (is_array($config['common'])) {
+					foreach ($config['common'] as $idx => $c) {
+						if (!is_string($c)) {
+							$state = 'error';
+							$messages[] = "Common entry $idx is not a string.";
+						}
+					}
+				} else {
+					$state = 'error';
+					$messages[] = "Field 'common' must be a string or array of strings.";
+				}
+			}
+
+			// Validate language (can be string or array of strings based on getLanguage usage)
+			if (isset($config['language'])) {
+				if (!is_string($config['language']) && !is_array($config['language'])) {
+					$state = 'error';
+					$messages[] = "Field 'language' must be a string or array of strings.";
+				} else if (is_array($config['language'])) {
+					foreach ($config['language'] as $idx => $lang) {
+						if (!is_string($lang)) {
+							$state = 'error';
+							$messages[] = "Language entry $idx is not a string.";
+						}
+					}
+				}
+			}
+
+			if (empty($messages)) {
+				$messages[] = 'Config is valid.';
+			}
+
+			return [$state, $messages];
+		}
+
 		public function useHyperfine() {
 			return $this->getAOCBenchConfig()['hyperfine'] ?? true;
 		}
@@ -536,24 +841,9 @@
 		}
 
 		public function getAOCBenchConfig() {
-			global $participantsDir;
-
 			if ($this->yaml === null) {
-				$validFiles = [];
-				$validFiles[] = $participantsDir . '/' . $this->getDirName(false) . '.yaml';
-				$validFiles[] = $participantsDir . '/' . $this->getDirName(false) . '.yml';
-				$validFiles[] = $this->getDirName(true) . '/.aocbench.yaml';
-				$validFiles[] = $this->getDirName(true) . '/.aocbench.yml';
-
-				$filename = null;
-				foreach ($validFiles as $f) {
-					if (file_exists($f)) {
-						$filename = $f;
-						break;
-					}
-				}
-
-				$this->yaml = $this->getAOCBenchConfigOverride($filename != null ? yaml_decode_file($filename) : []);
+				$filename = $this->getConfigFilePath();
+				$this->yaml = $this->getAOCBenchConfigOverride($filename !== null ? yaml_decode_file($filename) : []);
 			}
 
 			return $this->yaml;

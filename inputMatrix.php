@@ -167,6 +167,23 @@
 		$valid = $participant->isValidParticipant();
 		if ($valid !== true) {
 			echo 'Repo not valid: ', $valid, "\n";
+			continue;
+		}
+
+		// Validate config
+		[$configState, $configMessages] = $participant->validateConfig();
+
+		if ($configState === 'error') {
+			echo 'Config validation failed:', "\n";
+			foreach ($configMessages as $msg) {
+				echo '  - ', $msg, "\n";
+			}
+			continue;
+		} else if ($configState === 'warning') {
+			echo 'Config validation warnings:', "\n";
+			foreach ($configMessages as $msg) {
+				echo '  - ', $msg, "\n";
+			}
 		}
 
 		// Prepare.
