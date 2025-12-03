@@ -73,12 +73,6 @@
                 echo '<span class="text-muted">No update data</span><br>';
             }
 
-            echo '<strong>Config:</strong> ';
-            echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-config" class="btn btn-sm btn-secondary">show/hide</button>';
-            echo '<div id="' . $person . '-config" class="collapse"><br><code class="codeview"><pre>';
-            echo yaml_encode($pdata['config']);
-            echo '</pre></code></div><br>';
-
             echo '<strong>Config Validation:</strong> ';
             if (!empty($pdata['configvalidation'])) {
                 $configValidation = $pdata['configvalidation'];
@@ -109,6 +103,12 @@
             } else {
                 echo '<span class="text-muted">Not validated yet</span><br>';
             }
+
+            echo '<strong>Config:</strong> ';
+            echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-config" class="btn btn-sm btn-secondary">show/hide</button>';
+            echo '<div id="' . $person . '-config" class="collapse"><br><code class="codeview"><pre>';
+            echo yaml_encode($pdata['config']);
+            echo '</pre></code></div><br>';
 
             echo '<br>';
 
