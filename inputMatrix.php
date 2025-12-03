@@ -255,11 +255,14 @@
 				}
 
 				if (!empty($bulkFiles)) {
-					list($ret, $result) = $participant->runOnce($day);
+					list($ret, $result, $unhandled) = $participant->runOnce($day);
 					$needsRunOnce = false;
 
 					if ($ret != 0) {
 						echo 'RunOnce error.', "\n";
+						if (!empty($unhandled)) {
+							foreach ($unhandled as $out) { echo '        > ', $out, "\n"; }
+						}
 						$preRunFail = true; // Force skipping everything
 					} else {
 						echo "\t", 'Bulk runnning: ', implode(', ', array_keys($bulkFiles)), "\n";
@@ -289,17 +292,20 @@
 				if ($skip && $thisInputVersion == $input['version']) { echo 'Up to date.', "\n"; continue; }
 
 				if ($needsRunOnce) {
-					list($ret, $result) = $participant->runOnce($day);
+					list($ret, $result, $unhandled) = $participant->runOnce($day);
 					$needsRunOnce = False;
 
 					if ($ret != 0) {
 						echo 'RunOnce error.', "\n";
+						if (!empty($unhandled)) {
+							foreach ($unhandled as $out) { echo '        > ', $out, "\n"; }
+						}
 						break;
 					}
 				}
 				$participant->setInput($day, $input['input']);
 				if ($bulkResults === FALSE) {
-					list($ret, $result) = $participant->run($day);
+					list($ret, $result, $unhandled) = $participant->run($day);
 					usleep($sleepTime); // Sleep a bit so that we're not constantly running.
 					$hasRun = true;
 				} else {

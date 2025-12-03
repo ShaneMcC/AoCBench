@@ -276,6 +276,20 @@
                         $rowspan++;
                     }
 
+                    if (isset($ddata['docker_error']) && !empty($ddata['docker_error'])) {
+                        echo '<tr class="collapse dayinfo table-danger">';
+                        echo '<th>Docker Error</th>';
+                        echo '<td>';
+                        echo '<button href="#" data-toggle="collapse" data-target="#' . $person . '-' . $day . '-dockererror" class="btn btn-sm btn-secondary">show/hide</button>';
+                        echo '<div id="' . $person . '-' . $day . '-dockererror" class="collapse"><br><code class="codeview"><pre>';
+                        echo htmlspecialchars($ddata['docker_error']);
+                        echo '</pre></code></div>';
+                        echo '</td>';
+                        echo '</tr>';
+                        $dayClass = 'table-danger';
+                        $rowspan++;
+                    }
+
                     $runType = $ddata['runtype'] ?? 'unknown';
                     if (empty($runType)) { $runClass = 'table-success'; } // For now.
                     else if ($runType == 'hyperfine') { $runClass = 'table-success'; }

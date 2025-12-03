@@ -145,6 +145,17 @@
 		}
 		chdir($dir);
 
+		if ($participant instanceof V2Participant) {
+			$data['healthcheck'][$person]['participanttype'] = 2;
+			$data['healthcheck'][$person]['config'] = $participant->getAOCBenchConfig();
+			$data['healthcheck'][$person]['image'] = $participant->getImageInfo();
+		} else {
+			$data['healthcheck'][$person]['participanttype'] = 1;
+			$data['healthcheck'][$person]['config'] = [];
+			$data['healthcheck'][$person]['config']['subheading'] = $participant->getSubheading();
+			$data['healthcheck'][$person]['config']['language'] = $participant->getLanguage();
+		}
+
 		$valid = $participant->isValidParticipant();
 		$data['healthcheck'][$person]['valid'] = ($valid === true);
 		if ($valid !== true) {
@@ -191,17 +202,6 @@
 		$data['results'][$person]['repo'] = $participant->getRepo();
 		$data['results'][$person]['subheading'] = $participant->getSubheading();
 		$data['results'][$person]['language'] = $participant->getLanguage();
-
-		if ($participant instanceof V2Participant) {
-			$data['healthcheck'][$person]['participanttype'] = 2;
-			$data['healthcheck'][$person]['config'] = $participant->getAOCBenchConfig();
-			$data['healthcheck'][$person]['image'] = $participant->getImageInfo();
-		} else {
-			$data['healthcheck'][$person]['participanttype'] = 1;
-			$data['healthcheck'][$person]['config'] = [];
-			$data['healthcheck'][$person]['config']['subheading'] = $participant->getSubheading();
-			$data['healthcheck'][$person]['config']['language'] = $participant->getLanguage();
-		}
 
 		// Run day.
 		for ($day = 1; $day <= 25; $day++) {
@@ -398,7 +398,7 @@
 				}
 
 				if ($i == 0) {
-					list($ret, $result) = $participant->runOnce($day);
+					list($ret, $result, $unhandled) = $participant->runOnce($day);
 					echo ' R';
 					$data['healthcheck'][$person]['days'][$day]['log'] .= ' R';
 					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
@@ -407,15 +407,23 @@
 					$data['healthcheck'][$person]['days'][$day]['runonce'] = ($ret === 0);
 
 					unset($data['healthcheck'][$person]['days'][$day]['runonce_info']);
+					unset($data['healthcheck'][$person]['days'][$day]['docker_error']);
 					if ($ret != 0) {
 						echo 'F';
 						$data['healthcheck'][$person]['days'][$day]['log'] .= 'F';
 						$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
 						$data['healthcheck'][$person]['days'][$day]['runonce_info'] = implode("\n", $result);
+						if (!empty($unhandled)) {
+							$data['healthcheck'][$person]['days'][$day]['docker_error'] = implode("\n", $unhandled);
+						}
 						echo "\n";
 						echo 'RunOnce exited with error.', "\n";
 						echo 'Output:', "\n";
 						foreach ($result as $out) { echo '        > ', $out, "\n"; }
+						if (!empty($unhandled)) {
+							echo 'Unhandled output (docker error?):', "\n";
+							foreach ($unhandled as $out) { echo '        > ', $out, "\n"; }
+						}
 						$failedRun = true;
 						break;
 					} else if ($runDebugMode) {
@@ -432,7 +440,7 @@
 				echo ' ', $i;
 				$data['healthcheck'][$person]['days'][$day]['log'] .= ' ' . $i;
 				$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
-				list($ret, $result) = $participant->run($day);
+				list($ret, $result, $unhandled) = $participant->run($day);
 				$end = time();
 				$lastRunTime = ($end - $start);
 				usleep($sleepTime); // Sleep a bit so that we're not constantly running.
@@ -444,11 +452,18 @@
 					$data['healthcheck'][$person]['days'][$day]['runtype'] = 'fail';
 					$data['healthcheck'][$person]['days'][$day]['log'] .= 'F';
 					$data['healthcheck'][$person]['days'][$day]['logtime'] = time();
+					if (!empty($unhandled)) {
+						$data['healthcheck'][$person]['days'][$day]['docker_error'] = implode("\n", $unhandled);
+					}
 					echo 'F';
 					echo "\n";
 					echo 'Exited with error.', "\n";
 					echo 'Output:', "\n";
 					foreach ($result as $out) { echo '        > ', $out, "\n"; }
+					if (!empty($unhandled)) {
+						echo 'Unhandled output (docker error?):', "\n";
+						foreach ($unhandled as $out) { echo '        > ', $out, "\n"; }
+					}
 					$failedRun = true;
 					break;
 				} else {

@@ -1175,6 +1175,7 @@
 
 		private function parseRunOutput($output) {
 			$realOutput = [];
+			$unhandled = [];
 			$canary = $this->getCanary();
 			$section = null;
 			foreach ($output as $line) {
@@ -1185,8 +1186,17 @@
 					$section = null;
 				} else if ($section != null) {
 					$realOutput[$section][] = preg_replace("/\r$/D", '', $line);
+				} else {
+					// Line not in any canary section - capture it
+					$unhandled[] = preg_replace("/\r$/D", '', $line);
 				}
 			}
+
+			// Include unhandled output if any exists
+			if (!empty($unhandled)) {
+				$realOutput['_UNHANDLED_OUTPUT'] = $unhandled;
+			}
+
 			return $realOutput;
 		}
 
@@ -1218,22 +1228,22 @@
 		 * Do one-time run on the given day.
 		 *
 		 * @param int $day Day number.
-		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of lines of output.
+		 * @return Array Array of [returnCode, outputFromRun, unhandledOutput] where outputFromRun is an array of lines of output.
 		 */
 		public function runOnce($day) {
 			[$ret, $result] = $this->doRun($day, 'runonce');
-			return [$ret, $result['ONCE'] ?? []];
+			return [$ret, $result['ONCE'] ?? [], $result['_UNHANDLED_OUTPUT'] ?? []];
 		}
 
 		/**
 		 * Run the given day.
 		 *
 		 * @param int $day Day number.
-		 * @return Array Array of [returnCode, outputFromRun] where outputFromRun is an array of lines of output.
+		 * @return Array Array of [returnCode, outputFromRun, unhandledOutput] where outputFromRun is an array of lines of output.
 		 */
 		public function run($day) {
 			[$ret, $result] = $this->doRun($day, 'run');
-			return [$ret, $result['TIME'] ?? []];
+			return [$ret, $result['TIME'] ?? [], $result['_UNHANDLED_OUTPUT'] ?? []];
 		}
 
 		/**
