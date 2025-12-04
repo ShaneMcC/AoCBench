@@ -64,6 +64,11 @@ a.daylink {
   color: #212529;
 }
 
+.history-icon {
+  cursor: help;
+  font-size: 0.8em;
+}
+
 pre {
   line-height: 1.1em;
 }

@@ -150,8 +150,20 @@
 
 					if (!$podium && $time == $podiumTime['first']) { $classes[] = 'table-best'; }
 
-					echo '<td class="', implode(' ', $classes), '" data-ms="', $time ,'" data-toggle="tooltip" data-placement="bottom" data-html="true" title="', htmlspecialchars($tooltip), '">';
-					echo formatTime($time, $timeFormat);
+					echo '<td class="', implode(' ', $classes), '" data-ms="', $time ,'">';
+
+					// Show history icon if previousTimes exists (before the time)
+					if (!empty($pdata['days'][$day]['previousTimes'])) {
+						$historyTooltip = '';
+						foreach ($pdata['days'][$day]['previousTimes'] as $i => $prevEntry) {
+							$prevTime = getParticipantTime($prevEntry['times'], $method);
+							$prevDateTime = date('Y-m-d H:i', $prevEntry['time']);
+							$historyTooltip .= $prevDateTime . ': ' . formatTime($prevTime, $timeFormat) . '<br>';
+						}
+						echo '<span class="history-icon" data-toggle="tooltip" data-placement="left" data-html="true" title="', htmlspecialchars($historyTooltip), '">📈</span> ';
+					}
+
+					echo '<span data-toggle="tooltip" data-placement="bottom" data-html="true" title="', htmlspecialchars($tooltip), '">', formatTime($time, $timeFormat), '</span>';
 					echo '</td>';
 				} else {
 					echo '<td class="participant">&nbsp;</td>';

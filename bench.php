@@ -540,6 +540,20 @@
 					$thisDay['checkedOutput'] = $checkOutput;
 					$thisDay['long'] = $long;
 					$thisDay['reallyLong'] = $reallyLong;
+
+					// Save previous times for historical tracking
+					$existingDay = $data['results'][$person]['days'][$day] ?? [];
+					if (isset($existingDay['times']) && !empty($existingDay['times'])) {
+						// Preserve existing history
+						$thisDay['previousTimes'] = $existingDay['previousTimes'] ?? [];
+						// Add the old times to history
+						array_unshift($thisDay['previousTimes'], [
+							'times' => $existingDay['times'],
+							'time' => $existingDay['time'] ?? time()
+						]);
+						// Keep only the most recent entries
+						$thisDay['previousTimes'] = array_slice($thisDay['previousTimes'], 0, $historicalTimesCount);
+					}
 				}
 
 				$thisDay['time'] = time();
