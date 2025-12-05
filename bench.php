@@ -533,6 +533,24 @@
 
 			// Update data if we've actually ran enough times or if we failed.
 			if ($failedRun || $saveResult) {
+				// Save previous times for historical tracking (do this for both success and failure)
+				$existingDay = $data['results'][$person]['days'][$day] ?? [];
+				if (isset($existingDay['times']) && !empty($existingDay['times'])) {
+					// Preserve existing history
+					$thisDay['previousTimes'] = $existingDay['previousTimes'] ?? [];
+					// Add the old times to history
+					array_unshift($thisDay['previousTimes'], [
+						'times' => $existingDay['times'],
+						'time' => $existingDay['time'] ?? time(),
+						'version' => $existingDay['version'] ?? null
+					]);
+					// Keep only the most recent entries
+					$thisDay['previousTimes'] = array_slice($thisDay['previousTimes'], 0, $historicalTimesCount);
+				} else if (isset($existingDay['previousTimes'])) {
+					// Even if no current times, preserve existing history
+					$thisDay['previousTimes'] = $existingDay['previousTimes'];
+				}
+
 				// Invalidate any times if we failed or sort them for later.
 				if ($failedRun) {
 					unset($thisDay['times']);
@@ -540,20 +558,6 @@
 					$thisDay['checkedOutput'] = $checkOutput;
 					$thisDay['long'] = $long;
 					$thisDay['reallyLong'] = $reallyLong;
-
-					// Save previous times for historical tracking
-					$existingDay = $data['results'][$person]['days'][$day] ?? [];
-					if (isset($existingDay['times']) && !empty($existingDay['times'])) {
-						// Preserve existing history
-						$thisDay['previousTimes'] = $existingDay['previousTimes'] ?? [];
-						// Add the old times to history
-						array_unshift($thisDay['previousTimes'], [
-							'times' => $existingDay['times'],
-							'time' => $existingDay['time'] ?? time()
-						]);
-						// Keep only the most recent entries
-						$thisDay['previousTimes'] = array_slice($thisDay['previousTimes'], 0, $historicalTimesCount);
-					}
 				}
 
 				$thisDay['time'] = time();
