@@ -69,6 +69,10 @@ a.daylink {
   font-size: 0.8em;
 }
 
+.tooltip-inner {
+  max-width: 600px;
+}
+
 pre {
   line-height: 1.1em;
 }

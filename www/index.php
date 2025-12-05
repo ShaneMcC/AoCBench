@@ -154,12 +154,13 @@
 
 					// Show history icon if previousTimes exists (before the time)
 					if (!empty($pdata['days'][$day]['previousTimes'])) {
-						$historyTooltip = '';
+						$historyLines = [];
 						foreach ($pdata['days'][$day]['previousTimes'] as $i => $prevEntry) {
 							$prevTime = getParticipantTime($prevEntry['times'], $method);
-							$prevDateTime = date('Y-m-d H:i', $prevEntry['time']);
-							$historyTooltip .= $prevDateTime . ': ' . formatTime($prevTime, $timeFormat) . '<br>';
+							$prevDateTime = date('Y-m-d H:i:s', $prevEntry['time']);
+							$historyLines[] = '<strong>' . $prevDateTime . '</strong>: ' . formatTime($prevTime, $timeFormat);
 						}
+						$historyTooltip = '<div style="text-align:left">' . implode('<br>', $historyLines) . '</div>';
 						echo '<span class="history-icon" data-toggle="tooltip" data-placement="left" data-html="true" title="', htmlspecialchars($historyTooltip), '">📈</span> ';
 					}
 
