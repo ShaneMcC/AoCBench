@@ -60,6 +60,12 @@ table {
     background-color: #DCA671;
 }
 
+table .time {
+    vertical-align: middle;
+    text-align: right;
+    padding: .5rem;
+}
+
 a.daylink {
   color: #212529;
 }
