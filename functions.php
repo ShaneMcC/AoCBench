@@ -204,21 +204,22 @@
 			case 'SECONDS':
 				return sprintf('%ss', number_format($time/1000, 3));
 
+			case 'DEFAULT':
 			case 'MILLISECONDS':
-				return sprintf('%sms', number_format($time, 3));
+			default:
+				return sprintf('%sms', number_format($time, 2));
 
 			case 'MICROSECONDS':
-				return sprintf('%sμs', number_format($time*1000, 3));
+				return sprintf('%sμs', number_format($time*1000, -1));
 
 			case 'NANOSECONDS':
-				return sprintf('%sns', number_format($time*1000*1000, 3));
+				return sprintf('%sns', number_format($time*1000*1000, 0));
 
 			case 'PICOSECONDS':
 			case 'FULL':
 				return sprintf('%sps', number_format($time*1000*1000*1000, 0));
 
-			case 'DEFAULT':
-			default:
+			case 'MINUTES':
 				$newms = preg_replace('/^[0-9]+\./', '', sprintf('%s', $time));
 				if ($newms == $time) { $newms = ''; }
 

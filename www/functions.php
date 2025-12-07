@@ -4,7 +4,7 @@
 	session_start();
 
 	$method = $_REQUEST['method'] ?? ($_SESSION['method'] ?? 'MEDIAN');
-	$timeFormat = $_REQUEST['times'] ?? ($_SESSION['times'] ?? 'DEFAULT');
+	$timeFormat = $_REQUEST['times'] ?? ($_SESSION['times'] ?? 'MILLISECONDS');
 	$lang = $_REQUEST['lang'] ?? ($_SESSION['lang'] ?? '*');
 	if (!is_array($lang)) { $lang = [$lang]; }
 
