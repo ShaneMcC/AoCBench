@@ -160,7 +160,7 @@
 							$prevDateTime = date('Y-m-d H:i:s', $prevEntry['time']);
 							$historyLines[] = '<strong>' . $prevDateTime . '</strong>: ' . formatTime($prevTime, $timeFormat);
 						}
-						$historyTooltip = '<div style="text-align:left">' . implode('<br>', $historyLines) . '</div>';
+						$historyTooltip = '<div style="text-align:left">' . implode('<br>', array_reverse($historyLines)) . '</div>';
 						echo '<span class="history-icon" data-toggle="tooltip" data-placement="left" data-html="true" title="', htmlspecialchars($historyTooltip), '">📈</span> ';
 					}
 
